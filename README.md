@@ -39,7 +39,7 @@ src/data/                遗产点、参考来源与分区入口登记
 src/scene/               Three.js 场景及交互
 src/                     React 页面、导航与样式
 public/chapters/          三个可替换的分区接入示例
-.agent/                  项目使用的技能与辅助参考
+.agents/                  项目使用的技能与辅助参考
 AGENTS.md                项目约束、环境与协作规则
 docs/implementation-plan.md  已确认的实施计划
 docs/integration.md       独立章节接入契约

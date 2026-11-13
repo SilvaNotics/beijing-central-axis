@@ -9,7 +9,7 @@
 | 三维地理概览 | 场景模块 | 进行中 | `src/scene/` |
 | 页面与章节框架 | 界面模块 | 进行中 | 主页面、遗产详情、iframe、独立样例页 |
 | 三个分区接入示例 | 文档 / 示例模块 | 完成 | `public/chapters/{north,central,south}/index.html`；静态独立文件，正式内容待作者替换 |
-| 本地技能与项目约束 | 文档 / 示例模块 | 完成 | `AGENTS.md`、`.agent/`；保留来源和许可证 |
+| 本地技能与项目约束 | 文档 / 示例模块 | 完成 | `AGENTS.md`、`.agents/`；保留来源和许可证 |
 | 接入与运行文档 | 文档 / 示例模块 | 完成 | `README.md`、`docs/integration.md`、`docs/implementation-plan.md` |
 | 集成测试与浏览器 QA | 主实现 | 待验证 | 构建、单元测试、浏览器与移动端检查 |
 | 本地提交 | 主实现 | 待验证后执行 | 已授权 `codex/axis-atlas`；不推送 |

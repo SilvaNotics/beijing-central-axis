@@ -30,10 +30,10 @@ Identify the environment before every shell command.
 
 ## Repository-local skills
 
-The requested skills are vendored into the singular `.agent/` directory from the already installed `agent-skills` 0.6.10 package. Do not modify or relocate a pre-existing `.agents/` directory.
+The requested skills are vendored into `.agents/skills/` from the already installed `agent-skills` 0.6.10 package so Codex can discover them. Keep repository-local skills, their license, and shared references together in `.agents/`.
 
-- UI: `.agent/skills/frontend-ui-engineering/SKILL.md`
-- Runtime QA: `.agent/skills/browser-testing-with-devtools/SKILL.md`
-- Version control: `.agent/skills/git-workflow-and-versioning/SKILL.md`
+- UI: `.agents/skills/frontend-ui-engineering/SKILL.md`
+- Runtime QA: `.agents/skills/browser-testing-with-devtools/SKILL.md`
+- Version control: `.agents/skills/git-workflow-and-versioning/SKILL.md`
 
-Read the relevant skill before using it. The frontend skill’s `../../references/accessibility-checklist.md` resolves to `.agent/references/accessibility-checklist.md`. Read `.agent/README.md` for source attribution and local adaptation. Use available host browser tools; the browser skill’s sample MCP configuration is a reference, not a requirement to install a service.
+Read the relevant skill before using it. The frontend skill’s `../../references/accessibility-checklist.md` resolves to `.agents/references/accessibility-checklist.md`. Read `.agents/README.md` for source attribution and local adaptation. Use available host browser tools; the browser skill’s sample MCP configuration is a reference, not a requirement to install a service.
