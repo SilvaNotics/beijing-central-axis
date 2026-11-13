@@ -5,7 +5,7 @@ import { landmarks } from '../data/heritage';
 import { createLandmark } from './architecture';
 import { pointInPolygon, project } from './geo';
 import { localFootprintLayout, wgs84ToGcj02, type CityData } from './geodata';
-import { templeBoundary, moundCenter, tiantanDetailedIds } from './templeLayout';
+import { templeBoundary, moundCenter, tiantanDetailedIds, layoutCorners } from './templeLayout';
 import { alignPalaceRoof } from './precincts';
 import { jinshuiLayout, tiananmenPortals } from './gateLayout';
 import type { Materials } from './materials';
@@ -45,6 +45,28 @@ describe('temple collision regressions',()=>{
     expect([mound.position.x,mound.position.z]).toEqual([x,z]);
   });
   for(const [siteId,ids] of [['taimiao',[684772333,684772314,60540211]],['shejitan',[60540199,687599164]]] as const) {
+    it(`keeps ${siteId} interior halls and galleries inside the perimeter at every height`,()=>{
+      const landmark=site(siteId),model=createLandmark(landmark,materials,data),boundary=templeBoundary(landmark);
+      model.updateMatrixWorld(true);
+      let checked=0;
+      model.traverse(object=>{
+        const source=data.buildings.find(building=>building.id===object.userData.osmId);
+        // Gates straddle their wall by design; check buildings whose mapped
+        // envelopes are wholly inside the court, including secondary galleries.
+        if(!source||!layoutCorners(source,landmark).every(point=>pointInPolygon(point,boundary)))return;
+        const point=new THREE.Vector3();
+        object.traverse(child=>{
+          if(!(child instanceof THREE.Mesh))return;
+          const positions=child.geometry.getAttribute('position');
+          for(let i=0;i<positions.count;i++) {
+            point.fromBufferAttribute(positions,i).applyMatrix4(child.matrixWorld);
+            expect(pointInPolygon([point.x,point.z],boundary),`${siteId}/${source.id}: ${point.x}, ${point.z}`).toBe(true);
+          }
+        });
+        checked++;
+      });
+      expect(checked).toBeGreaterThan(5);
+    });
     it(`keeps ${siteId} main hall and altar bounds inside mapped walls`,()=>{
       const landmark=site(siteId),model=createLandmark(landmark,materials,data),boundary=templeBoundary(landmark);
       model.updateMatrixWorld(true);
