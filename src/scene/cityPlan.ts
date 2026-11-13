@@ -6,7 +6,7 @@ import { landmarks } from '../data/heritage';
 export const planBounds = { width: 640, depth: 1090, centerX: 45, centerZ: 3 };
 
 /** A single local map surface replaces thousands of background meshes. */
-export function createCityPlan(data: CityData, resolution = 2048) {
+export function createCityPlan(data: CityData, resolution = 2048, architecturalPlan = false) {
   const canvas = document.createElement('canvas');
   canvas.width = resolution;
   canvas.height = Math.round(resolution * planBounds.depth / planBounds.width);
@@ -37,7 +37,7 @@ export function createCityPlan(data: CityData, resolution = 2048) {
     const ring = localBuildingRing(building);
     const [x, z] = ring[0];
     const center: [number, number] = ring.slice(0,-1).reduce((sum, point) => [sum[0]+point[0],sum[1]+point[1]],[0,0]).map(value => value / Math.max(1,ring.length-1)) as [number, number];
-    if (protectedAreas.some(area => pointInPolygon(center,area.ring) && !area.holes.some(hole => pointInPolygon(center,hole)))) continue;
+    if (!architecturalPlan && protectedAreas.some(area => pointInPolygon(center,area.ring) && !area.holes.some(hole => pointInPolygon(center,hole)))) continue;
     const heritage = cores.some(c => Math.abs(x - c.p[0]) < c.w && Math.abs(z - c.p[1]) < c.d);
     trace([ring]); ctx.fillStyle = heritage ? '#a28b68' : '#71766f'; ctx.fill();
     ctx.lineWidth = .055; ctx.strokeStyle = heritage ? '#6e5340' : '#505b58'; ctx.stroke();

@@ -8,4 +8,5 @@ export interface SceneViewProps {
   quality: 'cinematic' | 'balanced';
   onSelect: (id: string) => void;
   onReady?: (state: 'ready' | 'fallback') => void;
+  onBearingChange?: (degrees: number) => void;
 }

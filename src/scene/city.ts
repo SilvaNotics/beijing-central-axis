@@ -4,6 +4,7 @@ import { project } from './geo';
 import type { CityData } from './geodata';
 import { createCityPlan } from './cityPlan';
 import { createForest } from './forest';
+import { southernRoadPath } from './southernRoad';
 import { bake, createLandmark } from './architecture';
 import type { Materials } from './materials';
 
@@ -55,28 +56,6 @@ function waterSurface(data: CityData, material: THREE.Material) {
   return group;
 }
 
-function palaceMoat(siteX: number, siteZ: number, material: THREE.Material) {
-  const shape = new THREE.Shape();
-  shape.moveTo(siteX - 40.2, -(siteZ - 52.2));
-  shape.lineTo(siteX + 40.2, -(siteZ - 52.2));
-  shape.lineTo(siteX + 40.2, -(siteZ + 52.2));
-  shape.lineTo(siteX - 40.2, -(siteZ + 52.2));
-  shape.closePath();
-  const island = new THREE.Path();
-  island.moveTo(siteX - 36.8, -(siteZ - 48.8));
-  island.lineTo(siteX + 36.8, -(siteZ - 48.8));
-  island.lineTo(siteX + 36.8, -(siteZ + 48.8));
-  island.lineTo(siteX - 36.8, -(siteZ + 48.8));
-  island.closePath();
-  shape.holes.push(island);
-  const moat = new THREE.Mesh(new THREE.ShapeGeometry(shape), material);
-  moat.name = 'forbidden-city-moat';
-  moat.rotation.x = -Math.PI / 2;
-  moat.position.y = .045;
-  moat.renderOrder = 3;
-  return moat;
-}
-
 export function createCity(m: Materials, data: CityData, sample = false): City {
   const object = new THREE.Group(), authored = new THREE.Group();
   const anchors = new Map<string, THREE.Vector3>();
@@ -96,8 +75,7 @@ export function createCity(m: Materials, data: CityData, sample = false): City {
   terrain.rotation.x = -Math.PI / 2; terrain.position.set(bounds.centerX, -.08, bounds.centerZ);
   terrain.name = 'city-plan'; object.add(terrain);
   object.add(waterSurface(data, m.water));
-  const forbiddenCity = project(landmarks.find(site => site.id === 'forbidden-city')!.coords);
-  object.add(palaceMoat(forbiddenCity[0], forbiddenCity[1], m.water));
+  const lateralSites = new Set(['shejitan', 'taimiao', 'tiantan', 'xiannongtan']);
   for (const site of landmarks) {
     const [x, z] = project(site.coords);
     const group = createLandmark(site, m, data); group.position.set(x, .05, z);
@@ -107,8 +85,8 @@ export function createCity(m: Materials, data: CityData, sample = false): City {
     const pick = new THREE.Mesh(new THREE.BoxGeometry(Math.max(2.2, site.footprint[0] / 10), 6, Math.max(2.2, site.footprint[1] / 10)), new THREE.MeshBasicMaterial({ visible: false }));
     pick.position.set(x, 3, z); pick.userData.id = site.id; pickers.push(pick); object.add(pick);
   }
-  // The axial sequence follows point geometry rather than forcing a mathematically straight line.
-  const centerline = landmarks.filter(site => !['shejitan', 'taimiao', 'tiantan', 'xiannongtan', 'square'].includes(site.id)).map(site => project(site.coords)).sort((a, b) => a[1] - b[1]);
+  // The route and every physical layer use the same geographic projection.
+  const centerline = [...landmarks.filter(site => !lateralSites.has(site.id) && !['square','southern-road'].includes(site.id)).map(site => project(site.coords)), ...southernRoadPath()].sort((a, b) => a[1] - b[1]);
   authored.add(path(centerline, .38, m.brass, .01));
 
   object.add(bake(authored),createForest(data,m));

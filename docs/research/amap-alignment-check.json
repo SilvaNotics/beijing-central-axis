@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-11-13",
+  "coordinateSystem": "GCJ-02",
+  "source": "Amap maps_search_detail connector",
+  "points": [
+    {
+      "id": "B000A84GDN",
+      "name": "故宫博物院-午门",
+      "coords": [
+        116.397228,
+        39.913582
+      ]
+    },
+    {
+      "id": "B000A9PISW",
+      "name": "故宫博物院-神武门",
+      "coords": [
+        116.396786,
+        39.922305
+      ]
+    },
+    {
+      "id": "B000A7QHTR",
+      "name": "太庙",
+      "coords": [
+        116.399898,
+        39.911374
+      ]
+    },
+    {
+      "id": "B0FFFTBFH7",
+      "name": "享殿",
+      "coords": [
+        116.399847,
+        39.911541
+      ]
+    },
+    {
+      "id": "B0FFIZ0SZ2",
+      "name": "永定门城楼",
+      "coords": [
+        116.399324,
+        39.872468
+      ]
+    },
+    {
+      "id": "B000A81GJV",
+      "name": "北京市基督教会珠市口堂",
+      "coords": [
+        116.398078,
+        39.890987
+      ]
+    }
+  ]
+}

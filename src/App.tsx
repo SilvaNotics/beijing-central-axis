@@ -8,6 +8,7 @@ import AtlasDialog from './components/AtlasDialog';
 import ChapterView from './components/ChapterView';
 import OrnamentalFrame from './components/OrnamentalFrame';
 import { parseRoute, type AtlasRoute } from './lib/navigation';
+import { AXIS_ROTATION } from './scene/geo';
 
 export default function App() {
   const [route, setRoute] = useState<AtlasRoute>(() => parseRoute(window.location.hash));
@@ -16,6 +17,7 @@ export default function App() {
   const [dialog, setDialog] = useState<'catalog' | 'about' | null>(null);
   const [viewRevision, setViewRevision] = useState(0);
   const [flat, setFlat] = useState(false);
+  const [bearing, setBearing] = useState(0);
   const [sceneStatus, setSceneStatus] = useState<'loading' | 'ready' | 'fallback'>('loading');
   const [quality, setQuality] = useState<'cinematic' | 'balanced'>(() => window.matchMedia('(max-width: 700px)').matches ? 'balanced' : 'cinematic');
   const entryTrigger = useRef<HTMLElement | null>(null);
@@ -59,13 +61,14 @@ export default function App() {
         </aside>
         <section className="scene-panel" aria-label="北京中轴线互动地图"><OrnamentalFrame />
           <div className="scene-corner"><span className="corner-cross">+</span><span>北京中轴线<br /><small>世界文化遗产 · 2024</small></span></div>
-          <div className="scene-viewport" style={{ visibility: flat ? 'hidden' : 'visible' }}><SceneView selection={selection} focus={focus} viewRevision={viewRevision} sample={sample} quality={quality} active={!flat && !chapter} onSelect={selectSite} onReady={setSceneStatus} /></div>
+          <div className="scene-viewport" style={{ visibility: flat ? 'hidden' : 'visible' }}><SceneView selection={selection} focus={focus} viewRevision={viewRevision} sample={sample} quality={quality} active={!flat && !chapter} onSelect={selectSite} onReady={setSceneStatus} onBearingChange={setBearing} /></div>
           {flat && <FlatMap selection={selection} focus={focus} viewRevision={viewRevision} onSelect={selectSite} />}
           {!flat && sceneStatus === 'loading' && <div className="scene-loading" role="status"><span>正在铺展中轴长卷</span><i /><button onClick={() => setFlat(true)}>先浏览二维地图 <ArrowRight size={14} /></button></div>}
           <div className="map-side-label" aria-hidden="true">纵贯南北 · 秩序之美</div>
+          <div className="north-marker" aria-label="方向：北 / 南" data-bearing={flat ? AXIS_ROTATION*180/Math.PI : bearing} style={{transform:`rotate(${flat ? AXIS_ROTATION*180/Math.PI : bearing}deg)`}}><span>北</span><i aria-hidden="true" /><span>南</span></div>
           <div className="map-controls"><button className="overview-control" onClick={reset} aria-label="全轴总览" title="全轴总览"><RotateCcw size={15} /><span>全轴总览</span></button><span className="control-divider" /><button className={`map-mode ${flat ? 'is-active' : ''}`} aria-pressed={flat} disabled={sceneStatus === 'fallback'} title={sceneStatus === 'fallback' ? '当前设备使用二维地图' : undefined} onClick={() => setFlat(value => !value)}><Map size={16} />{flat && sceneStatus !== 'fallback' ? '三维图景' : '二维地图'}</button><button className="quality-control" onClick={() => setQuality(value => value === 'cinematic' ? 'balanced' : 'cinematic')} aria-label={`当前${quality === 'cinematic' ? '精细' : '流畅'}画质，点击切换`}><Layers size={15} /><span>{quality === 'cinematic' ? '精细' : '流畅'}</span></button></div>
           {sceneStatus === 'fallback' && <p className="fallback-note" role="status">三维图景不可用 · 当前使用二维地图</p>}
-          {landmark && selectedRegion ? <article className="landmark-detail" key={landmark.id} aria-label={`${landmark.name}详情`}><button className="detail-close icon-button" aria-label="关闭地标详情" onClick={() => { setSelection(null); window.location.hash = '/'; }}><X size={17} /></button><span className="eyebrow">{selectedRegion.title} / {landmark.category}</span><h2>{landmark.name}</h2><p className="detail-english">{landmark.enName}</p><p className="detail-summary">{landmark.summary}</p><dl><div><dt>时代</dt><dd>{landmark.era}</dd></div><div><dt>一眼千年</dt><dd>{landmark.fact}</dd></div></dl><button className="detail-entry" onClick={() => enterChapter(landmark.region)}>进入{selectedRegion.title.split(' · ')[0]}篇章<MoveUpRight size={17} /></button></article> : <div className="map-instruction"><span className="instruction-dot" />{flat || sceneStatus === 'fallback' ? '中键拖动 · 滚轮缩放 · 点选地标' : '左键 / 中键拖动 · 滚轮缩放'}<span className="instruction-line" /></div>}
+          {landmark && selectedRegion ? <article className="landmark-detail" key={landmark.id} aria-label={`${landmark.name}详情`}><button className="detail-close icon-button" aria-label="关闭地标详情" onClick={() => { setSelection(null); window.location.hash = '/'; }}><X size={17} /></button><span className="eyebrow">{selectedRegion.title} / {landmark.category}</span><h2>{landmark.name}</h2><p className="detail-english">{landmark.enName}</p><p className="detail-summary">{landmark.summary}</p><dl><div><dt>时代</dt><dd>{landmark.era}</dd></div><div><dt>一眼千年</dt><dd>{landmark.fact}</dd></div></dl><button className="detail-entry" onClick={() => enterChapter(landmark.region)}>进入{selectedRegion.title.split(' · ')[0]}篇章<MoveUpRight size={17} /></button></article> : <div className="map-instruction"><span className="instruction-dot" />{flat || sceneStatus === 'fallback' ? '中键拖动 · 滚轮缩放 · 点选地标' : '拖动平移 · Shift + 拖动旋转 · 滚轮缩放'}<span className="instruction-line" /></div>}
           {!landmark && <div className="map-legend" aria-label="地图图例"><span><i className="legend-axis" />中轴序列</span><span><i className="legend-water" />水系</span><span><i className="legend-fabric" />城市肌理</span><span><i className="legend-heritage" />遗产建筑</span></div>}
           <div className="map-bottom"><div className="axis-distance">轴线全长 <span>7.8 km</span></div><span className="map-note">基于真实地理位置 · 周边肌理为示意<br /><small>AN INTERPRETATION OF BEIJING’S LIVING HERITAGE</small></span></div>
         </section>

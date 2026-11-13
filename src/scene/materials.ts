@@ -37,13 +37,13 @@ export function createMaterials() {
   const make = (color: string, roughness = .85, map?: THREE.Texture) => new THREE.MeshStandardMaterial({ color, roughness, ...(map ? { map } : {}) });
   return {
     // Weathered cinnabar and glazed tile sit inside the same dusk palette instead of reading as pure RGB primaries.
-    wall: make('#813a30', .93),
+    wall: make('#813a30', .93, texture('brick')),
     vermilion: make('#8e4435', .83),
     wood: make('#39291f', .9),
-    gold: new THREE.MeshStandardMaterial({ color: '#9c7b45', roughness: .58, metalness: .08, map: tiles, normalMap: tileNormal, normalScale: new THREE.Vector2(.08, .08) }),
+    gold: new THREE.MeshStandardMaterial({ color: '#9c7b45', roughness: .58, metalness: .08, map: tiles, normalMap: tileNormal, normalScale: new THREE.Vector2(.08, .08), side: THREE.DoubleSide }),
     blue: new THREE.MeshStandardMaterial({ color: '#294d67', roughness: .62, metalness: .05, map: tiles, normalMap: tileNormal, normalScale: new THREE.Vector2(.08, .08), side: THREE.DoubleSide }),
-    green: make('#465d52', .82, tiles),
-    grayRoof: make('#424a48', .9, tiles),
+    green: new THREE.MeshStandardMaterial({ color: '#465d52', roughness: .82, map: tiles, side: THREE.DoubleSide }),
+    grayRoof: new THREE.MeshStandardMaterial({ color: '#4b504c', roughness: .9, map: tiles, side: THREE.DoubleSide }),
     stone: make('#c9bca4', .97, stone),
     paving: make('#85877d', .98, stone),
     darkStone: make('#303a39', .94, stone),

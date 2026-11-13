@@ -4,6 +4,8 @@ import { localBuildingRing } from './geodata';
 import { project, pointInPolygon } from './geo';
 import { landmarks } from '../data/heritage';
 import { mappedLayout, jingshanPavilions } from './layouts';
+import { moundCenter } from './templeLayout';
+import { localPalaceBoundary } from './precincts';
 import type { Materials } from './materials';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
@@ -24,12 +26,13 @@ export function forestPoints(data:CityData):ForestPoint[] {
     const buildings=data.buildings.map(localBuildingRing).map(r=>({minX:Math.min(...r.map(p=>p[0]))-.65,maxX:Math.max(...r.map(p=>p[0]))+.65,minZ:Math.min(...r.map(p=>p[1]))-.65,maxZ:Math.max(...r.map(p=>p[1]))+.65})).filter(b=>b.maxX>=minX&&b.minX<=maxX&&b.maxZ>=minZ&&b.minZ<=maxZ);
     const site=landmarks.find(s=>s.id===siteId)!,[originX,originZ]=project(site.coords);
     const prayer=mappedLayout(43921139,landmarks.find(s=>s.id==='tiantan')!),vault=mappedLayout(43921121,landmarks.find(s=>s.id==='tiantan')!);
+    const [moundX,moundZ]=moundCenter(landmarks.find(s=>s.id==='tiantan')!);
     const peaks=jingshanPavilions.map((id,index)=>({...mappedLayout(id,site),height:index===2?4.57:Math.abs(index-2)===1?3.5:2.6,radius:index===2?10:7}));
     let accepted=0;
     for(let attempt=0;attempt<count*12&&accepted<count;attempt++) {
       const x=minX+random()*(maxX-minX),z=minZ+random()*(maxZ-minZ),lx=x-originX,lz=z-originZ;
       if(!pointInPolygon([x,z],ring)||holes.some(h=>pointInPolygon([x,z],h))||buildings.some(b=>x>b.minX&&x<b.maxX&&z>b.minZ&&z<b.maxZ))continue;
-      if(siteId==='tiantan'&&((Math.abs(lx-prayer.x)<13&&Math.abs(lz-prayer.z)<15)||(Math.abs(lx-vault.x)<10&&lz>vault.z-7&&lz<vault.z+20)||(Math.abs(lx-prayer.x)<3.3&&lz>prayer.z&&lz<vault.z)))continue;
+      if(siteId==='tiantan'&&(Math.hypot(lx-moundX,lz-moundZ)<6.5||( Math.abs(lx-prayer.x)<13&&Math.abs(lz-prayer.z)<15)||(Math.abs(lx-vault.x)<10&&lz>vault.z-7&&lz<vault.z+20)||(Math.abs(lx-prayer.x)<3.3&&lz>prayer.z&&lz<vault.z)))continue;
       if(siteId==='jingshan'&&peaks.some(p=>Math.hypot(lx-p.x,lz-p.z)<2.3))continue;
       let y=0;
       if(siteId==='jingshan')for(const peak of peaks){const q=((lx-peak.x)/peak.radius)**2+((lz-peak.z)/9)**2;if(q<1)y=Math.max(y,peak.height*Math.sqrt(1-q));}
@@ -42,9 +45,12 @@ export function forestPoints(data:CityData):ForestPoint[] {
   for(const side of [-1,1]) for(let z=-48;z<=37;z+=2.8) plantedRow(squareX+side*22.8,squareZ+z,rowIndex++);
   for(let x=-19;x<=19;x+=4) plantedRow(squareX+x,squareZ+39.4,rowIndex++);
   const palace=landmarks.find(site=>site.id==='forbidden-city')!, [palaceX,palaceZ]=project(palace.coords);
-  for(const side of [-1,1]) for(let z=-38;z<=38;z+=4.2) plantedRow(palaceX+side*41.7,palaceZ+z,rowIndex++);
-  for(let x=-30;x<=30;x+=4.4) { plantedRow(palaceX+x,palaceZ-50.4,rowIndex++); plantedRow(palaceX+x,palaceZ+50.4,rowIndex++); }
-  for(const side of [-1,1]) for(let i=0;i<12;i++) plantedRow(palaceX+side*(11+(i%3)*2.4),palaceZ-20-i*1.45,rowIndex++);
+  const boundary=localPalaceBoundary(palace);
+  // Trees follow the same transformed wall boundary, outside the water channel.
+  for(let edge=0;edge<4;edge++) {
+    const a=boundary[edge],b=boundary[(edge+1)%4],dx=b[0]-a[0],dz=b[1]-a[1],length=Math.hypot(dx,dz);
+    for(let along=5;along<length-5;along+=4.8) plantedRow(palaceX+a[0]+dx*along/length+dz/length*5.4,palaceZ+a[1]+dz*along/length-dx/length*5.4,rowIndex++);
+  }
   const taimiao=landmarks.find(site=>site.id==='taimiao')!, [taimiaoX,taimiaoZ]=project(taimiao.coords);
   for(let z=-19;z<=19;z+=3.8) {
     plantedRow(taimiaoX-22,taimiaoZ+z,rowIndex++);
