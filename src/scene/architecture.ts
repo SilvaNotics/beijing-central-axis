@@ -11,6 +11,9 @@ import { templeBoundary, moundCenter, tiantanDetailedIds, layoutCorners } from '
 import { createCivicBuilding, createMonument } from './civicArchitecture';
 import { civicLayouts, squareLocations } from './civicLayout';
 import { timberBody, timberEaves } from './timberArchitecture';
+import { roofGeometry, roofSection, roofGables, mappedRoofForm, type RoofForm } from './roofForms';
+import { palaceHallProfiles, zhongheLayout, zhongheProfile, type HallProfile } from './palaceArchitecture';
+export { roofGeometry } from './roofForms';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -35,14 +38,13 @@ function beam(group: THREE.Group, mat: THREE.Material, from: THREE.Vector3, to: 
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
   group.add(mesh); return mesh;
 }
-function roofRidges(group: THREE.Group, m: Materials, x: number, z: number, width: number, depth: number, rise: number, y: number) {
+function roofRidges(group: THREE.Group, m: Materials, x: number, z: number, width: number, depth: number, rise: number, y: number, form: RoofForm = 'hipped') {
   const columns = Math.max(4, Math.min(10, Math.round(width * 1.02)));
-  const ridgeWidth=Math.max(width*.16,width-depth*.88);
   for (let i = 0; i < columns; i++) {
     const px = (i / (columns - 1) - .5) * width * .82;
     for (const side of [-1,1]) {
       for(let section=0;section<4;section++) {
-        const point=(t:number)=>new THREE.Vector3(x+px*(1+(ridgeWidth/width-1)*t),y+rise*Math.pow(t,1.55)+.012,z+side*depth/2*(1-.98*t));
+        const point=(t:number)=>{const p=roofSection(width,depth,rise,t,form);return new THREE.Vector3(x+px*p.w/(width/2),y+p.y+.012,z+side*p.d);};
         beam(group,m.ridge,point(section/4),point((section+1)/4),.006);
       }
     }
@@ -53,7 +55,7 @@ function roofRidges(group: THREE.Group, m: Materials, x: number, z: number, widt
   }
   for (const sx of [-1,1]) for (const sz of [-1,1]) {
     for(let section=0;section<4;section++) {
-      const point=(t:number)=>new THREE.Vector3(x+sx*(width+(ridgeWidth-width)*t)/2,y+rise*Math.pow(t,1.55)+.02,z+sz*depth/2*(1-.98*t));
+      const point=(t:number)=>{const p=roofSection(width,depth,rise,t,form);return new THREE.Vector3(x+sx*p.w,y+p.y+p.corner+.02,z+sz*p.d);};
       beam(group,m.ridge,point(section/4),point((section+1)/4),.014);
     }
   }
@@ -89,57 +91,69 @@ function court(group: THREE.Group, m: Materials, x: number, z: number, w: number
   box(group, paved ? m.paving : m.park, x, .055, z, w, .06, d);
 }
 
-/** Hipped, curved tile roof with raised corners, ridge and deep overhanging eaves. */
-export function roofGeometry(width: number, depth: number, rise: number) {
-  const vertices: number[] = [], uvs: number[] = [], indices: number[] = [];
-  const rings = 7;
-  for (let r = 0; r <= rings; r++) {
-    const t = r / rings;
-    const ridgeWidth = Math.max(width * .16, width - depth * .88);
-    const w = (width + (ridgeWidth - width) * t) / 2;
-    const d = depth / 2 * (1 - t * .98);
-    const y = rise * Math.pow(t, 1.55);
-    const corner = r === 0 ? rise * .11 : 0;
-    const points = [[-w, y + corner, -d], [0, y, -d], [w, y + corner, -d], [w, y, 0], [w, y + corner, d], [0, y, d], [-w, y + corner, d], [-w, y, 0]];
-    points.forEach((p, i) => { vertices.push(...p); uvs.push(i / 8 * Math.max(1, width / 2), t * 2); });
-  }
-  for (let r = 0; r < rings; r++) for (let k = 0; k < 8; k++) {
-    const a = r * 8 + k, b = r * 8 + (k + 1) % 8, c = a + 8, d = b + 8;
-    indices.push(a, c, b, b, c, d);
-  }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-  geometry.setIndex(indices); geometry.computeVertexNormals();
-  return geometry;
-}
-
-function hall(group: THREE.Group, m: Materials, x: number, z: number, w: number, d: number, h: number, roofMat = m.gold, double = false, elevation = 0, fitFootprint = false) {
+function hall(group: THREE.Group, m: Materials, x: number, z: number, w: number, d: number, h: number, roofMat = m.gold, double = false, elevation = 0, fitFootprint = false, profile?: HallProfile) {
   // Mapped dimensions already include the eaves. Keep the roof inside that
   // envelope instead of expanding it into neighbouring halls and passages.
   const roofW = fitFootprint ? w : w + Math.min(1.3,d*.3);
   const roofD = fitFootprint ? d : d + Math.min(1.12,d*.28);
   if (fitFootprint) { w *= .82; d *= .78; }
-  const y = elevation;
-  box(group, m.stone, x, y + .18, z, Math.min(roofW,w+.7), .36, Math.min(roofD,d+.6));
+  const y = elevation, floor=profile?.platform??.46;
+  const form=profile?.roof??'hipped';
+  double=profile?.double??double;
+  if(profile)h=(profile.height-floor-(form==='pyramidal'?.16:.04))/(double?2.38:1.61);
+  if(profile) {
+    const levels=floor>.6?3:1;
+    for(let tier=0;tier<levels;tier++) {
+      const height=floor/levels;
+      box(group,m.marble,x,y+(tier+.5)*height,z,roofW*.98-tier*.14,height,roofD*.98-tier*.14);
+    }
+    const topW=roofW*.98-(levels-1)*.14,topD=roofD*.98-(levels-1)*.14;
+    for(const turn of [0,Math.PI/2,Math.PI,Math.PI*1.5]) {
+      const width=turn%Math.PI===0?topW:topD,depth=turn%Math.PI===0?topD:topW;
+      const edge=new THREE.Group();edge.position.set(x,y,z);edge.rotation.y=turn;group.add(edge);
+      const entrances=levels===3&&width>4?[-width*.28,0,width*.28]:[0];
+      const stairW=entrances.length===3?.66:Math.min(width*.36,1.15);
+      for(const entrance of entrances)for(let step=0;step<6;step++) {
+        const top=floor*(step+1)/6;
+        box(edge,m.marble,entrance,top/2,depth/2+.6-step*.12,stairW,top,.16);
+      }
+      // Openings in the balustrade coincide with each stair, including side exits.
+      const count=Math.max(3,Math.round(width/.24));
+      for(let i=0;i<=count;i++) {
+        const xx=-width/2+i*width/count;
+        if(entrances.some(entrance=>Math.abs(xx-entrance)<stairW/2+.04))continue;
+        box(edge,m.marble,xx,floor+.12,depth/2,.035,.24,.035);
+        if(i===count)continue;
+        const next=xx+width/count;
+        if(entrances.some(entrance=>xx<entrance+stairW/2&&next>entrance-stairW/2))continue;
+        box(edge,m.marble,(xx+next)/2,floor+.22,depth/2,width/count,.035,.035);
+        box(edge,m.marble,(xx+next)/2,floor+.10,depth/2,width/count,.07,.023);
+      }
+    }
+  } else box(group, m.stone, x, y + .18, z, Math.min(roofW,w+.7), .36, Math.min(roofD,d+.6));
   const facade=new THREE.Group();facade.position.set(x,0,z);group.add(facade);
-  timberBody(facade,m,w,d,h,y+.46);
-  const eaveY = y + h + .46;
+  timberBody(facade,m,w,d,h,y+floor,true,profile);
+  const eaveY = y + h + floor;
   const roofRise = h * .61;
-  const roof = new THREE.Mesh(roofGeometry(roofW, roofD, roofRise), roofMat);
+  const roof = new THREE.Mesh(roofGeometry(roofW, roofD, roofRise,double?'hipped':form), roofMat);
   roof.position.set(x, eaveY, z); group.add(roof);
   timberEaves(facade,m,roofW,roofD,w*.8,d*.8,eaveY);
-  roofRidges(group,m,x,z,roofW,roofD,roofRise,eaveY);
-  box(group, m.ridge, x, eaveY + h * .625, z, Math.max(roofW*.16,roofW-roofD*.88), .10, .11);
+  roofRidges(group,m,x,z,roofW,roofD,roofRise,eaveY,double?'hipped':form);
+  if(!double) {
+    const gables=roofGables(roofW,roofD,roofRise,form,m.wood);gables.position.set(x,eaveY,z);group.add(gables);
+    if(form==='pyramidal')cylinder(group,m.goldLeaf,x,eaveY+roofRise+.08,z,.07,.16);
+    else box(group,m.ridge,x,eaveY+roofRise+.02,z,roofSection(roofW,roofD,roofRise,1,form).w*2,.04,.08);
+  }
   if (double) {
     const upperBase = eaveY + h * .58;
     timberBody(facade,m,w*.75,d*.66,h*.32,upperBase,false);
     const upperRise = h * .48;
-    const upper = new THREE.Mesh(roofGeometry(w * .8, d * .72, upperRise), roofMat);
+    const upper = new THREE.Mesh(roofGeometry(w * .8, d * .72, upperRise,form), roofMat);
     upper.position.set(x, upperBase + h * .32, z); group.add(upper);
     timberEaves(facade,m,w*.8,d*.72,w*.60,d*.50,upperBase+h*.32,false);
-    roofRidges(group,m,x,z,w*.8,d*.72,upperRise,upperBase+h*.32);
-    box(group, m.ridge, x, upperBase + h * .80, z, Math.max(.5, w * .24), .09, .10);
+    roofRidges(group,m,x,z,w*.8,d*.72,upperRise,upperBase+h*.32,form);
+    const gables=roofGables(w*.8,d*.72,upperRise,form,m.wood);gables.position.set(x,upperBase+h*.32,z);group.add(gables);
+    box(group,m.ridge,x,upperBase+h*.80+.02,z,roofSection(w*.8,d*.72,upperRise,1,form).w*2,.04,.08);
   }
   // Shallow stone stairs, a geometric rather than painted detail.
   if(!fitFootprint) for (let step = 0; step < 5; step++) box(group, m.stone, x, y + .025 + step * .045, z + d / 2 + .78 - step * .12, w * .52, .09, .76 - step * .12);
@@ -165,8 +179,8 @@ function mappedHall(group: THREE.Group, site: Landmark, m: Materials, id: number
   if(footprint) {
     const layout=alignPalaceRoof(localFootprintLayout(footprint,site));
     hallGroup.position.set(layout.x,0,layout.z);hallGroup.rotation.y=layout.rotation;
-    hall(hallGroup,m,0,0,layout.width,layout.depth,height,m.gold,double,0,true);
-  } else hall(hallGroup,m,0,0,p.w,p.d,height,m.gold,double,0,true);
+    hall(hallGroup,m,0,0,layout.width,layout.depth,height,m.gold,double,0,true,palaceHallProfiles[id]);
+  } else hall(hallGroup,m,0,0,p.w,p.d,height,m.gold,double,0,true,palaceHallProfiles[id]);
   group.add(hallGroup); return hallGroup;
 }
 
@@ -205,10 +219,12 @@ function footprintBuilding(group: THREE.Group, m: Materials, building: BuildingF
   box(item,m.darkStone,0,.035,0,width,.07,depth);
   if(width>.65&&depth>.38)timberBody(item,m,width*.84,depth*.78,height,.07,false);
   else box(item,m.vermilion,0,height*.5+.07,0,width*.84,height,depth*.78);
-  const rise=Math.min(.72,Math.max(.16,height*.55));
-  const roof=new THREE.Mesh(roofGeometry(width,depth,rise),roofMat);roof.position.y=height+.09;item.add(roof);
+  const rise=Math.min(.72,Math.max(.16,height*.55)),form=mappedRoofForm(building.roof);
+  const roof=new THREE.Mesh(roofGeometry(width,depth,rise,form),roofMat);roof.position.y=height+.09;item.add(roof);
+  const gables=roofGables(width,depth,rise,form,m.wood);gables.position.y=height+.09;item.add(gables);
   if(width>.65&&depth>.38)timberEaves(item,m,width,depth,width*.70,depth*.64,height+.09,false);
-  box(item,m.ridge,0,height+.10+rise*.98,0,Math.max(width*.16,width-depth*.88),.045,.055);
+  if(form==='pyramidal')cylinder(item,m.goldLeaf,0,height+.09+rise+.04,0,.035,.08);
+  else box(item,m.ridge,0,height+.10+rise*.98,0,roofSection(width,depth,rise,1,form).w*2,.045,.055);
   group.add(item);
 }
 
@@ -285,10 +301,9 @@ function palace(group: THREE.Group, m: Materials, w: number, d: number, imperial
     box(group, m.stone, axisX, .12, .3, 5.5, .08, d - 8);
     box(group, m.brass, axisX, .17, .3, .12, .02, d - 8);
     for (const id of palaceAxis) mappedHall(group, site, m, id, id === 638449347 ? 1.7 : id === 638981229 ? .85 : 1.2, id === 638449347 || id === 638473398 || id === 638981317, undefined, data);
-    // Zhonghedian is square and sits between Taihedian and Baohedian, not a long hall.
-    const taihe = mappedLayout(638449347, site), baohe = mappedLayout(638473398, site);
-    const middle = new THREE.Group(); middle.name = '中和殿'; middle.position.set((taihe.x+baohe.x)/2, .28, (taihe.z + baohe.z) / 2);
-    court(middle, m, 0, 0, 4.2, 4.2); hall(middle, m, 0, 0, 2.35, 2.35, .82, m.gold, true); group.add(middle);
+    const middleLayout=zhongheLayout(site),middle=new THREE.Group();middle.name='中和殿';
+    middle.position.set(middleLayout.x,0,middleLayout.z);
+    hall(middle,m,0,0,middleLayout.width,middleLayout.depth,.8,m.gold,false,0,true,zhongheProfile);group.add(middle);
     for (const id of [40631331,40631343,40631116,40631121,685316170,40631788,40631798,40631806,40631817,40631826,40631832,40593735,40606461,40592355,40592356]) {
       mappedHall(group, site, m, id, .7, false, undefined, data);
     }

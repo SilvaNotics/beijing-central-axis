@@ -11,7 +11,7 @@ function block(group:THREE.Group,material:THREE.Material,x:number,y:number,z:num
  * Dimensions include the veranda; all details remain under the supplied roof.
  * Ornament is schematic, informed by Palace Museum exterior photographs.
  */
-export function timberBody(group:THREE.Group,m:Materials,width:number,depth:number,height:number,base:number,rich=true) {
+export function timberBody(group:THREE.Group,m:Materials,width:number,depth:number,height:number,base:number,rich=true,counts?:{frontBays:number;sideBays:number}) {
   const body=new THREE.Group();body.position.y=base;group.add(body);
   const porch=Math.min(.30,Math.min(width,depth)*.13);
   const wallW=width-porch*2,wallD=depth-porch*2;
@@ -28,7 +28,8 @@ export function timberBody(group:THREE.Group,m:Materials,width:number,depth:numb
     const windows=new THREE.Group();windows.name=`timber-windows-${face.name}`;facade.add(windows);
     const columns=new THREE.Group();columns.name=`timber-columns-${face.name}`;facade.add(columns);
     const span=face.span-radius*2,outer=face.cross/2-radius,wall=face.cross/2-porch;
-    const bays=Math.max(1,Math.min(rich?11:14,Math.round(span/(rich?.66:.72))));
+    const specified=counts?(face.name==='north'||face.name==='south'?counts.frontBays:counts.sideBays):undefined;
+    const bays=specified??Math.max(1,Math.min(rich?11:14,Math.round(span/(rich?.66:.72))));
     const spacing=span/bays;
     // Stone column shoes and slender red shafts are separate from the doors.
     for(let i=0;i<=bays;i++) {
@@ -47,7 +48,7 @@ export function timberBody(group:THREE.Group,m:Materials,width:number,depth:numb
     block(facade,m.wood,0,height*.965,outer,face.span,.055,.10);
     block(facade,m.goldLeaf,0,height*.815,outer+.045,face.span,.012,.012);
     const wallSpan=face.span-porch*2;
-    const windowBays=Math.max(1,Math.min(rich?11:14,Math.round(wallSpan/(rich?.64:.72))));
+    const windowBays=specified??Math.max(1,Math.min(rich?11:14,Math.round(wallSpan/(rich?.64:.72))));
     const bay=wallSpan/windowBays,panelW=bay*.76,panelH=height*.61;
     for(let i=0;i<windowBays;i++) {
       const x=-wallSpan/2+(i+.5)*bay,y=height*.43;

@@ -7,6 +7,8 @@ import { project } from '../scene/geo';
 import type { Landmark } from '../data/types';
 import { civicLayouts, civicPlanParts, squarePlanParts } from '../scene/civicLayout';
 import { southernRoadPath, roadPlanRings } from '../scene/southernRoad';
+import { palaceHallProfiles, zhongheLayout } from '../scene/palaceArchitecture';
+import { roofPlanLines, mappedRoofForm } from '../scene/roofForms';
 
 interface Props { selection: string | null; focus: RegionId | 'all'; onSelect: (id: string) => void; viewRevision?: number; }
 const WIDTH = 880, HEIGHT = 1040, SCALE = .73;
@@ -45,10 +47,17 @@ function loadPlan() {
       else {
         layer.roofs += path;
         const site=landmarks[nearest], p=localFootprintLayout(building,site), [ox,oz]=project(site.coords);
-        const dx=Math.cos(p.rotation)*p.width*.28,dz=-Math.sin(p.rotation)*p.width*.28;
-        if (p.width > .9 && p.depth > .4) layer.ridges += `M${440+(ox+p.x-dx-45)*SCALE},${520+(oz+p.z-dz-3)*SCALE}l${dx*2*SCALE},${dz*2*SCALE}`;
+        const form=palaceHallProfiles[building.id]?.roof??mappedRoofForm(building.roof);
+        const convert=([u,v]:[number,number])=>[440+(ox+p.x+u*Math.cos(p.rotation)+v*Math.sin(p.rotation)-45)*SCALE,520+(oz+p.z-u*Math.sin(p.rotation)+v*Math.cos(p.rotation)-3)*SCALE];
+        if(p.width>.9&&p.depth>.4)for(const line of roofPlanLines(p.width,p.depth,form))layer.ridges+='M'+line.map(point=>convert(point).join(',')).join('L');
       }
     }
+    const palace=landmarks.find(site=>site.id==='forbidden-city')!,middle=zhongheLayout(palace),[ox,oz]=project(palace.coords);
+    const convert=([u,v]:[number,number])=>[440+(ox+middle.x+u-45)*SCALE,520+(oz+middle.z+v-3)*SCALE];
+    const middleRing:[number,number][]=[[-middle.width/2,-middle.depth/2],[middle.width/2,-middle.depth/2],[middle.width/2,middle.depth/2],[-middle.width/2,middle.depth/2]];
+    const layer=layers.find(layer=>layer.id==='forbidden-city')!;
+    layer.roofs+='M'+middleRing.map(point=>convert(point).join(',')).join('L')+'Z';
+    for(const line of roofPlanLines(middle.width,middle.depth,'pyramidal'))layer.ridges+='M'+line.map(point=>convert(point).join(',')).join('L');
     const civic=[...squarePlanParts().map(part=>({id:'square',...part})),...Object.values(civicLayouts).flatMap(layout=>civicPlanParts(layout).map(part=>({id:layout.id,...part})))].map(part=>({id:part.id,kind:part.kind,path:'M'+part.ring.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z'}));
     return { image: createCityPlan(data,2048,true).toDataURL(), layers, civic };
   }).catch(error => {planPromise=undefined;throw error;});
