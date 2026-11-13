@@ -10,6 +10,7 @@ import { jinshuiLayout, tiananmenDepth, tiananmenWidth, tiananmenPortals } from 
 import { templeBoundary, moundCenter, tiantanDetailedIds, layoutCorners } from './templeLayout';
 import { createCivicBuilding, createMonument } from './civicArchitecture';
 import { civicLayouts, squareLocations } from './civicLayout';
+import { timberBody, timberEaves } from './timberArchitecture';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -121,45 +122,22 @@ function hall(group: THREE.Group, m: Materials, x: number, z: number, w: number,
   if (fitFootprint) { w *= .82; d *= .78; }
   const y = elevation;
   box(group, m.stone, x, y + .18, z, Math.min(roofW,w+.7), .36, Math.min(roofD,d+.6));
-  box(group, m.vermilion, x, y + h / 2 + .46, z, w, h, d);
-  // Recessed dark doors and a regular timber colonnade on both facades.
-  const bays = Math.max(3, Math.floor(w / 1.05));
-  for (const face of [-1,1]) for (let i = 0; i < bays; i++) {
-    const xx = x - w / 2 + .32 + i * (w - .64) / (bays - 1);
-    box(group, m.window, xx, y + h * .44 + .46, z + face*(d / 2 + .018), .38, h * .70, .045);
-    box(group, m.wood, xx, y + h * .46 + .46, z + face*(d / 2 + .043), .025, h * .74, .018);
-    const column = new THREE.Mesh(columnGeometry, m.vermilion);
-    column.position.set(xx, y + h / 2 + .48, z + face*(d / 2 + Math.min(.16,(roofD-d)*.28)));
-    column.scale.y = h;
-    group.add(column);
-    box(group, m.wood, xx, y + .49, z + face*(d / 2 + .10), .42, .08, .24);
-    box(group,m.green,xx,y+h+.39,z+face*(d/2+.10),.36,.10,.25);
-    box(group,m.ridge,xx,y+h+.47,z+face*(d/2+.13),.48,.07,.30);
-  }
-  for(const side of [-1,1]) {
-    const bays=Math.max(2,Math.round(d/.8));
-    for(let i=0;i<bays;i++) {
-      const zz=z-d*.36+i*d*.72/Math.max(1,bays-1),xx=x+side*(w/2+.025);
-      box(group,m.window,xx,y+h*.45+.46,zz,.04,h*.62,.30);
-      for(let bar=-1;bar<=1;bar++)box(group,m.ridge,xx+side*.03,y+h*.45+.46,zz+bar*.09,.025,h*.62,.015);
-      box(group,m.vermilion,xx+side*.07,y+h*.5+.46,zz+.21,.09,h,.09);
-    }
-    box(group,m.green,x+side*(w/2+.06),y+h+.36,z,.10,.17,d);
-  }
+  const facade=new THREE.Group();facade.position.set(x,0,z);group.add(facade);
+  timberBody(facade,m,w,d,h,y+.46);
   const eaveY = y + h + .46;
   const roofRise = h * .61;
   const roof = new THREE.Mesh(roofGeometry(roofW, roofD, roofRise), roofMat);
   roof.position.set(x, eaveY, z); group.add(roof);
+  timberEaves(facade,m,roofW,roofD,w*.8,d*.8,eaveY);
   roofRidges(group,m,x,z,roofW,roofD,roofRise,eaveY);
   box(group, m.ridge, x, eaveY + h * .625, z, Math.max(roofW*.16,roofW-roofD*.88), .10, .11);
   if (double) {
     const upperBase = eaveY + h * .58;
-    box(group, m.vermilion, x, upperBase + h * .16, z, w * .75, h * .32, d * .66);
-    const upperColumns=new THREE.Group();upperColumns.position.y=upperBase-.48;
-    colonnade(upperColumns, m, x, z + d * .34, w * .66, h * .31, Math.max(3, Math.floor(w / 1.6)));group.add(upperColumns);
+    timberBody(facade,m,w*.75,d*.66,h*.32,upperBase,false);
     const upperRise = h * .48;
     const upper = new THREE.Mesh(roofGeometry(w * .8, d * .72, upperRise), roofMat);
     upper.position.set(x, upperBase + h * .32, z); group.add(upper);
+    timberEaves(facade,m,w*.8,d*.72,w*.60,d*.50,upperBase+h*.32,false);
     roofRidges(group,m,x,z,w*.8,d*.72,upperRise,upperBase+h*.32);
     box(group, m.ridge, x, upperBase + h * .80, z, Math.max(.5, w * .24), .09, .10);
   }
@@ -225,18 +203,11 @@ function footprintBuilding(group: THREE.Group, m: Materials, building: BuildingF
   item.name = building.name ?? String(building.id); item.userData.osmId = building.id;
   item.position.set(p.x + offsetX, 0, p.z); item.rotation.y = p.rotation;
   box(item,m.darkStone,0,.035,0,width,.07,depth);
-  box(item,m.vermilion,0,height*.5+.07,0,width*.88,height,depth*.80);
-  if (width > 2.0 && depth > .7) {
-    const columns = Math.max(2, Math.min(8, Math.round(width / .85)));
-    for (let i=0;i<columns;i++) {
-      const x=-width*.42+i*width*.84/Math.max(1,columns-1);
-      box(item,m.window,x,height*.48+.07,depth*.4+.018,Math.min(.34,width/columns*.42),height*.58,.035);
-      const column=new THREE.Mesh(columnGeometry,m.vermilion);
-      column.position.set(x,.17+height*.45,depth*.44);column.scale.y=height*.9;item.add(column);
-    }
-  }
+  if(width>.65&&depth>.38)timberBody(item,m,width*.84,depth*.78,height,.07,false);
+  else box(item,m.vermilion,0,height*.5+.07,0,width*.84,height,depth*.78);
   const rise=Math.min(.72,Math.max(.16,height*.55));
   const roof=new THREE.Mesh(roofGeometry(width,depth,rise),roofMat);roof.position.y=height+.09;item.add(roof);
+  if(width>.65&&depth>.38)timberEaves(item,m,width,depth,width*.70,depth*.64,height+.09,false);
   box(item,m.ridge,0,height+.10+rise*.98,0,Math.max(width*.16,width-depth*.88),.045,.055);
   group.add(item);
 }

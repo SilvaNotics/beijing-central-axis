@@ -57,6 +57,7 @@ export function createMaterials() {
     wall: make('#813a30', .93, texture('brick')),
     vermilion: make('#8e4435', .83),
     wood: make('#39291f', .9),
+    paintedBlue: make('#2d505d', .88),
     gold: new THREE.MeshStandardMaterial({ color: '#9c7b45', roughness: .58, metalness: .08, map: tiles, normalMap: tileNormal, normalScale: new THREE.Vector2(.08, .08), side: THREE.DoubleSide }),
     blue: new THREE.MeshStandardMaterial({ color: '#294d67', roughness: .62, metalness: .05, map: tiles, normalMap: tileNormal, normalScale: new THREE.Vector2(.08, .08), side: THREE.DoubleSide }),
     green: new THREE.MeshStandardMaterial({ color: '#465d52', roughness: .82, map: tiles, side: THREE.DoubleSide }),

@@ -57,3 +57,12 @@ The next pass separates the main volumes, freestanding porticos, recessed glazin
 - [Beijing tourism authority: Monument to the People's Heroes](https://www.visitbeijing.com.cn/article/47QkX1Z2ORM): overall height 37.94 m, two-level terrace, granite stele and marble relief base.
 
 The gmp plan's central courtyard is left open in both map modes, with interior windows below the surrounding roof. The monument now has a rectangular stele, layered cap, two terrace levels, cardinal stairs, balustrades, north-facing gold inscription and relief treatment on all four sides. Relief figures, rear inscription strokes, national emblems, roof subdivisions and ornamental motifs are simplified navigation-scale interpretations, not replicas of the original sculpture or calligraphy. The front eight-character inscription is drawn with a local/system Chinese font. No CDN, remote texture or runtime image request was added.
+
+## Palace and temple side elevations
+
+Reviewed 2026-11-13 against the Palace Museum's exterior photographs of Taihedian and Baohedian:
+
+- [Palace Museum: Taihedian](https://www.dpm.org.cn/explore/building/236465.html): eleven front bays, five depth bays, double-eaved hipped roof, dense brackets below the eaves, painted beams and patterned door/window panels. The official gallery includes an oblique exterior showing the side veranda, deep shade below both eaves and the three-level marble platform.
+- [Palace Museum: Baohedian](https://www.dpm.org.cn/explore/building/236434.html): nine front bays, five depth bays, double-eaved hip-and-gable roof, painted interior/exterior beams and doors behind the red columns. The photographs show substantial separation between the freestanding column row and the doors.
+
+The common hall renderer now recesses its enclosure behind a four-sided column row, with separate stone column shoes, dark door/window panels, timber frames, upper lattice, painted beam bands, small crossed bracket blocks and physical eave undersides. Secondary mapped halls use the same recessed construction with a reduced ornament density. Roof footprints and geographic transforms are retained, so this detail pass does not enlarge a hall into its neighbours. Gold lines, lattice patterns, brackets, bay counts and rafter spacing are generalized at atlas scale; they are not replicas of measured timber joinery or painted dragon motifs. The existing roof-type and main-hall height simplifications still need a separate proportional review. Reference photographs remain inspection material only; runtime textures and geometry are local.
