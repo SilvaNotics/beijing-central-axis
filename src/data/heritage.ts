@@ -103,8 +103,8 @@ export const landmarks: Landmark[] = [
     "category": "古代皇家祭祀建筑",
     "era": "明永乐十八年 · 1420",
     "coords": [
-      116.392035,
-      39.9113
+      116.394822,
+      39.911235
     ],
     "footprint": [
       410,
@@ -149,8 +149,8 @@ export const landmarks: Landmark[] = [
     "category": "古代皇家宫苑建筑",
     "era": "明代 · 清代修葺",
     "coords": [
-      116.39735,
-      39.91175
+      116.397413,
+      39.910396
     ],
     "footprint": [
       110,
@@ -195,8 +195,8 @@ export const landmarks: Landmark[] = [
     "category": "国家礼仪和公共建筑",
     "era": "明代肇建 · 清代改建",
     "coords": [
-      116.397463,
-      39.909187
+      116.397488,
+      39.908717
     ],
     "footprint": [
       120,
@@ -311,8 +311,8 @@ export const landmarks: Landmark[] = [
     "category": "居中道路遗存",
     "era": "明清道路 · 考古遗存",
     "coords": [
-      116.3997,
-      39.87325
+      116.399324,
+      39.879879
     ],
     "footprint": [
       35,
@@ -334,8 +334,8 @@ export const landmarks: Landmark[] = [
     "category": "古代城市管理设施",
     "era": "明嘉靖三十二年 · 1553",
     "coords": [
-      116.400059,
-      39.868631
+      116.399324,
+      39.872468
     ],
     "footprint": [
       80,
@@ -444,6 +444,12 @@ export const sources: Source[] = [
     "title": "高德地图｜地理编码与POI检索",
     "url": "https://lbs.amap.com/api/webservice/guide/api/georegeo",
     "note": "2026年11月13日检索；GCJ-02坐标，原始响应与筛选限制见本地研究记录。"
+  },
+  {
+    "id": "osm-geodata",
+    "title": "OpenStreetMap｜建筑、道路与水系",
+    "url": "https://www.openstreetmap.org/copyright",
+    "note": "© OpenStreetMap contributors，ODbL 1.0；2026-11-13下载的WGS84原始轮廓，渲染时统一转换为GCJ-02。"
   }
 ];
 
