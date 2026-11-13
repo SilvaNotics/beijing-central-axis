@@ -54,8 +54,9 @@ test('shows the layered Tiantan plan and one unambiguous north indicator', async
 });
 
 test('Shift drag rotates the scene and compass; ordinary drag pans', async ({ page }) => {
-  // Software WebGL can spend a second on each pointer-driven frame. Keep time
-  // for the final 1.15 s reset animation after both drag sequences complete.
+  // Software WebGL can spend over two seconds on each pointer-driven frame.
+  // Four moves per gesture still exercise continuous dragging, while leaving
+  // time for the final reset animation within the same timeout.
   test.setTimeout(60_000);
   await page.goto('/#/');
   await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
@@ -72,10 +73,10 @@ test('Shift drag rotates the scene and compass; ordinary drag pans', async ({ pa
   });
   const {x,y}=point;
   await page.mouse.move(x,y);await page.keyboard.down('Shift');await page.mouse.down();
-  await page.mouse.move(x+140,y-35,{steps:12});await page.mouse.up();await page.keyboard.up('Shift');
+  await page.mouse.move(x+140,y-35,{steps:4});await page.mouse.up();await page.keyboard.up('Shift');
   await expect.poll(async()=>Math.abs(Number(await compass.getAttribute('data-bearing'))-before)).toBeGreaterThan(10);
   const rotated=Number(await compass.getAttribute('data-bearing'));
-  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-60,y+20,{steps:8});await page.mouse.up();
+  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-60,y+20,{steps:4});await page.mouse.up();
   expect(Math.abs(Number(await compass.getAttribute('data-bearing'))-rotated)).toBeLessThan(.3);
   await page.getByRole('button',{name:'全轴总览'}).click();
   await expect.poll(async()=>Math.abs(Number(await compass.getAttribute('data-bearing'))-before)).toBeLessThan(.3);
