@@ -1,0 +1,29 @@
+{
+  "name": "beijing-axis-atlas",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": "^0.182.0",
+    "lucide-react": "^0.468.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.182.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "@playwright/test": "^1.57.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.0",
+    "vitest": "^4.0.0"
+  }
+}

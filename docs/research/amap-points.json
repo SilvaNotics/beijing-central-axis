@@ -1,0 +1,468 @@
+{
+  "queriedAt": "2026-11-13",
+  "coordinateSystem": "GCJ-02 (Amap geocoding)",
+  "queries": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "bell-drum",
+        "address": "北京市钟楼",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.389445,39.924493\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.395860,39.942439\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.352002,39.917895\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"海淀区\",\"street\":[],\"number\":[],\"adcode\":\"110108\",\"location\":\"116.311257,39.946180\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "drum",
+        "address": "北京市鼓楼",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.395937,39.940781\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"海淀区\",\"street\":[],\"number\":[],\"adcode\":\"110108\",\"location\":\"116.192413,39.997427\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "wanning",
+        "address": "北京市万宁桥",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.396105,39.936545\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"房山区\",\"street\":[],\"number\":[],\"adcode\":\"110111\",\"location\":\"115.983900,39.711564\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "jingshan",
+        "address": "北京市景山公园",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.396551,39.925875\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "forbidden-city",
+        "address": "北京市故宫博物院",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.397029,39.917839\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "shejitan",
+        "address": "北京市中山公园社稷坛",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.395678,39.908479\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.392035,39.908245\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"朝阳区\",\"street\":[],\"number\":[],\"adcode\":\"110105\",\"location\":\"116.459675,39.918946\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"顺义区\",\"street\":[],\"number\":[],\"adcode\":\"110113\",\"location\":\"116.607958,40.048863\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "taimiao",
+        "address": "北京市太庙",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.399898,39.911374\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "duanmen",
+        "address": "北京市端门",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":[],\"street\":[],\"number\":[],\"adcode\":\"110000\",\"location\":\"116.407387,39.904179\",\"level\":\"省\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "jinshui",
+        "address": "北京市外金水桥",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.397663,39.908002\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "tiananmen",
+        "address": "北京市天安门",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.397463,39.909187\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "square",
+        "address": "北京市天安门广场",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.397755,39.903182\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "zhengyang",
+        "address": "北京市正阳门",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"朝阳区\",\"street\":[],\"number\":[],\"adcode\":\"110105\",\"location\":\"116.459430,39.919054\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "tiantan",
+        "address": "北京市天坛公园",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.410829,39.881913\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "xiannongtan",
+        "address": "北京市先农坛",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.396443,39.876984\",\"level\":\"住宅区\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "southern-road",
+        "address": "北京市永定门御道遗址",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.400059,39.868631\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "yongdingmen",
+        "address": "北京市永定门",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.400059,39.868631\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "shichahai",
+        "address": "北京市什刹海",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.391736,39.933803\",\"level\":\"住宅区\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "beihai",
+        "address": "北京市北海公园",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.391802,39.928775\",\"level\":\"兴趣点\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"朝阳区\",\"street\":[],\"number\":[],\"adcode\":\"110105\",\"location\":\"116.460011,39.918593\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "zhongnanhai",
+        "address": "北京市中南海",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":[],\"street\":[],\"number\":[],\"adcode\":\"110000\",\"location\":\"116.407387,39.904179\",\"level\":\"省\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "duanmen-refined",
+        "address": "东城区天安门端门城楼",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":[],\"number\":[],\"adcode\":\"110101\",\"location\":\"116.397463,39.909187\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "zhengyang-refined",
+        "address": "东城区前门大街正阳门城楼",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":\"前门大街\",\"number\":[],\"adcode\":\"110101\",\"location\":\"116.397902,39.900583\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "shejitan-refined",
+        "address": "西城区社稷坛拜殿",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.365850,39.912600\",\"level\":\"区县\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "xiannongtan-refined",
+        "address": "西城区北京古代建筑博物馆",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.393164,39.879311\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "southern-road-refined",
+        "address": "东城区天桥南大街御道遗址",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":\"天桥南大街\",\"number\":[],\"adcode\":\"110101\",\"location\":\"116.398458,39.883601\",\"level\":\"道路\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"东城区\",\"street\":\"天桥南大街\",\"number\":[],\"adcode\":\"110101\",\"location\":\"116.398458,39.883601\",\"level\":\"道路\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "id": "zhongnanhai-refined",
+        "address": "西城区中南海新华门",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"results\":[{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"西城区\",\"street\":[],\"number\":[],\"adcode\":\"110102\",\"location\":\"116.365850,39.912600\",\"level\":\"区县\"},{\"country\":\"中国\",\"province\":\"北京市\",\"city\":\"北京市\",\"citycode\":\"010\",\"district\":\"朝阳区\",\"street\":[],\"number\":[],\"adcode\":\"110105\",\"location\":\"116.459555,39.919026\",\"level\":\"兴趣点\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    }
+  ],
+  "textSearch": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "keywords": "端门",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"suggestion\":{\"keywords\":\"\",\"ciytes\":{\"suggestion\":[]}},\"pois\":[{\"id\":\"B000A7VMK9\",\"name\":\"故宫博物院-端门\",\"address\":\"景山前街4号故宫博物院内(南侧)\",\"typecode\":\"110200\",\"photo\":\"https://aos-comment.amap.com/B000A7VMK9/comment/1968e4aa365bbdfcf1f941e101ecc4a3_2048_2048_80.jpg\"},{\"id\":\"B000A9X01O\",\"name\":\"端门快餐\",\"address\":\"景山前街4号故宫博物院内(南侧)\",\"typecode\":\"050300\",\"photo\":\"https://aos-comment.amap.com/B000A9X01O/comment/content_media_external_images_media_100000013_1730031526654_86662364.jpg\"},{\"id\":\"B0FFFTC4ZV\",\"name\":\"端门西卫生间\",\"address\":\"东长安街天安门内\",\"typecode\":\"200300\",\"photo\":\"http://store.is.autonavi.com/showpic/75284aaf42f04c78aec603a8f04b9625\"},{\"id\":\"B0FFFT7SXV\",\"name\":\"端门东卫生间\",\"address\":\"故宫内\",\"typecode\":\"200300\",\"photo\":\"https://store.is.autonavi.com/showpic/ae52a67ea7489bb00000003376616670?type=pic\"},{\"id\":\"B0L27LLA5U\",\"name\":\"端门精品店-故宫文创\",\"address\":\"景山前街4号故宫博物院内(南侧)\",\"typecode\":\"060000\",\"photo\":\"https://aos-comment.amap.com/B0L27LLA5U/comment/D359CBA4_E705_4AEF_B388_2D5B86B059B8_L0_001_1440_105_1766195268051_62663901.jpg\"},{\"id\":\"B0L3YOJDXW\",\"name\":\"故宫寄存处(端门广场西侧)\",\"address\":\"景山前街4号故宫博物院内(南侧)\",\"typecode\":\"070000\",\"photo\":\"https://store.is.autonavi.com/showpic/781d0873c634122c0000009361744535?type=pic\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "keywords": "社稷坛",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"suggestion\":{\"keywords\":\"\",\"ciytes\":{\"suggestion\":[]}},\"pois\":[{\"id\":\"B000A7ZXMF\",\"name\":\"中山公园-社稷坛\",\"address\":\"中华路4号中山公园\",\"typecode\":\"110200\",\"photo\":\"http://store.is.autonavi.com/showpic/2339949e6519f866f25709ee6698c332\"},{\"id\":\"B0FFFDFBZ1\",\"name\":\"来今雨轩茶社\",\"address\":\"社稷坛中山公园东侧路南段\",\"typecode\":\"050600\",\"photo\":\"http://store.is.autonavi.com/showpic/b03e72c448ae66ae94051eeba88a37d4\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "keywords": "中南海",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"suggestion\":{\"keywords\":\"\",\"ciytes\":{\"suggestion\":[]}},\"pois\":[]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "keywords": "永定门内御道遗址",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"suggestion\":{\"keywords\":\"\",\"ciytes\":{\"suggestion\":[]}},\"pois\":[{\"id\":\"B000A7J4UA\",\"name\":\"永定门公园\",\"address\":\"永定门内大街156号\",\"typecode\":\"110200\",\"photo\":\"http://aos-cdn-image.amap.com/sns/ugccomment/8ab6dc46-c937-405e-ab5e-9ca4a3ec2574.jpg\"},{\"id\":\"B0MRKL4FOY\",\"name\":\"永定门·茶\",\"address\":\"北京城区永定门内大街与永定门东街辅路交叉口北180米\",\"typecode\":\"050600\",\"photo\":\"https://store.is.autonavi.com/showpic/ee7c60d494f1dc630000006864658590?type=pic\"},{\"id\":\"B0LAAAO074\",\"name\":\"永定门公园(西城园区)\",\"address\":\"永定门大街\",\"typecode\":\"110200\",\"photo\":\"http://aos-cdn-image.amap.com/sns/ugccomment/8ab6dc46-c937-405e-ab5e-9ca4a3ec2574.jpg\"},{\"id\":\"B000A2E518\",\"name\":\"明皇城东安门遗址\",\"address\":\"东安门大街55号(王府世纪大厦斜对面)\",\"typecode\":\"110000\",\"photo\":\"https://store.is.autonavi.com/showpic/ba87684cd0633a7f8fb9c4f7bea73a6c\"},{\"id\":\"B0LG31GAY0\",\"name\":\"永定门公园-北区\",\"address\":\"永定门内大街156号永定门公园内(北侧)\",\"typecode\":\"110101\",\"photo\":\"https://store.is.autonavi.com/showpic/003402acb75c67ed0000004177890754?type=pic\"},{\"id\":\"B0FFIZ0SZ2\",\"name\":\"永定门城楼(装修中)\",\"address\":\"永定门内大街156号\",\"typecode\":\"110000\",\"photo\":\"https://aos-comment.amap.com/B0FFIZ0SZ2/comment/content_media_external_file_21544_ss__1769300790073_49619196.jpg\"},{\"id\":\"B0HROCMIEY\",\"name\":\"永定门公园东城园区\",\"address\":\"永定门内大街与木料巷交叉口南220米\",\"typecode\":\"110200\",\"photo\":\"https://aos-comment.amap.com/B0HROCMIEY/comment/content_media_external_file_114067_ss__1747804350236_04622531.jpg\"},{\"id\":\"BV10000672\",\"name\":\"永定门内(公交站)\",\"address\":\"120路;24路;2路;36路;622路;692路;71路;72路;7路;90路;93路;夜2路\",\"typecode\":\"150700\",\"photo\":null},{\"id\":\"B0FFHJ4IJN\",\"name\":\"阜成门遗址\",\"address\":\"北礼士路三条与北礼士路头条交叉口东40米\",\"typecode\":\"110000\",\"photo\":\"https://store.is.autonavi.com/showpic/f9210711cdc329f42e990cc1b78cd3cf\"},{\"id\":\"B0FFH6JN3T\",\"name\":\"永定门内西大街\",\"address\":\"西城区\",\"typecode\":\"190301\",\"photo\":null},{\"id\":\"B0IADL0317\",\"name\":\"永定门内大街\",\"address\":\"东城区\",\"typecode\":\"190301\",\"photo\":null},{\"id\":\"B0LU6XOOZE\",\"name\":\"永定门公园(西4入口)\",\"address\":\"永定门内大街148号\",\"typecode\":\"080000\",\"photo\":\"http://store.is.autonavi.com/showpic/c8ebedc476c3fc8b4b3d24c664395f71\"},{\"id\":\"B0FFME9FJ0\",\"name\":\"永定门公园南园\",\"address\":\"永定门内大街156号永定门公园内(南侧)\",\"typecode\":\"110101\",\"photo\":\"https://store.is.autonavi.com/showpic/5f7e0d521ccfbb157d8f099f60b278cf\"},{\"id\":\"B0LR1XUZ13\",\"name\":\"行宫御道遗址\",\"address\":\"密三路与行宫路交叉口北380米\",\"typecode\":\"110200\",\"photo\":null},{\"id\":\"BZDBPW023L\",\"name\":\"永定门内大街\",\"address\":\"西城区\",\"typecode\":\"190301\",\"photo\":null},{\"id\":\"BZDBPW023M\",\"name\":\"永定门内大街\",\"address\":\"东城区\",\"typecode\":\"190301\",\"photo\":null},{\"id\":\"B0L695MGRI\",\"name\":\"御道文苑\",\"address\":\"南四环中路60号\",\"typecode\":\"120302\",\"photo\":\"https://store.is.autonavi.com/showpic/63e5b3daba93351688cada37a47b439d\"},{\"id\":\"B0FFH6JKAM\",\"name\":\"永定门内大街\",\"address\":\"西城区\",\"typecode\":\"190301\",\"photo\":null},{\"id\":\"BZDBPW02UT\",\"name\":\"永定门内大街\",\"address\":\"东城区\",\"typecode\":\"190301\",\"photo\":null},{\"id\":\"B000A80SBO\",\"name\":\"古御道\",\"address\":\"北京市古北口镇古北口村\",\"typecode\":\"110000\",\"photo\":\"https://store.is.autonavi.com/showpic/726ebb172c41c1f9a9bf9e9d4db51e47\"}]}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    }
+  ]
+}
