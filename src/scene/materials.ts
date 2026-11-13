@@ -26,6 +26,23 @@ function texture(kind: 'brick' | 'tile' | 'stone' | 'ground', normal = false) {
   return map;
 }
 
+/** Local inscription surface; small rear engraving is represented by strokes. */
+function monumentInscription(front:boolean) {
+  const canvas=document.createElement('canvas');canvas.width=256;canvas.height=768;
+  const ctx=canvas.getContext('2d')!;ctx.fillStyle='#ddd4c1';ctx.fillRect(0,0,256,768);
+  if(front) {
+    ctx.fillStyle='#947126';ctx.font='70px "Noto Serif CJK SC", "SimSun", serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    [...'人民英雄永垂不朽'].forEach((character,i)=>ctx.fillText(character,128,60+i*91));
+  } else {
+    ctx.fillStyle='#969186';
+    for(let column=0;column<8;column++)for(let row=0;row<30;row++) {
+      const x=24+column*28,y=35+row*23;
+      ctx.fillRect(x,y,15,2);ctx.fillRect(x+7,y-4,2,15);ctx.fillRect(x+3,y+8,12,2);
+    }
+  }
+  const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace;map.anisotropy=4;return map;
+}
+
 export function createMaterials() {
   const tiles = texture('tile');
   const tileNormal = texture('tile', true);
@@ -61,6 +78,8 @@ export function createMaterials() {
     waterEdge: make('#8d9a8d', .94),
     flagRed: make('#8d332e', .82),
     marble: make('#ddd4c1', .93, stone),
+    monumentFront: make('#ffffff', .93, monumentInscription(true)),
+    monumentBack: make('#ffffff', .93, monumentInscription(false)),
     civicStone: make('#c3bfb3', .94, stone),
     civicStoneDark: make('#85847d', .96, stone),
     glass: new THREE.MeshStandardMaterial({ color: '#283d40', roughness: .22, metalness: .22 }),

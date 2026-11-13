@@ -22,6 +22,7 @@ test('renders the full axis without browser errors or horizontal overflow', asyn
 
 test('renders the Tiananmen square ensemble and its supporting landmarks', async ({ page }) => {
   await page.goto('/#/site/square');
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
   await expect(page.locator('.landmark-detail h2')).toHaveText('天安门广场及建筑群');
   for (const annotation of ['heroes', 'memorial', 'great-hall']) {
     await expect(page.locator(`[data-annotation="${annotation}"]`)).toHaveCSS('opacity', '1');
@@ -30,6 +31,7 @@ test('renders the Tiananmen square ensemble and its supporting landmarks', async
 
 test('shows the layered Tiantan plan and one unambiguous north indicator', async ({ page }) => {
   await page.goto('/#/site/tiantan');
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
   for (const annotation of ['prayer-hall', 'imperial-vault', 'circular-altar']) {
     await expect(page.locator(`[data-annotation="${annotation}"]`)).toHaveCSS('opacity', '1');
   }
@@ -40,7 +42,15 @@ test('shows the layered Tiantan plan and one unambiguous north indicator', async
   await expect(page.locator('.flat-cartouche')).toHaveCount(0);
   await expect(page.locator('.flat-landmark-detail')).toHaveCount(15);
   await expect(page.locator('[data-plan-site="forbidden-city"] .plan-roofs')).toHaveAttribute('d',/.{1000}/);
+  for(const building of ['great-hall','museum'])await expect(page.locator(`[data-civic="${building}"].civic-column`)).toHaveCount(12);
   expect(await page.locator('.flat-map circle').evaluateAll(circles=>circles.some(c=>Number(c.getAttribute('r'))>5))).toBe(false);
+  const marker=page.locator('.flat-site .flat-marker').first();
+  const markerWidth=(await marker.boundingBox())!.width;
+  const mapBox=(await page.locator('.flat-map').boundingBox())!;
+  await page.mouse.move(mapBox.x+mapBox.width*.6,mapBox.y+mapBox.height*.6);
+  await page.mouse.wheel(0,-1300);
+  await expect(page.locator('.flat-map-content')).toHaveAttribute('transform',/scale\([2-9]/);
+  expect(Math.abs((await marker.boundingBox())!.width-markerWidth)).toBeLessThan(.5);
 });
 
 test('Shift drag rotates the scene and compass; ordinary drag pans', async ({ page }) => {
@@ -48,7 +58,7 @@ test('Shift drag rotates the scene and compass; ordinary drag pans', async ({ pa
   // for the final 1.15 s reset animation after both drag sequences complete.
   test.setTimeout(60_000);
   await page.goto('/#/');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/);
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
   const compass=page.locator('.north-marker');
   await expect(compass).toHaveAttribute('data-bearing',/[1-9]/);
   const before=Number(await compass.getAttribute('data-bearing'));

@@ -51,3 +51,10 @@ button:hover,a:hover{color:#ffe0a1}button:focus-visible,a:focus-visible,[tabinde
 .mapped-plan.temple-plan .plan-roofs{fill:#527f8d;stroke:#a1b9b4}
 .mapped-plan.is-selected .plan-roofs{fill:#d2a967;stroke:#ffe1a4;stroke-width:.3}
 .mapped-plan.is-selected .plan-ridges{stroke:#765834;stroke-width:.18}
+
+.civic-plan .civic-roof{fill:#b7b1a1;stroke:#ece1c7;stroke-width:.2;stroke-dasharray:none}
+.civic-plan .civic-court{fill:#6a7470;stroke:#d0c3a6;stroke-width:.15;stroke-dasharray:none}
+.civic-plan .civic-column{fill:#f1e1bc;stroke:none}
+.civic-plan .civic-steps{fill:#d1c4a5;stroke:#7c8073;stroke-width:.08;stroke-dasharray:none}
+.civic-plan .civic-plaza{fill:#a9a591;stroke:#d4c8aa;stroke-width:.2;stroke-dasharray:none}
+.civic-plan .civic-joint{fill:#8c8b7b;stroke:none}

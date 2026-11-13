@@ -5,6 +5,7 @@ import { createCityPlan } from '../scene/cityPlan';
 import { loadCityData, localBuildingRing, localFootprintLayout } from '../scene/geodata';
 import { project } from '../scene/geo';
 import type { Landmark } from '../data/types';
+import { civicLayouts, civicPlanParts, squarePlanParts } from '../scene/civicLayout';
 import { southernRoadPath, roadPlanRings } from '../scene/southernRoad';
 
 interface Props { selection: string | null; focus: RegionId | 'all'; onSelect: (id: string) => void; viewRevision?: number; }
@@ -20,7 +21,7 @@ const annotations: [string, [number, number]][] = [
   ['中南海', [116.3869,39.9173]], ['长安街', [116.419,39.9074]], ['前门大街', [116.3998,39.8938]],
 ];
 interface PlanLayer { id: string; roofs: string; walls: string; ridges: string; }
-interface Plan { image: string; layers: PlanLayer[]; }
+interface Plan { image: string; layers: PlanLayer[]; civic: {id:string;kind:string;path:string}[]; }
 let planPromise: Promise<Plan> | undefined;
 function loadPlan() {
   planPromise ??= loadCityData().then(data => {
@@ -48,7 +49,8 @@ function loadPlan() {
         if (p.width > .9 && p.depth > .4) layer.ridges += `M${440+(ox+p.x-dx-45)*SCALE},${520+(oz+p.z-dz-3)*SCALE}l${dx*2*SCALE},${dz*2*SCALE}`;
       }
     }
-    return { image: createCityPlan(data,2048,true).toDataURL(), layers };
+    const civic=[...squarePlanParts().map(part=>({id:'square',...part})),...Object.values(civicLayouts).flatMap(layout=>civicPlanParts(layout).map(part=>({id:layout.id,...part})))].map(part=>({id:part.id,kind:part.kind,path:'M'+part.ring.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z'}));
+    return { image: createCityPlan(data,2048,true).toDataURL(), layers, civic };
   }).catch(error => {planPromise=undefined;throw error;});
   return planPromise;
 }
@@ -99,18 +101,24 @@ export default function FlatMap({ selection, focus, onSelect, viewRevision }: Pr
       <g className="flat-map-content" transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
         {plan&&<image href={plan.image} x={440-640*SCALE/2} y={520-1090*SCALE/2} width={640*SCALE} height={1090*SCALE} />}
         <rect x="150" y="100" width="580" height="840" fill="url(#plan-grid)" className="flat-grid" pointerEvents="none" />
+        <g className="civic-plan" aria-hidden="true" pointerEvents="none">
+          {plan?.civic.filter(part=>part.kind==='plaza'||part.kind==='joint').map((part,index)=><path key={index} className={`civic-${part.kind}`} d={part.path}/>)}
+        </g>
         {plan?.layers.map(layer=>{
           const site=landmarks.find(item=>item.id===layer.id)!, selected=site.id===selection, muted=focus!=='all'&&site.region!==focus;
           return <g key={site.id} data-plan-site={site.id} className={`flat-landmark-detail mapped-plan ${selected?'is-selected':''} ${site.id==='tiantan'?'temple-plan':''}`} opacity={muted?.3:1} pointerEvents="none">
             <path className="plan-roofs" d={layer.roofs}/><path className="plan-walls" d={layer.walls}/><path className="plan-ridges" d={layer.ridges}/>
           </g>;
         })}
-        <path className="flat-axis-halo" d={`M${axis.map(p=>p.join(',')).join('L')}`} />
-        <path className="flat-axis-line" d={`M${axis.map(p=>p.join(',')).join('L')}`} />
-        {annotations.map(([name,coords])=>{const[x,y]=mapPoint(coords);return <text key={name} x={x} y={y} className="flat-context-label">{name}</text>;})}
+        <g className="civic-plan" aria-hidden="true" pointerEvents="none">
+          {plan?.civic.filter(part=>part.kind!=='plaza'&&part.kind!=='joint').map((part,index)=><path key={index} data-civic={part.id} className={`civic-${part.kind}`} d={part.path}/>)}
+        </g>
+        <path className="flat-axis-halo" vectorEffect="non-scaling-stroke" d={`M${axis.map(p=>p.join(',')).join('L')}`} />
+        <path className="flat-axis-line" vectorEffect="non-scaling-stroke" d={`M${axis.map(p=>p.join(',')).join('L')}`} />
+        {annotations.map(([name,coords])=>{const[x,y]=mapPoint(coords);return <text key={name} x={x} y={y} transform={`translate(${x} ${y}) scale(${1/view.scale}) translate(${-x} ${-y})`} className="flat-context-label">{name}</text>;})}
         {markers.map(({site,x,y,labelX,labelY,side},index)=>{
           const selected=site.id===selection,muted=focus!=='all'&&site.region!==focus;
-          return <g key={site.id} className={`flat-site ${selected?'is-selected':''}`} opacity={muted?.48:1} role="button" tabIndex={0} aria-label={`查看${site.name}`} aria-pressed={selected} onClick={()=>onSelect(site.id)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelect(site.id);}}}>
+          return <g key={site.id} transform={`translate(${x} ${y}) scale(${1/view.scale}) translate(${-x} ${-y})`} className={`flat-site ${selected?'is-selected':''}`} opacity={muted?.48:1} role="button" tabIndex={0} aria-label={`查看${site.name}`} aria-pressed={selected} onClick={()=>onSelect(site.id)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelect(site.id);}}}>
             <path className="flat-leader" d={`M${x},${y}h${side*18}L${labelX-side*8},${labelY}`} />
             <circle className="flat-marker" cx={x} cy={y} r={selected?4.5:3} />
             <circle className="flat-marker-core" cx={x} cy={y} r="1" />
