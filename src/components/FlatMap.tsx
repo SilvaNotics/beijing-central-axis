@@ -67,6 +67,11 @@ export default function FlatMap({ selection, focus, onSelect, viewRevision }: Pr
       <g className="flat-map-content" transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
         {plan&&<image href={plan} x={440-640*SCALE/2} y={520-1090*SCALE/2} width={640*SCALE} height={1090*SCALE} />}
         <rect x="150" y="100" width="580" height="840" fill="url(#plan-grid)" className="flat-grid" pointerEvents="none" />
+        {markers.map(({site,x,y})=>{
+          const selected=site.id===selection,muted=focus!=='all'&&site.region!==focus;
+          const radius=Math.max(8,Math.min(28,Math.max(...site.footprint)/10*SCALE*.20));
+          return <g key={`zone-${site.id}`} className={`flat-landmark-zone ${selected?'is-selected':''}`} opacity={muted?.16:1} pointerEvents="none"><circle cx={x} cy={y} r={radius}/><circle cx={x} cy={y} r={selected?5.5:3.5}/></g>;
+        })}
         <path className="flat-axis-halo" d={`M${axis.map(p=>p.join(',')).join('L')}`} />
         <path className="flat-axis-line" d={`M${axis.map(p=>p.join(',')).join('L')}`} />
         {annotations.map(([name,coords])=>{const[x,y]=mapPoint(coords);return <text key={name} x={x} y={y} className="flat-context-label">{name}</text>;})}

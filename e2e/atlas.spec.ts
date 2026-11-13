@@ -28,6 +28,19 @@ test('renders the Tiananmen square ensemble and its supporting landmarks', async
   }
 });
 
+test('shows the layered Tiantan plan and one unambiguous north indicator', async ({ page }) => {
+  await page.goto('/#/site/tiantan');
+  for (const annotation of ['prayer-hall', 'imperial-vault', 'circular-altar']) {
+    await expect(page.locator(`[data-annotation="${annotation}"]`)).toHaveCSS('opacity', '1');
+  }
+  await page.goto('/#/');
+  await page.getByRole('button', { name: /二维地图/ }).click();
+  await expect(page.locator('.flat-map')).toBeVisible();
+  await expect(page.locator('.flat-cartouche')).toHaveCount(1);
+  await expect(page.locator('.compass')).toHaveCount(0);
+  await expect(page.locator('.flat-landmark-zone')).toHaveCount(15);
+});
+
 test('keeps each chapter independently reachable and returns focus to the atlas', async ({ page }) => {
   await page.goto('/#/chapter/north');
   const frame = page.frameLocator('iframe');

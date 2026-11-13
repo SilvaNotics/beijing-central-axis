@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowRight, Compass, Layers, LocateFixed, Map, MoveUpRight, RotateCcw, X } from 'lucide-react';
+import { ArrowDown, ArrowRight, Layers, LocateFixed, Map, MoveUpRight, RotateCcw, X } from 'lucide-react';
 import { landmarks, regions } from './data/heritage';
 import type { RegionId } from './data/types';
 import SceneView from './scene/SceneView';
@@ -67,7 +67,7 @@ export default function App() {
           {sceneStatus === 'fallback' && <p className="fallback-note" role="status">三维图景不可用 · 当前使用二维地图</p>}
           {landmark && selectedRegion ? <article className="landmark-detail" key={landmark.id} aria-label={`${landmark.name}详情`}><button className="detail-close icon-button" aria-label="关闭地标详情" onClick={() => { setSelection(null); window.location.hash = '/'; }}><X size={17} /></button><span className="eyebrow">{selectedRegion.title} / {landmark.category}</span><h2>{landmark.name}</h2><p className="detail-english">{landmark.enName}</p><p className="detail-summary">{landmark.summary}</p><dl><div><dt>时代</dt><dd>{landmark.era}</dd></div><div><dt>一眼千年</dt><dd>{landmark.fact}</dd></div></dl><button className="detail-entry" onClick={() => enterChapter(landmark.region)}>进入{selectedRegion.title.split(' · ')[0]}篇章<MoveUpRight size={17} /></button></article> : <div className="map-instruction"><span className="instruction-dot" />{flat || sceneStatus === 'fallback' ? '中键拖动 · 滚轮缩放 · 点选地标' : '左键 / 中键拖动 · 滚轮缩放'}<span className="instruction-line" /></div>}
           {!landmark && <div className="map-legend" aria-label="地图图例"><span><i className="legend-axis" />中轴序列</span><span><i className="legend-water" />水系</span><span><i className="legend-fabric" />城市肌理</span><span><i className="legend-heritage" />遗产建筑</span></div>}
-          <div className="map-bottom"><div className="compass"><Compass size={32} strokeWidth={1} /><span>N</span></div><div className="axis-distance">轴线全长 <span>7.8 km</span></div><span className="map-note">基于真实地理位置 · 周边肌理为示意<br /><small>AN INTERPRETATION OF BEIJING’S LIVING HERITAGE</small></span></div>
+          <div className="map-bottom"><div className="axis-distance">轴线全长 <span>7.8 km</span></div><span className="map-note">基于真实地理位置 · 周边肌理为示意<br /><small>AN INTERPRETATION OF BEIJING’S LIVING HERITAGE</small></span></div>
         </section>
       </main>
       <footer className="page-footer"><span>北京中轴线 — 中国理想都城秩序的杰作</span><span>钟鼓楼 <i /> 永定门 <span className="footer-distance">7.8 KM</span></span><button onClick={() => setDialog('about')}>资料与说明 <ArrowRight size={12} /></button></footer>

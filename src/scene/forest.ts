@@ -39,8 +39,8 @@ export function forestPoints(data:CityData):ForestPoint[] {
   // Formal tree lines frame the public square and the palace moat; they remain outside the protected footprints.
   const square=landmarks.find(site=>site.id==='square')!, [squareX,squareZ]=project(square.coords);
   let rowIndex=0;
-  for(const side of [-1,1]) for(let z=-19;z<=26;z+=2.6) plantedRow(squareX+side*25.5,squareZ+z,rowIndex++);
-  for(let x=-20;x<=20;x+=4) plantedRow(squareX+x,squareZ+28.4,rowIndex++);
+  for(const side of [-1,1]) for(let z=-48;z<=37;z+=2.8) plantedRow(squareX+side*22.8,squareZ+z,rowIndex++);
+  for(let x=-19;x<=19;x+=4) plantedRow(squareX+x,squareZ+39.4,rowIndex++);
   const palace=landmarks.find(site=>site.id==='forbidden-city')!, [palaceX,palaceZ]=project(palace.coords);
   for(const side of [-1,1]) for(let z=-38;z<=38;z+=4.2) plantedRow(palaceX+side*41.7,palaceZ+z,rowIndex++);
   for(let x=-30;x<=30;x+=4.4) { plantedRow(palaceX+x,palaceZ-50.4,rowIndex++); plantedRow(palaceX+x,palaceZ+50.4,rowIndex++); }

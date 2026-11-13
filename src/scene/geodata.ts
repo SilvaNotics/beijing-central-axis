@@ -1,5 +1,6 @@
 import { project } from './geo';
 import type { ContextFeature } from '../data/context';
+import type { Landmark } from '../data/types';
 export interface BuildingFootprint { id: number; ring: [number, number][]; height?: number; levels?: number; building?: string; roof?: string; name?: string; }
 export interface CityContext extends ContextFeature { holes?: [number, number][][]; }
 export interface CityData { buildings: BuildingFootprint[]; context: CityContext[]; }
@@ -53,3 +54,47 @@ async function readCityData(): Promise<CityData> {
   return { buildings: b.buildings, context };
 }
 export function localBuildingRing(building: BuildingFootprint) { return building.ring.map(point => project(wgs84ToGcj02(point))); }
+
+export interface FootprintLayout {
+  x: number;
+  z: number;
+  width: number;
+  depth: number;
+  rotation: number;
+  height: number;
+}
+
+/** Minimum-area rectangle in local 10-metre units; this preserves real footprint orientation. */
+export function localFootprintLayout(building: BuildingFootprint, site: Landmark): FootprintLayout {
+  const ring = localBuildingRing(building);
+  const [originX, originZ] = project(site.coords);
+  let best: { area: number; ux: number; uz: number; vx: number; vz: number; minU: number; maxU: number; minV: number; maxV: number } | undefined;
+  for (let i = 0; i < ring.length - 1; i++) {
+    const dx = ring[i + 1][0] - ring[i][0], dz = ring[i + 1][1] - ring[i][1];
+    const length = Math.hypot(dx, dz);
+    if (length < .05) continue;
+    const ux = dx / length, uz = dz / length, vx = -uz, vz = ux;
+    let minU = Infinity, maxU = -Infinity, minV = Infinity, maxV = -Infinity;
+    for (const [x, z] of ring) {
+      const u = x * ux + z * uz, v = x * vx + z * vz;
+      minU = Math.min(minU, u); maxU = Math.max(maxU, u);
+      minV = Math.min(minV, v); maxV = Math.max(maxV, v);
+    }
+    const area = (maxU - minU) * (maxV - minV);
+    if (!best || area < best.area) best = { area, ux, uz, vx, vz, minU, maxU, minV, maxV };
+  }
+  if (!best) return { x: 0, z: 0, width: .5, depth: .5, rotation: 0, height: .6 };
+  const uWidth = best.maxU - best.minU, vDepth = best.maxV - best.minV;
+  const longU = uWidth >= vDepth;
+  const cu = (best.minU + best.maxU) / 2, cv = (best.minV + best.maxV) / 2;
+  const centerX = best.ux * cu + best.vx * cv - originX;
+  const centerZ = best.uz * cu + best.vz * cv - originZ;
+  return {
+    x: centerX,
+    z: centerZ,
+    width: longU ? uWidth : vDepth,
+    depth: longU ? vDepth : uWidth,
+    rotation: -(longU ? Math.atan2(best.uz, best.ux) : Math.atan2(best.vz, best.vx)),
+    height: buildingHeight(building) / 10,
+  };
+}

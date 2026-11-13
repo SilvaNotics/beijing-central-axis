@@ -54,6 +54,10 @@ export default function SceneView(props: SceneViewProps) {
         <span data-annotation="memorial">毛主席纪念堂</span>
         <span data-annotation="great-hall">人民大会堂</span>
         <span data-annotation="museum">中国国家博物馆</span>
+        <span data-annotation="prayer-hall">祈年殿</span>
+        <span data-annotation="imperial-vault">皇穹宇</span>
+        <span data-annotation="circular-altar">圜丘坛</span>
+        <span data-annotation="danbi-bridge">丹陛桥</span>
       </div>
     </div>
     <div className="scene-vignette" aria-hidden="true" />
@@ -134,8 +138,9 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     Object.assign(sun.shadow.camera, { left: -shadowExtent, right: shadowExtent, top: shadowExtent, bottom: -shadowExtent });
     sun.shadow.camera.updateProjectionMatrix(); sun.target.position.copy(center);
     sun.position.copy(center).add(new THREE.Vector3(-180, 320, 120));
-    const angle = activeFocus === 'all' ? .52 : .72;
+    const angle = activeFocus === 'all' ? .52 : activeFocus === 'square' ? .52 : activeFocus === 'tiantan' ? .46 : .68;
     const to = center.clone().add(new THREE.Vector3(0, Math.sin(angle) * distance, Math.cos(angle) * distance));
+    if (activeFocus === 'square') to.x += distance * .18;
     if (animated && !reducedMotion) animation = { from: camera.position.clone(), to, fromTarget: controls.target.clone(), target: center.clone(), start: performance.now() };
     else { animation = null; camera.position.copy(to); controls.target.copy(center); controls.update(); }
     invalidate();
@@ -154,7 +159,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
       if (id === 'sample') { target.z += 8; }
       if (s.id === 'tiantan') {
         const prayer=mappedLayout(43921139,s),vault=mappedLayout(43921121,s);
-        target.x+=prayer.x;target.z+=(prayer.z+vault.z)/2+4;extent=Math.max(112,70/Math.max(.45,camera.aspect));
+        target.x+=prayer.x;target.z+=(prayer.z+vault.z)/2+4;extent=Math.max(58,38/Math.max(.45,camera.aspect));
       }
       fit(target, extent);
     } else {
@@ -192,16 +197,29 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     }
     const squareAnchor = city.anchors.get('square');
     const annotations: Record<string, THREE.Vector3> = {
-      heroes: new THREE.Vector3(0, 4.2, 0),
-      memorial: new THREE.Vector3(0, 3.4, 16),
-      'great-hall': new THREE.Vector3(-31, 3, 4),
-      museum: new THREE.Vector3(31, 3, 4),
+      heroes: new THREE.Vector3(-.8, 4.2, -15.8),
+      memorial: new THREE.Vector3(.3, 3.4, 7.4),
+      'great-hall': new THREE.Vector3(-36, 3, -18.7),
+      museum: new THREE.Vector3(33.6, 3, -21.5),
     };
     const squareVisible = Boolean(squareAnchor) && (activeFocus === 'square' || ref.current.selection === 'square');
+    const tiantanAnchor = city.anchors.get('tiantan');
+    if (tiantanAnchor) {
+      const site = landmarks.find(item => item.id === 'tiantan')!;
+      const prayer = mappedLayout(43921139,site), vault = mappedLayout(43921121,site);
+      annotations['prayer-hall'] = new THREE.Vector3(prayer.x,6.5,prayer.z);
+      annotations['imperial-vault'] = new THREE.Vector3(vault.x,3.5,vault.z);
+      annotations['circular-altar'] = new THREE.Vector3(vault.x,2,vault.z+11.2);
+      annotations['danbi-bridge'] = new THREE.Vector3(prayer.x,1,(prayer.z+vault.z)/2);
+    }
+    const tiantanVisible = Boolean(tiantanAnchor) && (activeFocus === 'tiantan' || ref.current.selection === 'tiantan');
     for (const el of annotationElements) {
       const offset = annotations[el.dataset.annotation!];
-      if (!squareVisible || !squareAnchor || !offset) { el.style.opacity = '0'; continue; }
-      normal.copy(squareAnchor).add(offset).project(camera);
+      const tiantan = ['prayer-hall','imperial-vault','circular-altar','danbi-bridge'].includes(el.dataset.annotation!);
+      const origin = tiantan ? tiantanAnchor : squareAnchor;
+      const activeGroup = tiantan ? tiantanVisible : squareVisible;
+      if (!activeGroup || !origin || !offset) { el.style.opacity = '0'; continue; }
+      normal.copy(origin).add(offset).project(camera);
       const x = (normal.x + 1) * width / 2, y = (1 - normal.y) * height / 2;
       const visible = normal.z < 1 && normal.z > -1 && x > 45 && x < width - 70 && y > 45 && y < height - 60;
       el.style.opacity = visible ? '1' : '0';

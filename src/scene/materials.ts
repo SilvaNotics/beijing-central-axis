@@ -41,7 +41,7 @@ export function createMaterials() {
     vermilion: make('#8e4435', .83),
     wood: make('#39291f', .9),
     gold: new THREE.MeshStandardMaterial({ color: '#9c7b45', roughness: .58, metalness: .08, map: tiles, normalMap: tileNormal, normalScale: new THREE.Vector2(.08, .08) }),
-    blue: new THREE.MeshStandardMaterial({ color: '#496c78', roughness: .7, metalness: .04, map: tiles, normalMap: tileNormal, normalScale: new THREE.Vector2(.08, .08) }),
+    blue: new THREE.MeshStandardMaterial({ color: '#294d67', roughness: .62, metalness: .05, map: tiles, normalMap: tileNormal, normalScale: new THREE.Vector2(.08, .08), side: THREE.DoubleSide }),
     green: make('#465d52', .82, tiles),
     grayRoof: make('#424a48', .9, tiles),
     stone: make('#c9bca4', .97, stone),
@@ -60,6 +60,13 @@ export function createMaterials() {
     plazaLine: make('#8d8372', 1),
     waterEdge: make('#8d9a8d', .94),
     flagRed: make('#8d332e', .82),
+    marble: make('#ddd4c1', .93, stone),
+    civicStone: make('#c3bfb3', .94, stone),
+    civicStoneDark: make('#85847d', .96, stone),
+    glass: new THREE.MeshStandardMaterial({ color: '#283d40', roughness: .22, metalness: .22 }),
+    flatRoof: make('#51524d', .9),
+    bronzeRoof: make('#665d4d', .76, tiles),
+    goldLeaf: new THREE.MeshStandardMaterial({ color: '#d1a94e', roughness: .42, metalness: .3 }),
   };
 }
 export type Materials = ReturnType<typeof createMaterials>;
