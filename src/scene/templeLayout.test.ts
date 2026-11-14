@@ -8,6 +8,7 @@ import { localFootprintLayout, wgs84ToGcj02, type CityData } from './geodata';
 import { templeBoundary, moundCenter, tiantanDetailedIds, layoutCorners } from './templeLayout';
 import { alignPalaceRoof } from './precincts';
 import { jinshuiLayout, tiananmenPortals } from './gateLayout';
+import { distanceToRing } from './centralGreenery';
 import type { Materials } from './materials';
 
 const data:CityData={buildings:bundled.buildings as CityData['buildings'],context:[{
@@ -60,7 +61,10 @@ describe('temple collision regressions',()=>{
           const positions=child.geometry.getAttribute('position');
           for(let i=0;i<positions.count;i++) {
             point.fromBufferAttribute(positions,i).applyMatrix4(child.matrixWorld);
-            expect(pointInPolygon([point.x,point.z],boundary),`${siteId}/${source.id}: ${point.x}, ${point.z}`).toBe(true);
+            // BufferGeometry stores Float32 vertices; points on a mapped wall
+            // can round a fraction of a millimetre outside the exact boundary.
+            const horizontal:[number,number]=[point.x,point.z];
+            expect(pointInPolygon(horizontal,boundary)||distanceToRing(horizontal,boundary)<=1e-5,`${siteId}/${source.id}: ${point.x}, ${point.z}`).toBe(true);
           }
         });
         checked++;
@@ -88,7 +92,9 @@ describe('shared architectural alignment',()=>{
     const bridges=jinshuiLayout().filter(b=>b.portal!==null);
     bridges.forEach((bridge,i)=>expect(bridge.x-x).toBeCloseTo(tiananmenPortals[i],10));
     for(const offset of tiananmenPortals) {
-      const ray=new THREE.Raycaster(new THREE.Vector3(offset,.9,4),new THREE.Vector3(0,0,-1),0,8);
+      // Check a usable human-scale passage. At 9m a ray is above the smaller
+      // outer arches; dedicated Tiananmen tests cover its graduated arches.
+      const ray=new THREE.Raycaster(new THREE.Vector3(offset,.20,4),new THREE.Vector3(0,0,-1),0,8);
       expect(ray.intersectObject(gate,true),`portal ${offset}`).toHaveLength(0);
     }
   });

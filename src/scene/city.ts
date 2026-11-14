@@ -6,6 +6,7 @@ import { createCityPlan } from './cityPlan';
 import { createForest } from './forest';
 import { zhengyangLayout } from './zhengyangLayout';
 import { southernRoadPath } from './southernRoad';
+import { axisThroughShenwu } from './axisRoute';
 import { bake, createLandmark } from './architecture';
 import type { Materials } from './materials';
 
@@ -88,7 +89,7 @@ export function createCity(m: Materials, data: CityData, sample = false): City {
   }
   // The route and every physical layer use the same geographic projection.
   const centerline = [...landmarks.filter(site => !lateralSites.has(site.id) && !['square','southern-road','zhengyang'].includes(site.id)).map(site => project(site.coords)), ...Object.values(zhengyangLayout(landmarks.find(s=>s.id==='zhengyang')!,data)).map(p=>{const [x,z]=project(landmarks.find(s=>s.id==='zhengyang')!.coords);return [x+p.x,z+p.z] as [number,number];}), ...southernRoadPath()].sort((a, b) => a[1] - b[1]);
-  authored.add(path(centerline, .38, m.brass, .01));
+  authored.add(path(axisThroughShenwu(centerline,landmarks.find(s=>s.id==='forbidden-city')!,data), .38, m.brass, .01));
 
   object.add(bake(authored),createForest(data,m));
   const halo = new THREE.Mesh(new THREE.RingGeometry(5, 5.18, 64), new THREE.MeshBasicMaterial({ color: '#d8b476', transparent: true, opacity: .75, depthWrite: false, side: THREE.DoubleSide }));

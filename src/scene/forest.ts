@@ -1,4 +1,5 @@
 import { tiantanGround, templePavingClearance } from './tiantanGround';
+import { tiantanWallRuns } from './tiantanWalls';
 import * as THREE from 'three';
 import type { CityData } from './geodata';
 import { localBuildingRing } from './geodata';
@@ -57,6 +58,7 @@ export function forestPoints(data:CityData):ForestPoint[] {
     const site=landmarks.find(s=>s.id===siteId)!,[originX,originZ]=project(site.coords);
     const authoredBounds=siteId==='jingshan'?jingshanBuildingBounds(site):[];
     const paving=siteId==='tiantan'?tiantanGround(site,data):undefined;
+    const templeWalls=siteId==='tiantan'?tiantanWallRuns(site,data):undefined;
     const prayer=mappedLayout(43921139,landmarks.find(s=>s.id==='tiantan')!),vault=mappedLayout(43921121,landmarks.find(s=>s.id==='tiantan')!);
     const [moundX,moundZ]=moundCenter(landmarks.find(s=>s.id==='tiantan')!);
     const peaks=jingshanPeaks(site);
@@ -75,6 +77,7 @@ export function forestPoints(data:CityData):ForestPoint[] {
       const radius=species==='cypress'?.68+random()*.30:species==='pine'?.55+random()*.3:.52+random()*.35;
       const tree:ForestPoint={x,z,y,height,radius,shade,species,region:siteId};
       if(paving&&templePavingClearance([lx,lz],paving)<radius*1.9+.12)continue;
+      if(templeWalls?.some(run=>nearEdge(lx,lz,radius*1.9+.28,[run.a,run.b])))continue;
       if(siteId==='jingshan'||siteId==='tiantan') {
         const clearance=radius*1.9+.12;
         const overlaps=(px:number,pz:number,b:typeof buildingBounds[number])=>Math.hypot(Math.max(b.minX-px,0,px-b.maxX),Math.max(b.minZ-pz,0,pz-b.maxZ))<clearance;

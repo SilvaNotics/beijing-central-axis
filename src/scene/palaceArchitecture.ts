@@ -1,6 +1,9 @@
 import type { Landmark } from '../data/types';
 import { project } from './geo';
 import type { RoofForm } from './roofForms';
+import { localFootprintLayout,type CityData } from './geodata';
+import { mappedLayout } from './layouts';
+import { palaceRoofRotation } from './precincts';
 
 export interface HallProfile {
   roof:RoofForm;
@@ -24,7 +27,15 @@ export const palaceHallProfiles:Record<number,HallProfile>={
 };
 export const zhongheProfile:HallProfile={roof:'pyramidal',double:false,height:2.1,platform:.813,frontBays:3,sideBays:3};
 export const zhongheCoords:[number,number]=[116.397065,39.917875];
-export function zhongheLayout(site:Landmark) {
+export function zhongheLayout(site:Landmark,data?:CityData) {
   const [x,z]=project(zhongheCoords),[ox,oz]=project(site.coords);
-  return {x:x-ox,z:z-oz,width:2.65,depth:2.65};
+  const center=(id:number)=>{
+    const footprint=data?.buildings.find(b=>b.id===id);
+    return footprint?localFootprintLayout(footprint,site):mappedLayout(id,site);
+  };
+  const south=center(638449347),north=center(638473398),dx=north.x-south.x,dz=north.z-south.z;
+  // A POI is a label anchor, not a surveyed building centre. Preserve its
+  // position along the three-hall axis while removing the lateral label offset.
+  const t=((x-ox-south.x)*dx+(z-oz-south.z)*dz)/(dx*dx+dz*dz);
+  return {x:south.x+t*dx,z:south.z+t*dz,width:2.65,depth:2.65,rotation:palaceRoofRotation()};
 }

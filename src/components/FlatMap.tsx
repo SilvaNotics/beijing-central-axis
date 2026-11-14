@@ -8,14 +8,23 @@ import type { Landmark } from '../data/types';
 import { civicLayouts, civicPlanParts, squarePlanParts } from '../scene/civicLayout';
 import { southernRoadPath, roadPlanRings, roadPlanDetails } from '../scene/southernRoad';
 import { palaceHallProfiles, zhongheLayout } from '../scene/palaceArchitecture';
+import { palaceSideHallLayout } from '../scene/palaceSideHalls';
 import { palaceTerraces,palaceRaisedBuildings,palaceRoofCore,sharedPalaceTerrace } from '../scene/palaceMassing';
+import { axisThroughShenwu } from '../scene/axisRoute';
 import { palaceWallRuns } from '../scene/palaceWalls';
+import { palaceGateIds, palaceGateLayout, palaceGateHalls, shenwuForecourtLayout } from '../scene/palaceGates';
 import { roofPlanLines, mappedRoofForm } from '../scene/roofForms';
 import { agricultureCompounds } from '../scene/agricultureLayout';
 import { wanningLayout } from '../scene/wanningLayout';
+import { drumTowerDisplayOffset } from '../scene/bellDrumLayout';
 import { moundStoneGates, moundCenter } from '../scene/templeLayout';
 import { moundEnclosures } from '../scene/moundEnclosures';
+import { tiantanWallRuns } from '../scene/tiantanWalls';
 import { wallRuns } from '../scene/wallRuns';
+import { yongdingmenPlatform, yongdingmenRoofs } from '../scene/yongdingmen';
+import { tiananmenRoofs } from '../scene/tiananmen';
+import { duanmenPlatform, duanmenRoofs } from '../scene/duanmen';
+import { jinshuiLayout, tiananmenDepth, tiananmenWidth } from '../scene/gateLayout';
 import { zhengyangPlatformRing, zhengyangCityRoofs } from '../scene/zhengyangLayout';
 
 interface Props { selection: string | null; focus: RegionId | 'all'; onSelect: (id: string) => void; viewRevision?: number; }
@@ -31,16 +40,26 @@ const annotations: [string, [number, number]][] = [
   ['中南海', [116.3869,39.9173]], ['长安街', [116.419,39.9074]], ['前门大街', [116.3998,39.8938]],
 ];
 interface PlanLayer { id: string; roofs: string; walls: string; ridges: string; }
-interface Plan { image: string; layers: PlanLayer[]; civic: {id:string;kind:string;path:string}[]; }
+interface Plan { axis: [number,number][]; image: string; layers: PlanLayer[]; civic: {id:string;kind:string;path:string}[]; }
 let planPromise: Promise<Plan> | undefined;
 function loadPlan() {
   planPromise ??= loadCityData().then(data => {
     const layers = landmarks.map(site => ({ id: site.id, roofs: '', walls: '', ridges: '' }));
     const roadLayer = layers.find(layer=>layer.id==='southern-road')!;
+    const jinshuiLayer = layers.find(layer=>layer.id==='jinshui')!;
+    const bridgePoint = ([x,z]: [number,number]) => `${440+(x-45)*SCALE},${520+(z-3)*SCALE}`;
+    for(const bridge of jinshuiLayout(data.context)) {
+      const corners: [number,number][] = [[bridge.x-bridge.width/2,bridge.crossingNorthZ],[bridge.x+bridge.width/2,bridge.crossingNorthZ],[bridge.x+bridge.width/2,bridge.crossingSouthZ],[bridge.x-bridge.width/2,bridge.crossingSouthZ]];
+      jinshuiLayer.walls += 'M'+corners.map(bridgePoint).join('L')+'Z';
+      jinshuiLayer.ridges += 'M'+bridgePoint([bridge.x,bridge.northZ])+'L'+bridgePoint([bridge.x,bridge.southZ]);
+    }
     for(const ring of roadPlanRings()) roadLayer.roofs += 'M'+ring.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z';
     for(const line of roadPlanDetails())roadLayer.ridges+='M'+line.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L');
     for (const building of data.buildings) {
-      const ring = localBuildingRing(building);
+      const palace = landmarks.find(site=>site.id==='forbidden-city')!;
+      const display = shenwuForecourtLayout(palace,data,building.id);
+      const [px,pz] = project(palace.coords);
+      const ring = display ? display.ring.map(([x,z]):[number,number]=>[x+px,z+pz]) : localBuildingRing(building);
       const center = ring.reduce((sum,p) => [sum[0]+p[0]/ring.length,sum[1]+p[1]/ring.length],[0,0]);
       let nearest = -1, distance = 1;
       landmarks.forEach((site,index) => {
@@ -48,10 +67,16 @@ function loadPlan() {
         const d = Math.max(Math.abs(center[0]-x)/(site.footprint[0]/20),Math.abs(center[1]-z)/(site.footprint[1]/20));
         if (d < distance) { nearest = index; distance = d; }
       });
+      if(palaceGateIds.some(id => id === building.id)) nearest=landmarks.findIndex(site=>site.id==='forbidden-city');
       if([25109960,439956436].includes(building.id))nearest=landmarks.findIndex(site=>site.id==='zhengyang');
       if (nearest < 0) continue;
       const layer = layers[nearest];
-      const site=landmarks[nearest], p=palaceRaisedBuildings.has(building.id)?palaceRoofCore(building,site):localFootprintLayout(building,site), [ox,oz]=project(site.coords);
+      const site=landmarks[nearest], p=display??(palaceRaisedBuildings.has(building.id)?palaceRoofCore(building,site):localFootprintLayout(building,site)), [ox,oz]=project(site.coords);
+      if(building.id===267371087) {
+        const offset=drumTowerDisplayOffset(site);
+        p.x+=offset;
+        for(const point of ring)point[0]+=offset;
+      }
       const global=([u,v]:[number,number]):[number,number]=>[ox+p.x+u*Math.cos(p.rotation)+v*Math.sin(p.rotation),oz+p.z-u*Math.sin(p.rotation)+v*Math.cos(p.rotation)];
       const worldPath=(points:[number,number][])=>'M'+points.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L');
       if(moundStoneGates.has(building.id)) {
@@ -74,8 +99,33 @@ function loadPlan() {
         }
         continue;
       }
+      if (site.id === 'tiananmen' || site.id === 'duanmen' || site.id === 'yongdingmen') continue;
       const path = 'M'+ring.map(([x,z]) => `${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z';
+      if(palaceGateIds.some(id => id === building.id)) {
+        const gate = palaceGateLayout(site, data, building.id)!;
+        const gc = Math.cos(gate.rotation), gs = Math.sin(gate.rotation);
+        const gateWorld = ([x,z]:[number,number]):[number,number] => [ox+gate.x+x*gc+z*gs,oz+gate.z-x*gs+z*gc];
+        layer.walls += path;
+        for(const part of palaceGateHalls(gate)) {
+          const c = Math.cos(part.rotation), s = Math.sin(part.rotation);
+          const convert = ([x,z]:[number,number]) => gateWorld([part.x+x*c+z*s,part.z-x*s+z*c]);
+          layer.roofs += worldPath([[-part.width/2,-part.depth/2],[part.width/2,-part.depth/2],[part.width/2,part.depth/2],[-part.width/2,part.depth/2]].map(point=>convert(point as [number,number])))+'Z';
+          for(const line of roofPlanLines(part.width,part.depth,part.profile.roof)) layer.ridges += worldPath(line.map(convert));
+        }
+        continue;
+      }
       if(palaceTerraces.has(building.id)){layer.walls+=path;continue;}
+      if([43512262,43519304].includes(building.id)) {
+        layer.walls+=path;
+        for(const [name,part] of Object.entries(palaceSideHallLayout(building,site))) {
+          const c=Math.cos(part.rotation),s=Math.sin(part.rotation);
+          const convert=([x,z]:[number,number]):[number,number]=>[ox+part.x+x*c+z*s,oz+part.z-x*s+z*c];
+          layer.roofs+=worldPath([[-part.width/2,-part.depth/2],[part.width/2,-part.depth/2],[part.width/2,part.depth/2],[-part.width/2,part.depth/2]].map(point=>convert(point as [number,number])))+'Z';
+          const lines=name==='corridor'?roofPlanLines(part.depth,part.width,'gable').map(line=>line.map(([x,z]):[number,number]=>[z,-x])):roofPlanLines(part.width,part.depth,'hip-gable');
+          for(const line of lines)layer.ridges+=worldPath(line.map(convert));
+        }
+        continue;
+      }
       if(palaceRaisedBuildings.has(building.id)) {
         layer.walls+=path;
         layer.roofs+=worldPath([[-p.width/2,-p.depth/2],[p.width/2,-p.depth/2],[p.width/2,p.depth/2],[-p.width/2,p.depth/2]].map(point=>global(point as [number,number])))+'Z';
@@ -101,16 +151,43 @@ function loadPlan() {
         } else if(p.width>.9&&p.depth>.4)for(const line of lines)for(const segment of wallRuns(line[0],line[1],[ring],true))layer.ridges+=worldPath(segment);
       }
     }
+    const tiananmen = landmarks.find(site => site.id === 'tiananmen')!, gateLayer = layers.find(layer => layer.id === 'tiananmen')!;
+    const [gx, gz] = project(tiananmen.coords);
+    const gatePath = (points: [number, number][]) => 'M' + points.map(([x,z]) => `${440+(gx+x-45)*SCALE},${520+(gz+z-3)*SCALE}`).join('L');
+    const rectangle = (w: number, d: number): [number,number][] => [[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2]];
+    gateLayer.walls += gatePath(rectangle(tiananmenWidth, tiananmenDepth)) + 'Z';
+    for (const roof of tiananmenRoofs) {
+      gateLayer.roofs += gatePath(rectangle(roof.width, roof.depth)) + 'Z';
+      for (const line of roofPlanLines(roof.width, roof.depth, roof.form)) gateLayer.ridges += gatePath(line);
+    }
+    const duanmen = landmarks.find(site => site.id === 'duanmen')!, duanmenLayer = layers.find(layer => layer.id === 'duanmen')!;
+    const [dx, dz] = project(duanmen.coords);
+    const duanmenPath = (points: [number, number][]) => 'M' + points.map(([x,z]) => `${440+(dx+x-45)*SCALE},${520+(dz+z-3)*SCALE}`).join('L');
+    duanmenLayer.walls += duanmenPath(rectangle(duanmenPlatform.width, duanmenPlatform.depth)) + 'Z';
+    for (const roof of duanmenRoofs) {
+      duanmenLayer.roofs += duanmenPath(rectangle(roof.width, roof.depth)) + 'Z';
+      for (const line of roofPlanLines(roof.width, roof.depth, roof.form)) duanmenLayer.ridges += duanmenPath(line);
+    }
+    const southGate = landmarks.find(site => site.id === 'yongdingmen')!, southGateLayer = layers.find(layer => layer.id === 'yongdingmen')!;
+    const [sx, sz] = project(southGate.coords);
+    const southPath = (points: [number, number][]) => 'M' + points.map(([x,z]) => `${440+(sx+x-45)*SCALE},${520+(sz+z-3)*SCALE}`).join('L');
+    southGateLayer.walls += southPath(rectangle(yongdingmenPlatform.width, yongdingmenPlatform.depth)) + 'Z';
+    for (const roof of yongdingmenRoofs) {
+      southGateLayer.roofs += southPath(rectangle(roof.width, roof.depth)) + 'Z';
+      for (const line of roofPlanLines(roof.width, roof.depth, roof.form)) southGateLayer.ridges += southPath(line);
+    }
     const temple=landmarks.find(site=>site.id==='tiantan')!,templeLayer=layers.find(layer=>layer.id==='tiantan')!,enclosures=moundEnclosures(data.buildings,temple),[tx,tz]=project(temple.coords);
     const templePath=(points:[number,number][])=>'M'+points.map(([x,z])=>`${440+(tx+x-45)*SCALE},${520+(tz+z-3)*SCALE}`).join('L');
     for(const run of [...enclosures.inner,...enclosures.outer])templeLayer.walls+=templePath(run);
+    for(const run of tiantanWallRuns(temple,data))templeLayer.walls+=templePath([run.a,run.b]);
     const [mx,mz]=moundCenter(temple);
     for(const radius of [2.7455,1.9655,1.1825])templeLayer.ridges+=templePath(Array.from({length:65},(_,i)=>[mx+Math.sin(i/64*Math.PI*2)*radius,mz+Math.cos(i/64*Math.PI*2)*radius]))+'Z';
-    const palace=landmarks.find(site=>site.id==='forbidden-city')!,middle=zhongheLayout(palace),[ox,oz]=project(palace.coords);
+    const palace=landmarks.find(site=>site.id==='forbidden-city')!,middle=zhongheLayout(palace,data),[ox,oz]=project(palace.coords);
     for(const run of palaceWallRuns(palace,data))layers.find(layer=>layer.id===palace.id)!.walls+='M'+[run.a,run.b].map(([x,z])=>`${440+(ox+x-45)*SCALE},${520+(oz+z-3)*SCALE}`).join('L');
     const deck=sharedPalaceTerrace(palace,data);
     if(deck.length)layers.find(layer=>layer.id==='forbidden-city')!.walls+='M'+deck.map(([x,z])=>`${440+(x+ox-45)*SCALE},${520+(z+oz-3)*SCALE}`).join('L')+'Z';
-    const convert=([u,v]:[number,number])=>[440+(ox+middle.x+u-45)*SCALE,520+(oz+middle.z+v-3)*SCALE];
+    const mc=Math.cos(middle.rotation),ms=Math.sin(middle.rotation);
+    const convert=([u,v]:[number,number])=>[440+(ox+middle.x+u*mc+v*ms-45)*SCALE,520+(oz+middle.z-u*ms+v*mc-3)*SCALE];
     const middleRing:[number,number][]=[[-middle.width/2,-middle.depth/2],[middle.width/2,-middle.depth/2],[middle.width/2,middle.depth/2],[-middle.width/2,middle.depth/2]];
     const layer=layers.find(layer=>layer.id==='forbidden-city')!;
     layer.roofs+='M'+middleRing.map(point=>convert(point).join(',')).join('L')+'Z';
@@ -128,12 +205,13 @@ function loadPlan() {
     }
     const bridgeLayer=layers.find(layer=>layer.id==='wanning')!,bridgeSite=landmarks.find(site=>site.id==='wanning')!,[bx,bz]=project(bridgeSite.coords);
     const bridge=wanningLayout(bridgeSite),c=Math.cos(bridge.rotation),s=Math.sin(bridge.rotation);
-    const bridgePoint=(x:number,z:number)=>`${440+(bx+bridge.x+x*c+z*s-45)*SCALE},${520+(bz+bridge.z-x*s+z*c-3)*SCALE}`;
-    bridgeLayer.roofs+='M'+[[-.85,-1.73],[.85,-1.73],[.85,1.73],[-.85,1.73]].map(([x,z])=>bridgePoint(x,z)).join('L')+'Z';
-    for(const x of [-.8,.8])bridgeLayer.ridges+=`M${bridgePoint(x,-1.73)}L${bridgePoint(x,1.73)}`;
-    for(let z=-1.5;z<=1.5;z+=.3)bridgeLayer.ridges+=`M${bridgePoint(-.8,z)}L${bridgePoint(.8,z)}`;
+    const wanningBridgePoint=(x:number,z:number)=>`${440+(bx+bridge.x+x*c+z*s-45)*SCALE},${520+(bz+bridge.z-x*s+z*c-3)*SCALE}`;
+    bridgeLayer.roofs+='M'+[[-.85,-1.73],[.85,-1.73],[.85,1.73],[-.85,1.73]].map(([x,z])=>wanningBridgePoint(x,z)).join('L')+'Z';
+    for(const x of [-.8,.8])bridgeLayer.ridges+=`M${wanningBridgePoint(x,-1.73)}L${wanningBridgePoint(x,1.73)}`;
+    for(let z=-1.5;z<=1.5;z+=.3)bridgeLayer.ridges+=`M${wanningBridgePoint(-.8,z)}L${wanningBridgePoint(.8,z)}`;
     const civic=[...squarePlanParts(data).map(part=>({id:'square',...part})),...Object.values(civicLayouts).flatMap(layout=>civicPlanParts(layout).map(part=>({id:layout.id,...part})))].map(part=>({id:part.id,kind:part.kind,path:'M'+part.ring.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z'}));
-    return { image: createCityPlan(data,2048,true).toDataURL(), layers, civic };
+    const axis=axisThroughShenwu([...landmarks.filter(s=>!['shejitan','taimiao','square','tiantan','xiannongtan','southern-road'].includes(s.id)).map(site=>project(site.coords)),...southernRoadPath()].sort((a,b)=>a[1]-b[1]),palace,data);
+    return { axis, image: createCityPlan(data,2048,true).toDataURL(), layers, civic };
   }).catch(error => {planPromise=undefined;throw error;});
   return planPromise;
 }
@@ -165,7 +243,8 @@ export default function FlatMap({ selection, focus, onSelect, viewRevision }: Pr
     let last=100;
     for(const item of markers.filter(m=>m.side===side).sort((a,b)=>a.y-b.y)){item.labelY=Math.max(item.y,last+31);last=item.labelY;}
   }
-  const axis=[...landmarks.filter(s=>!['shejitan','taimiao','square','tiantan','xiannongtan','southern-road'].includes(s.id)).map(sitePoint),...southernRoadPath().map(([x,z])=>[440+(x-45)*SCALE,520+(z-3)*SCALE])].sort((a,b)=>a[1]-b[1]);
+  const axis=(plan?.axis??[]).map(([x,z])=>[440+(x-45)*SCALE,520+(z-3)*SCALE]);
+  const axisPath=axis.length ? `M${axis.map(p=>p.join(',')).join('L')}` : '';
   return <div ref={host} className="flat-map" aria-label="北京中轴线二维地图" onPointerDown={event=>{
     if(event.button!==0&&event.button!==1)return;
     if(event.button===0&&(event.target as Element).closest('.flat-site'))return;
@@ -196,8 +275,8 @@ export default function FlatMap({ selection, focus, onSelect, viewRevision }: Pr
         <g className="civic-plan" aria-hidden="true" pointerEvents="none">
           {plan?.civic.filter(part=>part.kind!=='plaza'&&part.kind!=='joint').map((part,index)=><path key={index} data-civic={part.id} className={`civic-${part.kind}`} d={part.path}/>)}
         </g>
-        <path className="flat-axis-halo" vectorEffect="non-scaling-stroke" d={`M${axis.map(p=>p.join(',')).join('L')}`} />
-        <path className="flat-axis-line" vectorEffect="non-scaling-stroke" d={`M${axis.map(p=>p.join(',')).join('L')}`} />
+        <path className="flat-axis-halo" vectorEffect="non-scaling-stroke" d={axisPath} />
+        <path className="flat-axis-line" vectorEffect="non-scaling-stroke" d={axisPath} />
         {annotations.map(([name,coords])=>{const[x,y]=mapPoint(coords);return <text key={name} x={x} y={y} transform={`translate(${x} ${y}) scale(${1/view.scale}) translate(${-x} ${-y})`} className="flat-context-label">{name}</text>;})}
         {markers.map(({site,x,y,labelX,labelY,side},index)=>{
           const selected=site.id===selection,muted=focus!=='all'&&site.region!==focus;

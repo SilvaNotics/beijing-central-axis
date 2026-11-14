@@ -1,0 +1,8 @@
+[out:json][timeout:60];
+(
+  way["barrier"](39.860,116.390,39.905,116.430);
+  way["man_made"="wall"](39.860,116.390,39.905,116.430);
+  way["building"="wall"](39.860,116.390,39.905,116.430);
+  relation["barrier"](39.860,116.390,39.905,116.430);
+);
+out body geom tags;

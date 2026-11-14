@@ -169,7 +169,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
       if (id === 'sample') { target.z += 8; }
       if (s.id === 'tiantan') {
         const prayer=mappedLayout(43921139,s),vault=mappedLayout(43921121,s);
-        target.x+=prayer.x;target.z+=(prayer.z+vault.z)/2+4;extent=Math.max(90,70/Math.max(.45,aspect));
+        target.x+=prayer.x;target.z+=(prayer.z+vault.z)/2+4;extent=Math.max(188,140/Math.max(.45,aspect));
       }
       if (s.id === 'southern-road') extent = Math.max(155,48/Math.max(.45,aspect));
       fit(target, extent);

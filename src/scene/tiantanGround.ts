@@ -9,7 +9,7 @@ import type { Materials } from './materials';
 
 type Point = [number, number];
 export interface TemplePath { id: string; points: Point[]; width: number; }
-export interface TempleCourt { id: string; ring: Point[]; }
+export interface TempleCourt { id: string; ring: Point[]; walled: boolean; }
 export interface TempleGround { paths: TemplePath[]; courts: TempleCourt[]; }
 const cache = new WeakMap<CityData, TempleGround>();
 
@@ -32,32 +32,29 @@ export function tiantanGround(site: Landmark, data: CityData): TempleGround {
   for (const water of data.context.filter(f => f.kind === 'water')) {
     for (const hole of water.holes ?? []) {
       const ring = hole.map(project).map(local);
-      if (pointInPolygon(gate(43925089), ring)) courts.push({ id: 'fasting-palace', ring });
+      if (pointInPolygon(gate(43925089), ring)) courts.push({ id: 'fasting-palace', ring, walled:true });
     }
   }
-  const compound = (id: string, ids: number[]) => {
+  const compound = (id: string, ids: number[], walled=true) => {
     const rings = ids.flatMap(id => {
       const building = data.buildings.find(b => b.id === id);
       return building ? localBuildingRing(building).map(local) : [];
     });
     if (!rings.length) return;
-    // Align the court with its mapped hall, rather than the atlas axes.
-    const anchor = data.buildings.find(b => b.id === ids[0])!;
-    const angle = localFootprintLayout(anchor,site).rotation;
-    const rotation = angle - Math.round(angle/(Math.PI/2))*(Math.PI/2);
-    const c = Math.cos(rotation), s = Math.sin(rotation);
-    const us = rings.map(([x,z]) => x*c-z*s), vs = rings.map(([x,z]) => x*s+z*c);
-    const l = Math.min(...us)-.45, r = Math.max(...us)+.45;
-    const n = Math.min(...vs)-.45, south = Math.max(...vs)+.45;
-    const ring: Point[] = [[l,n],[r,n],[r,south],[l,south]].map(([u,v]) => [u*c+v*s,-u*s+v*c]);
-    courts.push({ id, ring });
+    // Service compounds follow the established Tiantan map grid. A single
+    // round or irregular first footprint has no stable rectangle orientation
+    // and previously skewed the whole pavement court by up to 33 degrees.
+    const xs=rings.map(([x])=>x), zs=rings.map(([,z])=>z);
+    const l=Math.min(...xs)-.45, r=Math.max(...xs)+.45;
+    const n=Math.min(...zs)-.45, south=Math.max(...zs)+.45;
+    courts.push({ id, ring:[[l,n],[r,n],[r,south],[l,south]], walled });
   };
   compound('north-kitchen', [43921134,43921142,43921145,43921146]);
   compound('north-sacrifice', [43921129,43921147]);
   compound('south-kitchen', [43922699,43922700,43922701,43922692]);
   compound('south-sacrifice', [43922676,43922677,43922678,43922679,43922695,43922704,43922706]);
   // Small apron for the mapped pavilion, preserving the surrounding grove.
-  compound('double-ring-pavilion', [43921112,43921125]);
+  compound('double-ring-pavilion', [43921112,43921125], false);
 
   // These northern groups have no verified historic names in the snapshot.
   // Aprons and access walks are model interpretations around mapped buildings.
@@ -72,7 +69,7 @@ export function tiantanGround(site: Landmark, data: CityData): TempleGround {
     ['northwest-annex',[1476164302]],
     ['north-gate-annex',[1123769963]],
   ];
-  for(const [id,ids] of northernGroups) compound(id,ids);
+  for(const [id,ids] of northernGroups) compound(id,ids,ids.length>1);
   const westernGroups: [string,number[]][] = [
     ['west-entry-court',[371497135,371497105,371497134,1416953408]],
     ['west-roadside',[1358113548]],
@@ -86,7 +83,7 @@ export function tiantanGround(site: Landmark, data: CityData): TempleGround {
     ['southwest-hall',[352734831]],
     ['southwest-annex',[352734835]],
   ];
-  for(const [id,ids] of westernGroups) compound(id,ids);
+  for(const [id,ids] of westernGroups) compound(id,ids,ids.length>1||/court|rows|hall|annex/.test(id));
   const courtEdge = (id:string, side:'north'|'south'='south', fraction=.5):Point => {
     const ring=courts.find(c=>c.id===id)!.ring, a=ring[side==='south'?3:0], b=ring[side==='south'?2:1];
     return [a[0]+(b[0]-a[0])*fraction,a[1]+(b[1]-a[1])*fraction];

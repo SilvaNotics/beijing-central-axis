@@ -1,13 +1,31 @@
 # Scene reference review
 
+> 这是保留的场景研究工作笔记，包含英文记录和分轮追加。当前来源身份与核验状态以 [来源目录](source-catalogue.md) 为准，逐地标解释以 [证据矩阵](evidence-matrix.md) 为准。本轮只重整入口，没有重新在线核验照片或取得额外分发授权。
+
+<details>
+<summary>内容索引</summary>
+
+- [Architectural photographs](#architectural-photographs)
+- [Geographic and layout evidence](#geographic-and-layout-evidence)
+- [Shared alignment and southern road correction](#shared-alignment-and-southern-road-correction)
+- [Courtyard collision corrections](#courtyard-collision-corrections)
+- [Civic elevations and monument](#civic-elevations-and-monument)
+- [Palace and temple side elevations](#palace-and-temple-side-elevations)
+- [Principal palace silhouettes and proportions](#principal-palace-silhouettes-and-proportions)
+- [Minor landmarks, trees and remaining irregular buildings](#minor-landmarks-trees-and-remaining-irregular-buildings)
+- [Circular Mound stone gates and terrace proportions](#circular-mound-stone-gates-and-terrace-proportions)
+- [Zhengyangmen Arrow Tower](#zhengyangmen-arrow-tower)
+
+</details>
+
 Reviewed 2026-11-13 for the second 3D architecture pass. Reference photographs were inspected online but are not bundled as runtime assets.
 
 ## Architectural photographs
 
 - People's Great Hall: [20251026 Great Hall of the People](https://commons.wikimedia.org/wiki/File:20251026_Great_Hall_of_the_People.jpg), Wikimedia Commons. The square-facing elevation has a long stone portico, deep columns, a shallow overhanging roof, vertical wings, flags, and restrained modern detailing.
 - National Museum of China: [20251026 National Museum of China](https://commons.wikimedia.org/wiki/File:20251026_National_Museum_of_China.jpg), Windmemories, CC BY-SA 4.0. The west elevation has a tall central colonnade, long symmetrical wings, two end towers with stepped caps, recessed glazing, and a shallow roof rather than a palace roof.
-- Tiananmen: [Tiananmen Gate 2019](https://commons.wikimedia.org/wiki/File:Tiananmen_Gate_2019.jpg). Its five-arch red wall carries a large portrait, paired long inscriptions, and a tall double-eaved gatehouse; this treatment distinguishes it from Duanmen.
-- Duanmen: [Duanmen Gate of the Forbidden City](https://commons.wikimedia.org/wiki/File:Duanmen_Gate_of_the_Forbidden_City.jpg). Duanmen has a lower, wider red platform, five passages, a more compressed double-eaved hall, and low flanking roof masses without the Tiananmen portrait or declaration panels.
+- Tiananmen: [Tiananmen Gate 2019](https://commons.wikimedia.org/wiki/File:Tiananmen_Gate_2019.jpg), Jp16103, 2019-09-04, CC BY-SA 4.0. Its five-arch red wall carries a large portrait, paired long inscriptions, and a tall double-eaved gatehouse; this treatment distinguishes it from Duanmen. The visible photo proportions supplement, but do not replace, the DPM-recorded 16.19 m bastion and published 34.7 m total height.
+- Duanmen: [Duanmen Gate of the Forbidden City](https://commons.wikimedia.org/wiki/File:Duanmen_Gate_of_the_Forbidden_City.jpg), そらみみ, 2016-08-26, CC BY-SA 4.0. Duanmen has a wide red platform and a much narrower, compressed double-eaved hall without the Tiananmen portrait or declaration panels. The model's gatehouse width and depth come from the 187-chi by 85.9-chi record in `DUAN-DPM`; they are not measured from the photograph.
 - Forbidden City: [Aerial view of Forbidden City](https://commons.wikimedia.org/wiki/File:China_(Beijing)_Aerial_view_of_Forbidden_City_(38884882275).jpg), Güldem Üstün, CC BY 2.0. The overview confirms the density of continuous courtyard halls, walls, galleries, trees, and ochre/gray roofs around the axial halls.
 - Hall of Prayer for Good Harvests: [20200110 Temple of Heaven-1](https://commons.wikimedia.org/wiki/File:20200110_Temple_of_Heaven-1.jpg), Balon Greyjoy, CC0. The dominant silhouette is a low circular red drum carrying three broad, deep-blue circular roofs on a white marble terrace, topped by a gold finial.
 - Circular Mound Altar: [Circular Mound Altar, Beijing](https://commons.wikimedia.org/wiki/File:Circular_Mound_Altar,_Beijing.jpg), CC BY-SA 4.0. White marble three-tier terraces and dense stone balustrades dominate; it has no red enclosing hall.
@@ -20,6 +38,8 @@ The Amap web page initially returned a login/slider challenge. The Amap connecto
 ## Shared alignment and southern road correction
 
 The entire display plane is rotated using the checked Wumen–Shenwumen direction. Roads, water, buildings, forest, picking and both map modes use this one projection. Geographic coordinates and distances are retained; axial sites are no longer individually forced onto x=0. The four palace corner-wall footprints determine its paving boundary, and the water layer supplies its moat. Concave wall polygons are extruded as polygons, rather than rendered as solid rectangular halls. The camera uses a parallel projection to keep parallel walls parallel; Shift-drag rotates the view and the compass is projected from geographic north.
+
+The Amap Outer Golden Water Bridge point remains a label anchor only; it lies north of the mapped main water. Both renderers now derive each bridge crossing centre from the bundled OSM river section along that bridge's north–south axis. The five principal axes respond to the five Tiananmen openings, while the two outer crossings remain lateral, river-only sections toward the Taimiao and Shejitan. No bridge centre is moved away from water merely to satisfy a portal alignment.
 
 - [Beijing Cultural Heritage Bureau: Southern Section Road Remains](https://wwj.beijing.gov.cn/bjww/362771/362782/743928533/743928539/index.html), published 2026-02-14, identifies separate protection areas, including paired Y01/Y02 remains north of Yongdingmen. It does not describe a continuous exposed ancient road.
 - [Beijing Central Axis Heritage Protection Centre, republished by Beijing social-science popularisation](https://www.bjskpj.cn/bjzzx/bjzzx-jz/18036-2022-12-01-14-15-17): paired granite remains about 100 m north of the gate, stacked road remains about 400 m north, and a separate brick drainage site south of Zhushikou church.

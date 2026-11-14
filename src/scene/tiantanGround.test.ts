@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import * as THREE from 'three';
 import bundled from '../../public/data/buildings.json';
 import contextText from '../../public/data/context.geojson?raw';
 import { landmarks } from '../data/heritage';
@@ -7,6 +8,8 @@ import { localBuildingRing, localFootprintLayout, wgs84ToGcj02, type CityData } 
 import { pointInPolygon, project } from './geo';
 import { distanceToRing } from './centralGreenery';
 import { tiantanGround } from './tiantanGround';
+import { createTiantanWalls, tiantanCourtWallRuns, tiantanWallPlan, tiantanWallRuns } from './tiantanWalls';
+import type { Materials } from './materials';
 
 const site=landmarks.find(s=>s.id==='tiantan')!;
 const data:CityData={buildings:bundled.buildings as CityData['buildings'],context:[]};
@@ -17,6 +20,81 @@ for(const f of JSON.parse(contextText).features) {
     coordinates:ring.map(wgs84ToGcj02),holes:holes.map((r:[number,number][])=>r.map(wgs84ToGcj02))});
 }
 const ground=tiantanGround(site,data),[ox,oz]=project(site.coords);
+const palette:Record<string,THREE.MeshBasicMaterial>={};
+const materials=new Proxy(palette,{get:(target,key:string)=>target[key]??=new THREE.MeshBasicMaterial()}) as unknown as Materials;
+function pointSegmentDistance(point:[number,number],a:[number,number],b:[number,number]) {
+  const dx=b[0]-a[0],dz=b[1]-a[1],length=dx*dx+dz*dz;
+  const t=length?Math.max(0,Math.min(1,((point[0]-a[0])*dx+(point[1]-a[1])*dz)/length)):0;
+  return Math.hypot(point[0]-a[0]-dx*t,point[1]-a[1]-dz*t);
+}
+
+it('keeps every generated service-court outline on the shared Tiantan map grid',()=>{
+  for(const court of ground.courts.filter(court=>court.walled&&court.id!=='fasting-palace')) {
+    for(let edge=0;edge<court.ring.length;edge++) {
+      const a=court.ring[edge],b=court.ring[(edge+1)%court.ring.length];
+      expect(Math.min(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1])),court.id).toBeLessThan(1e-9);
+    }
+  }
+});
+
+it('builds the documented double altar walls and traditional court-wall openings',()=>{
+  const plan=tiantanWallPlan(site,data),runs=tiantanWallRuns(site,data);
+  expect(plan.find(line=>line.id==='outer-altar-wall')!.points.length).toBeGreaterThan(50);
+  expect(plan.find(line=>line.id==='inner-altar-wall')!.points.length).toBeGreaterThan(40);
+  expect(runs.filter(run=>run.kind==='outer').length).toBeGreaterThan(20);
+  expect(runs.filter(run=>run.kind==='inner').length).toBeGreaterThan(10);
+  expect(runs.filter(run=>run.kind==='divider').length).toBeGreaterThan(0);
+  const length=(kind:string)=>runs.filter(run=>run.kind===kind).reduce((sum,run)=>sum+Math.hypot(run.b[0]-run.a[0],run.b[1]-run.a[1]),0);
+  expect(length('outer')).toBeGreaterThan(620);
+  expect(length('outer')).toBeLessThan(680);
+  expect(length('inner')).toBeGreaterThan(390);
+  expect(length('inner')).toBeLessThan(430);
+  const buildings=data.buildings.filter(building=>!/门/.test(building.name??'')).map(building=>
+    localBuildingRing(building).map(([x,z]):[number,number]=>[x-ox,z-oz]))
+    .filter(ring=>ring.some(([x,z])=>Math.abs(x)<120&&z>-100&&z<110));
+  for(const run of runs.filter(run=>run.kind!=='court')) {
+    const midpoint:[number,number]=[(run.a[0]+run.b[0])/2,(run.a[1]+run.b[1])/2];
+    expect(buildings.some(ring=>pointInPolygon(midpoint,ring)),`${run.lineId}: ${midpoint}`).toBe(false);
+  }
+  const model=createTiantanWalls(site,data,materials);model.updateMatrixWorld(true);
+  for(const kind of ['outer','inner','divider','court'] as const) {
+    const walls=model.getObjectByName(`tiantan-${kind}-wall`)!;
+    expect(walls,kind).toBeDefined();
+    let segments=0;walls.traverse(object=>{if(object.name===`tiantan-wall-segment-${kind}`)segments++;});
+    expect(segments,kind).toBeGreaterThan(0);
+    const segment=walls.getObjectByName(`tiantan-wall-segment-${kind}`)!;
+    const body=segment.children[0] as THREE.Mesh<THREE.BufferGeometry>;
+    const height=kind==='outer'?.37:kind==='court'?.42:.50;
+    body.geometry.computeBoundingBox();
+    expect(body.position.y+body.geometry.boundingBox!.min.y,`${kind} wall meets ground`).toBeCloseTo(0,6);
+    expect(body.position.y+body.geometry.boundingBox!.max.y,`${kind} wall meets cap`).toBeCloseTo(height,6);
+    const positions=body.geometry.getAttribute('position'),indices=body.geometry.getIndex()!;
+    const center=new THREE.Vector3(0,height/2,0);
+    for(let i=0;i<indices.count;i+=3) {
+      const a=new THREE.Vector3().fromBufferAttribute(positions,indices.getX(i));
+      const b=new THREE.Vector3().fromBufferAttribute(positions,indices.getX(i+1));
+      const c=new THREE.Vector3().fromBufferAttribute(positions,indices.getX(i+2));
+      const normal=b.clone().sub(a).cross(c.clone().sub(a));
+      const outward=a.clone().add(b).add(c).divideScalar(3).sub(center);
+      expect(normal.dot(outward),`${kind} wall triangle ${i/3} faces outward`).toBeGreaterThan(0);
+    }
+  }
+  for(const court of ground.courts) {
+    const wallRuns=tiantanCourtWallRuns(ground,court);
+    if(!court.walled) {
+      expect(wallRuns,`${court.id} is a pavilion apron, not a walled court`).toEqual([]);
+      continue;
+    }
+    expect(wallRuns.length,court.id).toBeGreaterThan(0);
+    for(const path of ground.paths)for(const point of path.points) {
+      const touches=court.ring.some((a,index)=>pointSegmentDistance(point,a,court.ring[(index+1)%court.ring.length])<=.08);
+      if(!touches)continue;
+      const clearance=Math.min(...wallRuns.flatMap(([a,b])=>[pointSegmentDistance(point,a,b)]));
+      expect(clearance,`${court.id}/${path.id}`).toBeGreaterThan(path.width/2+.1);
+    }
+  }
+});
+
 it('paves the pictured moat island and connects all three mapped gates to park walks',()=>{
   const court=ground.courts.find(c=>c.id==='fasting-palace')!;
   const hall=localFootprintLayout(data.buildings.find(b=>b.id===43925089)!,site);

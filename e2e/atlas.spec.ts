@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 
+// Software WebGL in the desktop test environment can take around 20 seconds to
+// construct and bake the city. Keep a bounded readiness check that tolerates
+// that setup cost without masking a fallback or persistent console failure.
+const SCENE_READY_TIMEOUT = 30_000;
+
 test('renders the full axis without browser errors or horizontal overflow', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', message => {
@@ -8,7 +13,7 @@ test('renders the full axis without browser errors or horizontal overflow', asyn
   page.on('pageerror', error => errors.push(error.message));
 
   await page.goto('/#/');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: SCENE_READY_TIMEOUT });
   await expect(page.locator('.region-row.region-active')).toHaveCount(0);
   await expect(page.locator('.map-legend')).toBeVisible();
   await expect(page.locator('[data-site="bell-drum"]')).toHaveCSS('opacity', '1');
@@ -22,7 +27,7 @@ test('renders the full axis without browser errors or horizontal overflow', asyn
 
 test('renders the Tiananmen square ensemble and its supporting landmarks', async ({ page }) => {
   await page.goto('/#/site/square');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: SCENE_READY_TIMEOUT });
   await expect(page.locator('.landmark-detail h2')).toHaveText('天安门广场及建筑群');
   for (const annotation of ['heroes', 'memorial', 'great-hall']) {
     await expect(page.locator(`[data-annotation="${annotation}"]`)).toHaveCSS('opacity', '1');
@@ -31,7 +36,7 @@ test('renders the Tiananmen square ensemble and its supporting landmarks', async
 
 test('shows the layered Tiantan plan and one unambiguous north indicator', async ({ page }) => {
   await page.goto('/#/site/tiantan');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: SCENE_READY_TIMEOUT });
   for (const annotation of ['prayer-hall', 'imperial-vault', 'circular-altar']) {
     await expect(page.locator(`[data-annotation="${annotation}"]`)).toHaveCSS('opacity', '1');
   }
@@ -60,7 +65,7 @@ test('Shift drag rotates the scene and compass; Ctrl and ordinary drag pan', asy
   await page.setViewportSize({ width: 800, height: 600 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#/');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: SCENE_READY_TIMEOUT });
   const compass=page.locator('.north-marker');
   await expect(compass).toHaveAttribute('data-bearing',/[1-9]/);
   const before=Number(await compass.getAttribute('data-bearing'));

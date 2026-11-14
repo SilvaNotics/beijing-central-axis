@@ -1,6 +1,6 @@
 {
   "checkedOn": "2026-11-14",
-  "method": "复核仓库文件字节数、SHA-256和公开数据计数。本轮仅新增故宫barrier围墙历史时点查询；既有建筑、环境、湖泊及高德快照保持不变。 天坛/景山铺地轮次仅复核既有快照；天坛步道查询未成功，保留失败查询记录，不增加地理要素计数。",
+  "method": "复核仓库文件字节数、SHA-256和公开数据计数。本轮仅新增故宫barrier围墙历史时点查询；既有建筑、环境、湖泊及高德快照保持不变。天坛/景山铺地轮次仅复核既有快照；天坛步道及坛墙查询未成功，保留失败查询记录，不增加地理要素计数。坛墙实现使用既有天坛公园外环、门址和官方导览图拓扑。 故宫花园/桥梁补查未成功，仅归档失败查询文本；未更换既有建筑、水系、园界或坐标系统。",
   "files": [
     {
       "path": "public/data/buildings.json",
@@ -56,6 +56,16 @@
       "path": "docs/research/osm-tiantan-paths.overpass",
       "bytes": 221,
       "sha256": "d11d196947a04ee7c03b29868a51060a693e6b73e6996c11f32d05edcb9998df"
+    },
+    {
+      "path": "docs/research/osm-tiantan-walls.overpass",
+      "bytes": 266,
+      "sha256": "95216e218307f5527f1318c97b7e773edee0b022b886dc0f84995401742ffadc"
+    },
+    {
+      "path": "docs/research/osm-palace-landscape.overpass",
+      "bytes": 206,
+      "sha256": "7e8fab2864e72af5a5368e7e6953335a108ecf4f061950a3e808aab5208408ba"
     }
   ],
   "counts": {
@@ -90,5 +100,21 @@
     "status": "failed-no-snapshot",
     "result": "主端点HTTP406；镜像请求超时。保留查询供后续重试，不计入道路或原始快照数。",
     "runtime": "src/scene/tiantanGround.ts uses official guide topology and existing building anchors; no downloaded pedestrian ways."
+  },
+  "tiantanWallAttempt": {
+    "attemptedOn": "2026-11-14",
+    "queryFile": "docs/research/osm-tiantan-walls.overpass",
+    "status": "failed-no-snapshot",
+    "coordinateSystem": "WGS84",
+    "result": "主端点返回HTTP 406；两个镜像分别超时或无DNS解析，未取得原始响应，不增加围墙要素计数。",
+    "runtime": "src/scene/tiantanWalls.ts uses the archived Tiantan park boundary, mapped gate footprints, TEMPLE-GUIDE-MAP topology and documented wall style; reconstructed wall lines remain model interpretations."
+  },
+  "palaceLandscapeAttempt": {
+    "attemptedOn": "2026-11-14",
+    "queryFile": "docs/research/osm-palace-landscape.overpass",
+    "status": "failed-no-snapshot",
+    "coordinateSystem": "WGS84",
+    "result": "overpass-api.de返回HTTP406，kumi镜像HTTP429；没有采用新几何或增加快照计数。",
+    "runtime": "Four interpreted garden envelopes and bridge candidate axes use official text, user reference topology and existing building/water snapshots."
   }
 }
