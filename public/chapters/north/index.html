@@ -1,23 +1,872 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="color-scheme" content="dark" />
-<meta name="description" content="北京中轴线北段 · 景山 / 钟鼓楼 / 万宁桥分区接入示例。独立页面，用于替换接入与导航演示。" />
-<title>北段 · 分区接入示例</title>
-<style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Microsoft YaHei","PingFang SC",sans-serif;line-height:1.75}a{color:inherit;text-underline-offset:.25em}button,a{-webkit-tap-highlight-color:transparent}a:focus-visible{outline:3px solid currentColor;outline-offset:6px}p{margin:0 0 1.25rem}h1,h2{font-weight:500;line-height:1.25}h1{margin:.75rem 0 1.5rem;font-family:"Songti SC","Noto Serif CJK SC",SimSun,serif;font-size:clamp(2.75rem,7vw,5.5rem);letter-spacing:.08em}h2{font-size:1.25rem;margin:0 0 .75rem}.skip{position:absolute;left:1rem;top:-5rem;z-index:5;padding:.5rem 1rem;background:var(--paper);color:var(--ink)}.skip:focus{top:1rem}.frame{max-width:1280px;margin:0 auto;padding:2rem clamp(1.25rem,5vw,5rem) 3rem}.topline{display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.75rem;letter-spacing:.12em}.tag{border:1px solid currentColor;padding:.25rem .65rem;display:inline-block}.back{text-decoration:none;display:inline-block;padding:.5rem 0;white-space:nowrap}.hero{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,6vw,6rem);align-items:center;margin:4rem 0}.eyebrow{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase}.intro{max-width:29rem;font-size:.95rem}.intro-note{font-size:.75rem;opacity:.72;max-width:30rem}.map{margin:0;position:relative}.map svg{display:block;width:100%;height:auto}.map figcaption{font-size:.7rem;letter-spacing:.08em;margin-top:.75rem;text-align:right}.map text{font-family:"Microsoft YaHei","PingFang SC",sans-serif}.sequence{display:flex;gap:1rem;flex-wrap:wrap;margin:1.75rem 0 0;padding:0;list-style:none;font-size:.8rem}.sequence a{text-decoration:none;display:inline-block;border-bottom:1px solid;padding:.5rem .1rem}.sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;padding-top:2rem}.section{scroll-margin-top:2rem}.number{font-size:.7rem;letter-spacing:.15em;display:block;margin-bottom:1rem}.section p{font-size:.85rem;opacity:.78;margin:0}.foot{display:flex;justify-content:space-between;gap:1.5rem;margin-top:3rem;padding-top:1.5rem;font-size:.7rem;border-top:1px solid var(--line)}@media(max-width:720px){.frame{padding-top:1rem}.topline{font-size:.65rem;letter-spacing:.04em}.hero{grid-template-columns:1fr;margin:2.5rem 0;gap:2rem}h1{font-size:clamp(2.6rem,11vw,4rem)}.map{max-width:32rem;width:100%;margin:auto}.sections{grid-template-columns:1fr;gap:1.75rem}.section{padding-bottom:1.5rem;border-bottom:1px solid var(--line)}.foot{flex-direction:column;gap:.5rem}.sequence{gap:.75rem}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}body{--paper:#162e28;--ink:#e7e7ca;--line:#557063;background:var(--paper);color:var(--ink)}.topline{color:#b5c3a8}.map{background:#1d382f;border:1px solid #4f6658;padding:1.25rem}.sections{border-top:1px solid var(--line)}.number{color:#b5c899}.eyebrow{color:#bbcc9a}.sequence a:hover{color:#d2e4a2}.intro-note{border-left:2px solid #8a9b6b;padding-left:1rem}</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="北京中轴线北段（钟鼓楼—万宁桥—景山）的纸雕立体书地图，含四处地标介绍与三位人物对话。">
+<title>中轴线北段 · 纸雕地图</title>
+<style>
+  .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+    clip-path:inset(50%);white-space:nowrap;border:0;}
+  :focus-visible{outline:2.4px solid #7A5B33;outline-offset:3px;}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important;}
+  }
+  @font-face{
+    font-family:"AxisSerif";
+    src:url("assets/serif-sub.woff2") format("woff2");
+    font-weight:200 900; font-display:swap;
+  }
+  @font-face{
+    font-family:"AxisMing";
+    src:url("assets/hui-sub.woff2") format("woff2");
+    font-weight:300 700; font-display:swap;
+  }
+  @font-face{
+    font-family:"AxisKai";
+    src:url("assets/kai-sub.woff2") format("woff2");
+    font-weight:300 700; font-display:swap;
+  }
+  :root{
+    --ming:"AxisMing","AxisKai","LXGW WenKai","Songti SC","STSong",serif;
+    --kai:"AxisKai","LXGW WenKai","霞鹜文楷","Kaiti SC","楷体","STKaiti",serif;
+    --serif:"AxisMing","AxisKai","AxisSerif","Noto Serif SC","Songti SC","STSong",serif;
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='170' height='170' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E");
+    --grain2:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23m)' opacity='0.16'/%3E%3C/svg%3E");
+    --paper:#F8EDD3; --paper2:#F1E2C2; --paper3:#E8D6B0;
+    --core:#FFFDF4; --edge:#A2875A; --edge2:#B99A6B;
+    --texg:url("assets/tex_xuan.webp");
+    --texc:url("assets/tex_cloud.webp");
+    --texv:url("assets/tex_vignette.webp");
+    --meander:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='14'%3E%3Cpath d='M0 12 H9 V4 H17 V12 H26' fill='none' stroke='%237A6647' stroke-width='1.4'/%3E%3C/svg%3E");
+    --strip:polygon(0% 0%, 7.96% 3.4%, 13.99% 2.6%, 22.02% 1.8%, 28.36% 2.6%, 34.22% 1.8%, 42.35% 1.8%, 50.42% 4.2%, 56.37% 2.6%, 63.39% 4.2%, 69.38% 3.4%, 75.16% 3.4%, 82.26% 2.6%, 88.39% 1.8%, 93% 2.6%, 96.4% 0%, 96.4% 0%, 96.64% 15.2%, 97.51% 29.8%, 96.88% 41.4%, 98.29% 56.6%, 98.59% 69.6%, 96.81% 84.0%, 96.92% 100%, 98.6% 100%, 4.6% 100%);
+    --tom:polygon(0 0,100% 0,100% 88%,96% 100%,92% 90%,88% 100%,84% 91%,80% 100%,76% 90%,72% 100%,68% 91%,64% 100%,60% 90%,56% 100%,52% 91%,48% 100%,44% 90%,40% 100%,36% 91%,32% 100%,28% 90%,24% 100%,20% 91%,16% 100%,12% 90%,8% 100%,4% 92%,0 100%);
+    --ink:#3A3028; --ink2:#6E6152;
+    --copper:#8C4A32; --boat:#3E6B6E; --porter:#4E7A5C;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;background:#2E2823;display:grid;place-items:center;
+    font-family:var(--serif);color:var(--ink);}
+  #book{
+    position:relative;width:min(100vw,177.78vh);aspect-ratio:16/9;
+    background:var(--paper);overflow:hidden;perspective:2000px;
+    box-shadow:0 2.2vh 6vh rgba(0,0,0,.55);
+    container-type:size;
+  }
+
+  /* ---------- 地图 ---------- */
+  #stage{position:absolute;inset:0;}
+  #map{width:100%;height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none;}
+
+  /* 地名纸签：钉在纸雕地图上的位置牌 */
+  .place{position:absolute;transform:translate(-50%,-50%) rotate(var(--r,-1.2deg));pointer-events:none;z-index:4;
+    display:flex;align-items:center;justify-content:center;
+    padding:.45cqh .78cqw .5cqh;white-space:nowrap;
+    font-family:var(--ming);font-size:1.70cqh;letter-spacing:.16em;color:#3B2D1B;
+    background:url("assets/p_tag2.webp") 100% 100%/100% 100% no-repeat;
+    filter:drop-shadow(.16cqw .46cqh .34cqh rgba(26,17,8,.45));}
+  .place{cursor:pointer;pointer-events:auto;
+    transition:transform .16s ease, filter .16s ease;}
+  .place:hover{transform:translate(-50%,-50%) rotate(var(--r,-1.2deg)) translateY(-.55cqh) scale(1.05);
+    filter:drop-shadow(.26cqw .78cqh .55cqh rgba(24,15,7,.58)) saturate(1.05);}
+  .place:active{transform:translate(-50%,-50%) rotate(var(--r,-1.2deg)) translateY(-.1cqh) scale(1.02);}
+  .place.open{z-index:40;}
+  .pcard{position:absolute;width:30.2cqw;
+    border:36px solid transparent;
+    border-image:url("assets/p_card.webp") 72 fill / 36px stretch;
+    padding:.4cqh .2cqw 2.9cqh;
+    filter:drop-shadow(.45cqw 1.3cqh 1.0cqh rgba(14,8,3,.58));
+    transform:translateY(var(--cy,-50%)) scale(.965);transform-origin:0 50%;
+    opacity:0;pointer-events:none;z-index:30;white-space:normal;
+    transition:opacity .18s ease, transform .18s ease;}
+  .pcard.on{opacity:1;transform:translateY(var(--cy,-50%)) scale(1);pointer-events:auto;}
+  .pcard h4{margin:0 0 1.1cqh;font-family:var(--ming);font-size:2.15cqh;letter-spacing:.10em;color:#3A2C1C;}
+  .pcard dl{margin:0;display:flex;flex-direction:column;gap:1.0cqh;}
+  .pcard dl>div{display:grid;grid-template-columns:2.7em 1fr;gap:.55cqw;align-items:baseline;}
+  .pcard dt{font-family:var(--ming);font-size:1.28cqh;letter-spacing:.12em;color:#6E5433;}
+  .pcard dd{margin:0;font-family:var(--serif);font-size:1.44cqh;line-height:1.92;color:#3F3020;line-break:strict;}
+  .pcard .tail{margin:1.2cqh 0 0;padding-top:.9cqh;border-top:1px dashed rgba(110,85,50,.30);
+    font-family:var(--serif);font-size:1.34cqh;line-height:1.9;color:#5A4632;}
+  .pcard small{display:block;margin-top:1.1cqh;padding-top:.8cqh;border-top:1px solid rgba(110,85,50,.26);
+    font-family:var(--serif);font-size:1.20cqh;line-height:1.65;color:#6A5842;letter-spacing:.01em;}
+  .place::after{content:"";position:absolute;left:50%;bottom:-.62cqh;width:.42cqw;height:.62cqh;
+    transform:translateX(-50%) rotate(-2deg);
+    background:linear-gradient(180deg,rgba(60,42,22,.42),rgba(60,42,22,0));}
+  .marker{position:absolute;transform:translate(-50%,-100%);cursor:pointer;z-index:20;}
+  .marker .card{position:relative;width:6.05cqw;z-index:2;
+    transition:transform .18s ease, filter .18s ease;
+    filter:drop-shadow(.3cqw .7cqh .3cqh rgba(50,35,20,.35));}
+  .marker .card img,.marker .card svg{width:100%;height:auto;display:block;}
+  .marker:hover .card{transform:translateY(-1cqh);
+    filter:drop-shadow(.42cqw 1.1cqh .4cqh rgba(50,35,20,.4)) brightness(1.05);}
+  .marker .tag{position:absolute;left:50%;bottom:calc(100% + 1.55cqh);transform:translateX(-50%) translateY(.4cqh);
+    white-space:nowrap;background:none;border:0;padding:.32cqh .40cqw;
+    font-size:1.52cqh;letter-spacing:.04em;color:#382A19;opacity:0;pointer-events:none;transition:.16s;
+    isolation:isolate;z-index:3;}
+  .marker .tag::before{content:"";position:absolute;inset:-.32cqh -.40cqw -.62cqh;z-index:-1;
+    background-image:url("assets/p_tag2.webp");background-size:100% 100%;background-repeat:no-repeat;
+    transform:rotate(.5deg) scale(1.02);
+    filter:drop-shadow(.30cqw .95cqh .60cqh rgba(28,18,9,.50));}
+  .marker .tag i{font-style:normal;font-size:1.16cqh;color:#5B4835;margin-left:.35cqw;letter-spacing:.08em;}
+  .marker:hover .tag{opacity:1;transform:translateX(-50%) translateY(0);}
+  .marker .card .ok{display:none;position:absolute;right:-1.5cqw;bottom:13%;
+    width:3.2cqw;height:auto;transform:rotate(-6deg);
+    filter:drop-shadow(0 0 .14cqw rgba(253,247,232,.95)) drop-shadow(0 .1cqh .08cqh rgba(90,40,30,.22));}
+  .marker.done .card .ok{display:block;}
+
+  /* ---------- 翻页 ---------- */
+  #leaf{position:absolute;inset:0;background:linear-gradient(90deg,#F6EFE0,#EFE5D0);
+    transform-origin:left center;transform:rotateY(0deg);z-index:60;pointer-events:none;
+    display:none;box-shadow:1cqw 0 3cqw rgba(0,0,0,.18);}
+  #leaf.run{display:block;animation:turn .72s cubic-bezier(.55,.06,.32,1) both;}
+  @keyframes turn{
+    0%{transform:rotateY(0deg);}
+    100%{transform:rotateY(-104deg);}
+  }
+  #leaf.run::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(270deg,rgba(0,0,0,.13),transparent 42%);}
+
+  /* ---------- 对话 ---------- */
+  #dlg{position:absolute;inset:0;z-index:50;display:none;background:var(--paper2);}
+  #dlg.on{display:block;}
+  .dlg-bg{position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(0deg,rgba(120,100,70,.05) 0 1px,transparent 1px 4px),
+      linear-gradient(180deg,#EFE5D0,#E7DCC4 62%,#E1D4B8);}
+  .dlg-bg{background-size:cover !important;background-position:center !important;}
+  .dlg-bg::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(255,250,235,.06),rgba(60,45,30,.10) 62%,rgba(60,45,30,.22));}
+  .dlg-figure{position:absolute;left:4cqw;bottom:0;height:88cqh;}
+  .dlg-figure::after{content:"";position:absolute;left:-1cqw;bottom:-1.2cqh;width:26cqw;height:3cqh;
+    border-radius:50%;background:radial-gradient(closest-side,rgba(120,96,64,.22),transparent 72%);}
+  .dlg-figure svg{height:100%;width:auto;display:block;
+    filter:drop-shadow(.45cqw .75cqh 0 rgba(60,40,25,.28));position:relative;z-index:2;}
+
+  /* ---------- 纸带：一条从书页上撕下来的卡纸 ---------- */
+  .dlg-sheet{position:absolute;left:4.9cqw;width:85cqw;bottom:5.1cqh;height:23.2cqh;z-index:5;}
+
+  .strip{position:absolute;inset:0;z-index:2;
+    background-image:url("assets/p_strip.webp");
+    background-size:100% 100%;background-repeat:no-repeat;
+    filter:
+      drop-shadow(.10cqw .26cqh 0 rgba(255,253,244,.85))
+      drop-shadow(.42cqw 1.4cqh 1.2cqh rgba(18,11,5,.55));}
+  .strip::before{content:none;}
+  .strip::after{content:none;}
+
+  .fold{display:none;position:absolute;left:0;bottom:0;width:1.75cqw;height:2.0cqh;z-index:3;
+    background:linear-gradient(320deg,#F6EBD0,#D8C49B);
+    clip-path:polygon(0 0,100% 100%,0 100%);
+    filter:drop-shadow(.1cqw -.12cqh .2cqh rgba(40,28,16,.4));}
+
+  .dlg-box{position:absolute;inset:0;z-index:4;pointer-events:none;}
+  .pgbtn{position:absolute;right:13.0cqw;bottom:calc(100% - 2.1cqh);width:5.0cqw;height:4.6cqh;z-index:5;
+    isolation:isolate;display:flex;align-items:flex-start;justify-content:center;
+    padding:1.25cqh 0 0;margin:0;border:0;background:none;
+    font-family:var(--ming);font-size:2.05cqh;letter-spacing:.1em;color:#4A3B29;cursor:pointer;
+    transition:transform .14s ease,opacity .18s ease;}
+  .pgbtn::before{content:"";position:absolute;inset:0;z-index:-1;
+    background-image:url("assets/p_tag.webp");background-size:100% 100%;background-repeat:no-repeat;
+    filter:drop-shadow(0 .42cqh 0 rgba(255,253,244,.9)) drop-shadow(.22cqw .68cqh .5cqh rgba(24,14,6,.55));
+    transform:rotate(3.1deg) scale(1.06);}
+  .pgbtn:hover:not(:disabled){transform:translateY(-.3cqh);}
+  .pgbtn:disabled{opacity:.45;cursor:default;}
+  #dlgText{position:absolute;left:4.4cqw;right:6.4cqw;top:7.0cqh;margin:0;
+    font-family:var(--ming);font-size:3.42cqh;line-height:1.62;letter-spacing:.012em;
+    text-wrap:pretty;
+    color:#241D16;white-space:pre-wrap;}
+  #dlgNote{position:absolute;left:4.4cqw;right:9.0cqw;top:16.6cqh;
+    font-family:var(--serif);font-size:1.82cqh;line-height:1.7;letter-spacing:.02em;color:#4A3D2C;
+    padding-top:.9cqh;border-top:1px solid rgba(110,85,50,.28);opacity:0;transition:opacity .32s ease;}
+  #dlgNote.on{opacity:1;}
+  #dlgText .caret{display:inline-block;width:.2cqw;height:2.6cqh;background:#3A3028;
+    vertical-align:-.42cqh;margin-left:.35cqw;animation:blink .75s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* 名字：角色色燕尾书签，从纸带后面探出 */
+  .plate{position:absolute;left:6.5cqw;bottom:calc(100% - 1cqh);width:auto;height:6.2cqh;z-index:1;
+    isolation:isolate;display:flex;align-items:center;gap:.9cqw;padding:0 3.0cqw 0 2.0cqw;white-space:nowrap;
+    font-family:var(--serif);font-size:3.55cqh;font-weight:600;letter-spacing:.05em;
+    color:#FBF6E8;line-height:1;}
+  .plate i{position:absolute;inset:0;z-index:-1;
+    background-image:var(--plate,url("assets/p_plate_rust.webp"));background-size:100% 100%;background-repeat:no-repeat;
+    filter:drop-shadow(0 .28cqh 0 rgba(0,0,0,.22)) drop-shadow(.16cqw .85cqh .8cqh rgba(26,18,10,.45));}
+  .plate b{font-weight:600;}
+  .plate small{transform:translateY(-.30cqh);font-family:var(--serif);font-size:1.62cqh;font-weight:300;letter-spacing:.13em;opacity:.82;}
+
+  /* 继续：从纸带后面抽出半截的小标签 */
+  .next{position:absolute;right:6.2cqw;bottom:calc(100% - 2.1cqh);width:5.0cqw;height:4.6cqh;z-index:5;
+    isolation:isolate;display:flex;align-items:flex-start;justify-content:center;cursor:pointer;
+    padding-top:1.25cqh;
+    font-family:var(--ming);
+    font-size:2.05cqh;letter-spacing:.18em;color:#4A3B29;
+    transition:transform .14s ease,letter-spacing .14s ease;}
+  .next:hover{transform:translateY(-.34cqh);letter-spacing:.22em;}
+  .next:active{transform:translateY(0);}
+  .next::before{content:"";position:absolute;inset:0;z-index:-1;
+    background-image:url("assets/p_tag.webp");background-size:100% 100%;background-repeat:no-repeat;
+    filter:drop-shadow(0 .42cqh 0 rgba(255,253,244,.9)) drop-shadow(.22cqw .68cqh .5cqh rgba(24,14,6,.55));transform:rotate(3.1deg) scale(1.06);}
+  .next.done{z-index:6;right:auto;left:4.6cqw;bottom:8.6cqh;width:auto;height:auto;
+    display:block;cursor:default;font-family:var(--serif);font-size:1.82cqh;
+    letter-spacing:.16em;color:#2E2113;text-shadow:0 1px 0 rgba(255,248,228,.8),0 0 7px rgba(255,248,228,.6);}
+  .next.done::before{display:none;}
+
+  /* 印章：盖在面板右侧空白处 */
+  #stamp{position:absolute;right:5.8cqw;top:50%;width:9.4cqw;display:none;
+    transform:translateY(-50%) rotate(-6deg);}
+  #stamp img{width:100%;height:auto;display:block;}
+  #stamp.on{display:flex;animation:stampIn .34s cubic-bezier(.2,1.5,.5,1) both;}
+  @keyframes stampIn{
+    0%{transform:translateY(-50%) rotate(-8deg) scale(2.4);opacity:0;}
+    100%{transform:translateY(-50%) rotate(-8deg) scale(1);opacity:.85;}}
+
+  /* ---------- 结尾 ---------- */
+  #ending{position:absolute;inset:0;z-index:80;display:none;place-items:center;
+    background:rgba(46,40,35,.55);}
+  #ending.on{display:grid;}
+  .endcard{width:48cqw;padding:7.2cqh 6.6cqw 6.8cqh;text-align:center;
+    background-image:url("assets/p_card.webp");background-size:100% 100%;background-repeat:no-repeat;
+    border:0;box-shadow:none;
+    filter:drop-shadow(.85cqw 2.5cqh 1.9cqh rgba(14,8,3,.62));}
+  .endcard h2{margin:0 0 2.4cqh;font-size:3.6cqh;letter-spacing:.3em;font-weight:400;}
+  .endcard p{margin:0 0 1.0cqh;font-size:2.2cqh;line-height:2.1;color:#4A3A26;letter-spacing:.05em;text-wrap:pretty;}
+  .endcard .cred{margin:2.2cqh 0 0;font-size:1.48cqh;line-height:1.9;color:#6B5436;letter-spacing:.04em;}
+  .endcard button{margin-top:2.4cqh;font-family:var(--ming);
+    font-size:2.1cqh;letter-spacing:.22em;
+    background-color:transparent;background-image:url("assets/p_chip.webp");background-size:100% 100%;background-repeat:no-repeat;
+    border:0;padding:2.3cqh 3.0cqw;cursor:pointer;color:#3A2C1C;
+    filter:brightness(.95) saturate(1.06) drop-shadow(.30cqw .78cqh .45cqh rgba(26,16,7,.60));}
+  /* 返回：从画框上沿垂下的竖排书签丝带 */
+  #back{position:absolute;left:2.75cqw;top:0;width:1.9cqw;height:13.6cqh;z-index:6;
+    border:0;background:none;padding:.4cqh 0 1.5cqh;margin:0;cursor:pointer;isolation:isolate;
+    display:flex;align-items:center;justify-content:center;
+    writing-mode:vertical-rl;font-family:var(--ming);
+    font-size:2.15cqh;letter-spacing:.34em;color:#3A2C1E;transition:transform .14s;}
+  #back::before{content:"";position:absolute;inset:0;z-index:-1;
+    background-image:url("assets/p_ribbon.webp");background-size:100% 100%;background-repeat:no-repeat;
+    filter:drop-shadow(.20cqw .72cqh .55cqh rgba(24,14,6,.52));transform:rotate(-1.3deg) scale(1.04);}
+  #back:hover{transform:translateY(-.3cqh);}
+
+  /* ---------- 开场：书本展开动画 ---------- */
+  #intro{position:absolute;inset:0;z-index:60;background:#2E2823;
+    transition:opacity .5s ease;cursor:pointer;}
+  #intro video{display:block;width:100%;height:100%;object-fit:cover;background:#2E2823;}
+  #intro.off{opacity:0;pointer-events:none;}
+  #introTap{position:absolute;left:50%;bottom:7.0cqh;transform:translateX(-50%) rotate(-1.1deg);
+    padding:.80cqh 2.0cqw .86cqh;white-space:nowrap;
+    font-family:var(--ming);font-size:1.92cqh;letter-spacing:.24em;color:#3E2F1C;
+    background:url("assets/p_tag2.webp") 100% 100%/100% 100% no-repeat;
+    filter:drop-shadow(.14cqw .40cqh .34cqh rgba(20,12,5,.50));
+    transition:opacity .35s ease,transform .35s ease;pointer-events:none;}
+  #introTap.off{opacity:0;transform:translateX(-50%) rotate(-1.1deg) translateY(.6cqh);}
+  .place,.marker{transition:opacity .5s ease;}
+  #book.intro .place,#book.intro .marker{opacity:0;}
+
+</style>
 </head>
 <body>
-<a class="skip" href="#content">跳至正文</a>
-<div class="frame">
-<header class="topline"><span class="tag">分区接入示例</span><a class="back" data-return href="../../#/">← 返回中轴总览</a></header>
-<main id="content">
-<div class="hero"><div><div class="eyebrow">01 / NORTHERN LANDSCAPE</div><h1>沿山水，<br>读城北</h1><p class="intro">从钟鼓楼、万宁桥到景山，把北段作为一条可阅读的城市线索。先在小地图中辨认节点，再由各章节作者展开属于这一段的故事。</p><p class="intro-note">北段 · 景山 / 钟鼓楼 / 万宁桥<br>此页用于演示独立章节接入。正式图文与交互由分区作者替换。</p><nav aria-label="本页节点"><ul class="sequence"><li><a href="#towers">钟鼓楼</a></li><li><a href="#bridge">万宁桥</a></li><li><a href="#hill">景山</a></li></ul></nav></div><figure class="map"><svg viewBox="0 0 460 430" role="img" aria-labelledby="map-title map-desc"><title id="map-title">北段节点顺序示意</title><desc id="map-desc">从北向南是钟鼓楼、万宁桥、景山。山水图形仅为章节导览意象，不代表实际比例。</desc><defs><pattern id="contours" width="60" height="50" patternUnits="userSpaceOnUse"><path d="M-10 25 Q20 0 50 25 T110 25" fill="none" stroke="#5b7360" stroke-width=".6"/></pattern></defs><rect width="460" height="430" fill="url(#contours)" opacity=".45"/><path d="M5 210 C85 150 120 220 172 190 S273 250 320 190 400 170 460 200" fill="none" stroke="#74928a" stroke-width="26" opacity=".45"/><path d="M230 45V375" fill="none" stroke="#b5c899" stroke-dasharray="4 8"/><path d="M100 360Q170 230 230 315Q290 220 370 360Z" fill="#476b4b"/><path d="M130 360Q205 275 230 325Q290 275 335 360" fill="none" stroke="#8b9d6a"/><a href="#towers" aria-label="查看钟鼓楼接入位置"><path d="M205 88h50v33h-50z" fill="#bfc997"/><path d="M197 88l33-20 33 20z" fill="#d3d4a8"/><text x="279" y="110" fill="#e7e7ca" font-size="15">钟鼓楼</text><text x="279" y="129" fill="#b5c3a8" font-size="10">01</text></a><a href="#bridge" aria-label="查看万宁桥接入位置"><path d="M207 209Q230 184 253 209" fill="none" stroke="#d3d4a8" stroke-width="9"/><text x="279" y="207" fill="#e7e7ca" font-size="15">万宁桥</text><text x="279" y="226" fill="#b5c3a8" font-size="10">02</text></a><a href="#hill" aria-label="查看景山接入位置"><path d="M217 317h26v18h-26zM211 317l19-13 19 13z" fill="#d3d4a8"/><text x="279" y="340" fill="#e7e7ca" font-size="15">景山</text><text x="279" y="359" fill="#b5c3a8" font-size="10">03</text></a><text x="20" y="32" fill="#bfc997" font-size="11">北 N ↑</text><text x="20" y="405" fill="#b5c3a8" font-size="10" letter-spacing="2">LANDSCAPE / CITY / MEMORY</text></svg><figcaption>节点关系示意 · 非比例地图</figcaption></figure></div>
-<div class="sections"><section class="section" id="towers"><span class="number">01 / 城北节点</span><h2>钟鼓楼</h2><p>预留钟鼓楼的独立章节内容。作者可在此组织自己的图文、交互或空间叙事。</p></section><section class="section" id="bridge"><span class="number">02 / 水岸线索</span><h2>万宁桥</h2><p>从桥这一节点进入北段。此处只演示局部导航，详细介绍由分区作者接续。</p></section><section class="section" id="hill"><span class="number">03 / 山与城</span><h2>景山</h2><p>为景山保留内容入口。正式章节可自由替换此页的结构与视觉语言。</p></section></div>
-</main>
-<footer class="foot"><span>北京中轴 · 独立章节示例 / NORTH</span><span>本地资源 · 自包含页面 · 可整体替换</span></footer>
+<h1 class="sr">中轴线北段 · 纸雕立体书地图</h1>
+<div id="book">
+  <div id="intro"><video id="introV" src="assets/intro_book.mp4" poster="assets/intro_poster.jpg" playsinline muted preload="auto"></video><div id="introTap">点一下，翻开</div></div>
+  <div id="stage">
+    <img id="map" src="map.webp" alt="">
+  </div>
+
+  <div id="leaf"></div>
+
+  <section id="dlg" aria-live="polite">
+    <div class="dlg-bg" id="dlgBg"></div>
+    <div class="dlg-figure" id="fig"></div>
+
+    <div class="dlg-sheet">
+      <div class="plate" id="plate"></div>
+      <div class="next" id="nextSign">继续</div>
+      <div class="strip"></div>
+      <div class="fold"></div>
+      <button class="pgbtn" id="btnPrev">上一条</button>
+      <div class="dlg-box">
+        <p id="dlgText"></p>
+        <div id="dlgNote"></div>
+        <div id="stamp"><img src="assets/mark_ok.webp" alt=""></div>
+      </div>
+    </div>
+
+    <button id="back"><span>返回</span></button>
+  </section>
+
+  <div id="ending">
+    <div class="endcard">
+      <h2>三处都走过了</h2>
+      <p>钟楼、万宁桥、景山，三段话都收进了这本书。</p>
+      <p>图上还有一处你没去——鼓楼。它不出声，更鼓早就歇了。</p>
+      <button id="endClose">合上</button>
+      <p class="cred">音乐 Ripples · Kevin MacLeod（incompetech.com）· CC BY 4.0</p>
+    </div>
+  </div>
 </div>
-<script>document.querySelector('[data-return]').addEventListener('click',function(event){if(window.parent!==window){event.preventDefault();window.parent.postMessage({type:'axis:return'},window.location.origin);}});</script>
+
+<script>
+/* ===== 图片接入口 =====
+   生成好的素材放进这个目录，把路径填进来即可替换下面的占位 SVG。
+   card = 圆牌大头贴（建议 512×512，透明底）
+   body = 对话上半身（建议 800×1100，透明底）
+*/
+const ART = {
+  copper:{ card:"assets/copper_card2.webp", body:"assets/copper_body.webp", bg:"assets/bg_bell.jpg", plate:"assets/p_plate_rust.webp" },
+  boat:  { card:"assets/boat_card3.webp",   body:"assets/boat_body.webp",   bg:"assets/bg_bridge.jpg", plate:"assets/p_plate_teal.webp" },
+  porter:{ card:"assets/porter_card2.webp", body:"assets/porter_body.webp", bg:"assets/bg_hill.jpg", plate:"assets/p_plate_green.webp" }
+};
+
+const NPCS = {
+  copper:{
+    name:"铸钟厂的铜匠", year:"永乐十八年", ring:"#8C4A32",
+    x:"37.8%", y:"22.5%",
+    lines:[
+      "这钟，我铸了三回。头两回都裂在炉里，没一个成的。",
+      "头一回铜水浇下去，半截就凉住了，冷在半道上，从中间裂开。",
+      "第二回是炉温不够，铜在模子里走不动，灌不满，又裂一道。",
+      "两口废钟到现在还埋在厂后头的土里，谁也没去挖。",
+      "第三回，我先把老婆孩子送回了乡下，我自己搬到炉边上住。",
+      "几十座炉一起烧，风箱一天一夜不停，拉风箱的轮着倒，倒一个换一个。",
+      "铜水出坑那天，整条铸钟厂胡同亮得跟白天一样，孩子全跑出来看。",
+      "成了。七米多高，口径三米四，六十三吨，一口钟，全是铜的。",
+      "往上吊那天，绳子断了两回，底下的人全散了，第三回才吊上去。",
+      "楼底下挖了个坑，声音先往下走，再翻上来，四十里地外都听得见。",
+      "我师父没等到这一天。第三炉开的时候，他就跪在坑边上，看着铜水走的。",
+      "铸钟厂就在西边那条胡同，到这会儿还叫铸钟厂，名字没改过。",
+      "老辈人说，那炉里头捞出来过一只鞋，是个姑娘的。",
+      "别的我不讲了。你上去，站到钟底下，听一声，就都明白了。"
+    ],
+    notes:{
+      0:"注 · 永乐十八年（1420）铸钟；今钟楼为乾隆十年（1745）砖石重建",
+      1:"注 · 铜水约一千二百度，浇不足即成「冷隔」，一炉全废",
+      3:"注 · 明代称铸钟厂，清乾隆改称铸钟厂胡同，1965 年定名",
+      5:"注 · 熔铜用坩埚地炉，木制风箱须数人轮替，昼夜不歇",
+      6:"注 · 铸钟胡同至今仍在，位于旧鼓楼大街西侧",
+      7:"注 · 钟通高 7.02 米，最大直径 3.4 米，重约 63 吨，今悬二层",
+      8:"注 · 钲间铸「永乐年月吉日制」铭，悬于二层八角钟架",
+      9:"注 · 《七修类稿》记撞钟一百零八声，应一岁十二月二十四气",
+      11:"注 · 元、明、清三朝铸钟厂皆在此，史称华严钟厂",
+      12:"注 · 铸钟娘娘传说：匠人之女跃入炉中，钟乃铸成。正史不载",
+      13:"注 · 钟楼击钟、鼓楼击鼓，所谓晨钟暮鼓"
+    }
+  },
+  boat:{
+    name:"漕船上的船工", year:"永乐十八年", ring:"#3E6B6E",
+    x:"45.5%", y:"42.0%",
+    lines:[
+      "等。",
+      "就一个字，等。船到这儿，除了等，没别的法子。",
+      "闸不开，船就走不了。我在这个桥洞底下等过三天三夜，饭都是岸上递下来的。",
+      "打从通州过来，一路闸连着闸，一个闸一个闸地等水，快的等一天，慢的等三天。",
+      "水是打西边来的。一百二十多年前有人把海子的水引进城，才有这条水路。",
+      "打那以后，南边的粮船一直能摇到积水潭，一船一船往城里卸。",
+      "最挤的时候站在桥上往南看，桅杆比树还密，船帮挨着船帮，人都插不进去。",
+      "这桥是至元年间砌的，青石垒的，缝里嵌着铁，比我爷爷的爷爷还老。",
+      "桥底下六只镇水的兽，东西两岸都有，头全冲着水，谁也不敢去动它们。",
+      "石头上还刻着字，我摸过，冰凉的，一个字也不认得。",
+      "桥叫万宁，图个万方安宁，跑船的嘴上天天这么念。",
+      "闸在桥西边，叫澄清，是上闸。水涨到那个位，船才过得去。",
+      "船过桥洞得把桅杆放倒，一根一根放，放慢了就卡在洞里出不来。",
+      "你脚底下这块石板，我祖宗的祖宗就踩过，到现在还在，一点没动。"
+    ],
+    notes:{
+      2:"注 · 澄清上闸在万宁桥西，提闸放水，漕船方能上溯积水潭",
+      3:"注 · 至元二十九年（1292）开河，三十年（1293）赐名通惠河",
+      4:"注 · 海子即积水潭；引白浮、瓮山诸泉入城，汇于此",
+      5:"注 · 元天历二年（1329）漕粮岁运三百五十余万石",
+      6:"注 · 《元史·郭守敬传》：帝过积水潭，见舳舻蔽水，大悦",
+      7:"注 · 万宁桥始建于至元二十二年（1285），初木构，后改石桥",
+      8:"注 · 桥东西共六只镇水兽，西四东二，东北岸一只为元物",
+      9:"注 · 东北岸镇水兽颌下刻「至元四年九月」，即 1267 年",
+      10:"注 · 万宁桥俗称海子桥、后门桥，在地安门外",
+      11:"注 · 澄清上闸为元通惠河诸闸之一，今属大运河世遗",
+      12:"注 · 桥单孔拱券，长 34.6 米、宽 17 米，拱净跨 7.2 米",
+      13:"注 · 万宁桥是北京中轴线上现存最古老的桥"
+    }
+  },
+  porter:{
+    name:"堆山的役夫", year:"永乐十八年", ring:"#4E7A5C",
+    x:"58.2%", y:"68.0%",
+    lines:[
+      "这山是堆出来的。你看着像山，其实就是一筐一筐的土，我挑的。",
+      "土是挖筒子河挖出来的，河往下挖一尺，这山就往上一尺。",
+      "土不够，就拆城。前朝留下的城，砖全运到这儿来了。",
+      "老砖一块顶现在三块，结实得很，可我们不用整的，全拆碎了垫在底下。",
+      "我一天挑四十趟，从山脚到山顶二百多步，来回一趟天就黑一分。",
+      "肩上垫块皮子，不垫，三天就磨穿，磨穿了也没人管你。",
+      "山上有五个峰，中间那个最高，叫万春，上头能站人。",
+      "峰上要起亭子，五座，一个朝一边，站哪儿都看得见宫里。",
+      "听说底下压着一座殿，前朝的，拆不干净，就往上一埋。",
+      "压着就压着呗，反正我也看不见，我只看脚下的土。",
+      "山上的松柏是从南边运来的，一棵一棵抬上去，比挑土还累。",
+      "树栽下去头一年得天天浇水，浇不上，第二年就死一半。",
+      "你上到顶上，宫里的黄瓦一片一片数得清，那是我堆的。"
+    ],
+    notes:{
+      0:"注 · 永乐间以筒子河、太液池之土堆五峰，名万岁山",
+      1:"注 · 筒子河即紫禁城护城河，宽 52 米，全长 3.5 公里",
+      2:"注 · 所拆为元大内旧城，渣土一并堆于山上",
+      4:"注 · 景山高 42.6 米，海拔 88.35 米，为旧城制高点",
+      6:"注 · 五峰自东向西：周赏、观妙、万春、辑芳、富览",
+      7:"注 · 清乾隆十五年（1750）五峰各建一亭，万春居中最高",
+      8:"注 · 旧说景山之下压元大内延春阁旧基",
+      10:"注 · 景山多古柏，数百年树龄者今仍存",
+      12:"注 · 万春亭三重檐黄琉璃瓦，为中轴线上最高观景点"
+    }
+  }
+};
+
+/* ================= 占位美术（素材到位后由 ART 里的图片替换） ================= */
+
+function cardSVG(id){
+  const ring = {copper:"#8C4A32",boat:"#3E6B6E",porter:"#4E7A5C"}[id];
+  const head = {
+    copper:`
+      <path d="M60 26c18 0 27 13 27 30 0 20-12 32-27 32S33 76 33 56c0-17 9-30 27-30z" fill="#E4C49C"/>
+      <path d="M60 26c-18 0-27 13-27 30 0 20 12 32 27 32V26z" fill="#C9A57E"/>
+      <path d="M33 50c0-16 12-26 27-26s27 10 27 26c-6-7-15-11-27-11s-21 4-27 11z" fill="#1E1C1A"/>
+      <rect x="30" y="43" width="60" height="7" rx="2" fill="#1E1C1A"/>
+      <rect x="42" y="56" width="14" height="4" rx="1" fill="#3A3230"/>
+      <rect x="64" y="56" width="14" height="4" rx="1" fill="#3A3230"/>
+      <rect x="45" y="64" width="9" height="4" rx="1" fill="#2A2320"/>
+      <rect x="66" y="64" width="9" height="4" rx="1" fill="#2A2320"/>
+      <rect x="57" y="67" width="6" height="12" rx="2" fill="#D2AE86"/>
+      <path d="M40 84c2 9 9 15 20 15s18-6 20-15c-3 4-10 6-20 6s-17-2-20-6z" fill="#3A3230"/>
+      <rect x="53" y="80" width="14" height="2.6" rx="1.3" fill="#6A4436"/>`,
+    boat:`
+      <path d="M60 30c14 0 21 11 21 26 0 16-9 26-21 26s-21-10-21-26c0-15 7-26 21-26z" fill="#9A6E4A"/>
+      <path d="M39 57c0-8 9-13 21-13s21 5 21 13c-6-4-13-6-21-6s-15 2-21 6z" fill="#C99E72"/>
+      <path d="M43 55q6-4 13 0" stroke="#2A1E16" stroke-width="2.4" fill="none"/>
+      <path d="M64 55q7-4 13 0" stroke="#2A1E16" stroke-width="2.4" fill="none"/>
+      <rect x="45" y="61" width="11" height="3" rx="1.5" fill="#2A1E16"/>
+      <rect x="64" y="61" width="11" height="3" rx="1.5" fill="#2A1E16"/>
+      <rect x="57" y="65" width="5" height="10" rx="2" fill="#8A5E3C"/>
+      <path d="M52 80q8 6 16 0v4q-8 5-16 0z" fill="#4A2E22"/>
+      <ellipse cx="60" cy="49" rx="44" ry="9" fill="#B9924E"/>
+      <path d="M60 9L34 46h52z" fill="#C9A96A"/>
+      <path d="M42 40h36" stroke="#A8823C" stroke-width="1.4"/>`,
+    porter:`
+      <ellipse cx="60" cy="64" rx="24" ry="27" fill="#A87A54"/>
+      <ellipse cx="48" cy="52" rx="11" ry="5" fill="#BFAE8E" opacity=".9"/>
+      <ellipse cx="71" cy="60" rx="9" ry="5" fill="#BFAE8E" opacity=".8"/>
+      <rect x="43" y="55" width="12" height="4" rx="1" fill="#3A2C22"/>
+      <rect x="65" y="55" width="12" height="4" rx="1" fill="#3A2C22"/>
+      <ellipse cx="50" cy="65" rx="6" ry="5" fill="#F2EADA"/><circle cx="50" cy="65" r="2.6" fill="#2A2320"/>
+      <ellipse cx="70" cy="65" rx="6" ry="5" fill="#F2EADA"/><circle cx="70" cy="65" r="2.6" fill="#2A2320"/>
+      <rect x="57" y="70" width="6" height="8" rx="2" fill="#8A5E3C"/>
+      <rect x="52" y="82" width="16" height="5" rx="2" fill="#6A4436"/>
+      <path d="M34 53c0-15 11-25 26-25s26 10 26 25c-8-6-16-9-26-9s-18 3-26 9z" fill="#CFC3A8"/>
+      <rect x="31" y="44" width="58" height="8" rx="3" fill="#CFC3A8"/>
+      <path d="M89 48q10 5 8 17t-10 13" stroke="#CFC3A8" stroke-width="6" fill="none" stroke-linecap="round"/>`
+  }[id];
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="60" r="59" fill="#E2D6BC"/>
+    <circle cx="60" cy="60" r="56" fill="#EFE6D2"/>
+    <clipPath id="c${id}"><circle cx="60" cy="60" r="56"/></clipPath>
+    <g clip-path="url(#c${id})">${head}</g>
+    <circle cx="60" cy="60" r="56.5" fill="none" stroke="${ring}" stroke-width="3"/>
+  </svg>`;
+}
+
+function bodySVG(id){
+  const S = {
+    copper:`
+      <svg viewBox="0 0 320 440" xmlns="http://www.w3.org/2000/svg">
+        <path d="M160 152L96 198 76 440h168l-20-242z" fill="#2F4A5A"/>
+        <path d="M160 150l-30 62h60z" fill="#EFE6D2"/>
+        <path d="M160 154l-42 48 32 14 10-36z" fill="#27404E"/>
+        <path d="M160 154l42 48-32 14-10-36z" fill="#35525F"/>
+        <path d="M126 228h68l8 212h-84z" fill="#8C5A3C"/>
+        <ellipse cx="146" cy="300" rx="11" ry="7" fill="#5A3A28"/>
+        <path d="M172 358q15 10 6 27" stroke="#5A3A28" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M96 198l-40 106 40 16 34-98z" fill="#2F4A5A"/>
+        <path d="M224 198l40 100-40 16-32-96z" fill="#2F4A5A"/>
+        <path d="M56 304l42 14-8 36-40-15z" fill="#6E4A34"/>
+        <circle cx="78" cy="356" r="15" fill="#E4C49C"/>
+        <rect x="52" y="336" width="42" height="8" rx="4" transform="rotate(-38 73 340)" fill="#8A6A46"/>
+        <rect x="30" y="292" width="34" height="22" rx="4" transform="rotate(-38 47 303)" fill="#7A7A72"/>
+        <ellipse cx="160" cy="94" rx="46" ry="52" fill="#E4C49C"/>
+        <path d="M160 42c-26 0-46 14-46 40 10-12 26-18 46-18s36 6 46 18c0-26-20-40-46-40z" fill="#1E1C1A"/>
+        <rect x="112" y="74" width="96" height="11" rx="3" fill="#1E1C1A"/>
+        <rect x="126" y="92" width="24" height="7" rx="2" fill="#3A3230"/>
+        <rect x="170" y="92" width="24" height="7" rx="2" fill="#3A3230"/>
+        <rect x="131" y="106" width="15" height="6" rx="2" fill="#2A2320"/>
+        <rect x="174" y="106" width="15" height="6" rx="2" fill="#2A2320"/>
+        <rect x="155" y="110" width="10" height="22" rx="3" fill="#D2AE86"/>
+        <path d="M118 132c2 22 18 34 42 34s40-12 42-34c-6 9-20 14-42 14s-36-5-42-14z" fill="#3A3230"/>
+        <rect x="146" y="142" width="28" height="6" rx="3" fill="#6A4436"/>
+      </svg>`,
+    boat:`
+      <svg viewBox="0 0 320 440" xmlns="http://www.w3.org/2000/svg">
+        <path d="M160 158L104 204 92 440h136l-12-236z" fill="#4A5A5E"/>
+        <path d="M160 156l-26 56h52z" fill="#C9BC9E"/>
+        <path d="M160 158l-38 44 28 12 10-30z" fill="#3E4C50"/>
+        <path d="M96 204l-42 96 38 16 30-88z" fill="#4A5A5E"/>
+        <path d="M224 204l46 40-14 26-42-30z" fill="#4A5A5E"/>
+        <circle cx="76" cy="300" r="16" fill="#8A5E3C"/>
+        <circle cx="258" cy="256" r="15" fill="#8A5E3C"/>
+        <path d="M262 254L300 96" stroke="#8A9A5C" stroke-width="13" stroke-linecap="round"/>
+        <path d="M282 150l4 6M270 200l4 6" stroke="#5E6B3C" stroke-width="5"/>
+        <path d="M104 208q-12 40 4 70" stroke="#B49A6E" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <ellipse cx="160" cy="100" rx="38" ry="46" fill="#9A6E4A"/>
+        <path d="M126 72c2-20 15-30 34-30s32 10 34 30c-8-9-20-13-34-13s-26 4-34 13z" fill="#2A1E16"/>
+        <path d="M126 78c0-10 12-16 34-16s34 6 34 16c-9-5-20-8-34-8s-25 3-34 8z" fill="#C99E72"/>
+        <path d="M132 94q8-5 17 0" stroke="#2A1E16" stroke-width="3.4" fill="none"/>
+        <path d="M171 94q9-5 17 0" stroke="#2A1E16" stroke-width="3.4" fill="none"/>
+        <rect x="135" y="102" width="14" height="4" rx="2" fill="#2A1E16"/>
+        <rect x="172" y="102" width="14" height="4" rx="2" fill="#2A1E16"/>
+        <rect x="155" y="108" width="8" height="14" rx="3" fill="#8A5E3C"/>
+        <path d="M146 128q14 9 28 0v6q-14 8-28 0z" fill="#4A2E22"/>
+        <ellipse cx="160" cy="60" rx="62" ry="11" fill="#B9924E"/>
+        <path d="M160 6l-40 54h80z" fill="#C9A96A"/>
+        <path d="M132 44h56" stroke="#A8823C" stroke-width="2"/>
+      </svg>`,
+    porter:`
+      <svg viewBox="0 0 320 440" xmlns="http://www.w3.org/2000/svg">
+        <path d="M160 156L100 202 88 440h144l-12-238z" fill="#8A6242"/>
+        <path d="M160 156l-26 52h52z" fill="#C9BC9E"/>
+        <path d="M160 158l-34 44 26 12 8-30z" fill="#7A5438"/>
+        <path d="M160 158l34 44-26 12-8-30z" fill="#966C48"/>
+        <path d="M104 202l-40 80 38 18 32-76z" fill="#8A6242"/>
+        <path d="M216 202l40 80-38 18-32-76z" fill="#8A6242"/>
+        <ellipse cx="76" cy="292" rx="16" ry="14" fill="#A87A54"/>
+        <ellipse cx="244" cy="292" rx="16" ry="14" fill="#A87A54"/>
+        <path d="M62 296h228l-24 144H86z" fill="#B49A6E"/>
+        <path d="M66 306h220" stroke="#8A7048" stroke-width="6"/>
+        <path d="M84 350h184M92 390h168" stroke="#8A7048" stroke-width="5"/>
+        <path d="M70 300q90-34 180 0-14-26-90-26t-90 26z" fill="#A8906A"/>
+        <ellipse cx="112" cy="286" rx="16" ry="8" fill="#B8B09A"/>
+        <ellipse cx="176" cy="278" rx="13" ry="7" fill="#B8B09A"/>
+        <ellipse cx="160" cy="102" rx="50" ry="54" fill="#A87A54"/>
+        <ellipse cx="140" cy="82" rx="20" ry="10" fill="#BFAE8E"/>
+        <ellipse cx="182" cy="98" rx="16" ry="9" fill="#BFAE8E"/>
+        <path d="M118 68c4-24 20-36 42-36s38 12 42 36c-10-10-24-15-42-15s-32 5-42 15z" fill="#CFC3A8"/>
+        <rect x="114" y="60" width="92" height="14" rx="6" fill="#CFC3A8"/>
+        <path d="M206 66q18 8 14 30t-18 20" stroke="#CFC3A8" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <rect x="130" y="84" width="26" height="7" rx="2" fill="#3A2C22"/>
+        <rect x="166" y="84" width="26" height="7" rx="2" fill="#3A2C22"/>
+        <ellipse cx="143" cy="104" rx="12" ry="10" fill="#F2EADA"/><circle cx="143" cy="104" r="5" fill="#2A2320"/>
+        <ellipse cx="179" cy="104" rx="12" ry="10" fill="#F2EADA"/><circle cx="179" cy="104" r="5" fill="#2A2320"/>
+        <rect x="153" y="112" width="13" height="16" rx="4" fill="#8A5E3C"/>
+        <rect x="143" y="134" width="34" height="10" rx="4" fill="#6A4436"/>
+      </svg>`
+  }[id];
+  return S;
+}
+
+/* ================= 逻辑 ================= */
+
+const stage=document.getElementById('stage');
+/* 地名纸签 */
+const PLACES=[
+  {t:"钟楼", x:"56.0%", y:"8.1%",  r:"-1.4deg",
+   rows:[["年代","元至元九年（1272）始建；明永乐十八年（1420）、清乾隆十年（1745）两度重建"],
+         ["规模","通高 47.9 米，上下两层；下层十字拱券，上层八角钟架悬永乐铜钟（高 7.02 米、口径 3.4 米、重约 63 吨）"]],
+   tail:"乾隆十年重建时全用砖石，为的是防火；天井与十字拱券上下贯通，撞钟时十里有声。",
+   src:"出处：北京市文物局《龙尾之曜——浅记北京鼓楼》"},
+  {t:"鼓楼", x:"57.6%", y:"24.0%", r:"1.2deg",
+   rows:[["年代","元至元九年（1272）始建，初名齐政楼；元大德元年（1297）火后重建；现存为明永乐十八年（1420）重建"],
+         ["规模","通高 46.7 米，面宽 34 米、进深 22.4 米；重檐歇山，灰筒瓦绿琉璃剪边；下层砖石无梁拱券，南北各开券门三座、东西各一座"]],
+   tail:"齐政之名取日、月与五星「七政」之义；民国十三年（1924）曾易名「明耻楼」。",
+   src:"出处：北京市文物局；北京市文旅局"},
+  {t:"万宁桥", x:"56.2%", y:"44.6%", r:"-1.0deg",
+   rows:[["年代","元至元二十二年（1285）建；初为木构，后改石筑，桥西设澄清上闸"],
+         ["规模","单孔拱券，长 34.6 米、宽 17 米；拱净跨 7.2 米、拱高 3.5 米；桥面两侧望柱各十六根"]],
+   tail:"两岸存镇水兽六只，桥西四、桥东二，东北护岸一只为元代原物。",
+   src:"出处：北京市文物局《万宁桥》；北京市文旅局"},
+  {t:"景山公园", x:"45.2%", y:"56.2%", r:"1.5deg", cy:"-100%",
+   rows:[["年代","金代已辟为御苑；元至元四年（1267）入大都皇城；明永乐十八年（1420）以渣土与筒子河之土堆山，称万岁山；清顺治十二年（1655）改名景山；1928 年辟为公园"],
+         ["规模","占地 23 公顷，山高 42.6 米、海拔 88.35 米；山顶五峰各一亭，乾隆十五年（1750）建"],
+         ["五亭","自东向西：周赏、观妙、万春、辑芳、富览。万春居中，三重檐四角攒尖、黄琉璃瓦，为全城最高点；观妙在东、辑芳在西，八角重檐、绿琉璃瓦；周赏在东端、富览在西端，圆形重檐、蓝琉璃瓦"]],
+   tail:"明崇祯十七年（1644），崇祯帝自缢于山东坡槐树。",
+   src:"出处：首都之窗·景山公园；北京市公园管理中心"}];
+let openCard=null, openEl=null;
+const closeCard=()=>{ if(openCard){ openCard.classList.remove('on'); openEl&&openEl.classList.remove('open'); openCard=null; openEl=null; } };
+PLACES.forEach(o=>{
+  const d=document.createElement('div');
+  d.className='place'; d.textContent=o.t;
+  d.style.left=o.x; d.style.top=o.y; d.style.setProperty('--r',o.r);
+
+  const card=document.createElement('div');
+  card.className='pcard';
+  card.innerHTML=`<h4>${o.t}</h4><dl>${o.rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>${o.tail?`<p class="tail">${o.tail}</p>`:''}<small>${o.src}</small>`;
+  card.style.left=`calc(${o.x} + 5.4cqw)`;
+  card.style.top=o.y;
+  const oy=parseFloat(o.y);
+  if(o.cy) card.style.setProperty('--cy',o.cy);
+  else if(oy<20) card.style.setProperty('--cy','0%');
+  else if(oy>78) card.style.setProperty('--cy','-100%');
+
+  d.setAttribute('role','button'); d.tabIndex=0; d.setAttribute('aria-label',`${o.t}，点开介绍`);
+  const toggleCard=()=>{ sfx('paper');
+    if(openCard===card){ closeCard(); return; }
+    closeCard(); card.classList.add('on'); d.classList.add('open'); openCard=card; openEl=d; };
+  d.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleCard(); } });
+  d.addEventListener('click',e=>{
+    e.stopPropagation(); sfx('paper');
+    if(openCard===card){ closeCard(); return; }
+    closeCard(); card.classList.add('on'); d.classList.add('open'); openCard=card; openEl=d;
+  });
+  stage.appendChild(d); stage.appendChild(card);
+});
+document.addEventListener('click',()=>closeCard());
+
+const dlg=document.getElementById('dlg');
+const leaf=document.getElementById('leaf');
+const fig=document.getElementById('fig');
+const plate=document.getElementById('plate');
+const textEl=document.getElementById('dlgText');
+const noteEl=document.getElementById('dlgNote');
+const nextSign=document.getElementById('nextSign');
+const stamp=document.getElementById('stamp');
+const backBtn=document.getElementById('back');
+const ending=document.getElementById('ending');
+
+const SEEN = new Set();                            // 进度只活在这一次打开里，刷新即归零
+const saveSeen=()=>{};
+
+let cur=null, idx=0, typing=false, timer=null, finished=false;
+
+/* 建标记 */
+Object.entries(NPCS).forEach(([id,n])=>{
+  const el=document.createElement('div');
+  el.className='marker'+(SEEN.has(id)?' done':'');
+  el.dataset.npc=id;
+  el.style.left=n.x; el.style.top=n.y;
+  el.innerHTML=`<div class="card">${ART[id].card?`<img src="${ART[id].card}" alt="">`:cardSVG(id)}<img class="ok" src="assets/mark_ok.webp" alt=""></div>
+    <div class="tag">${n.name}<i>${n.year}</i></div>`;
+  el.setAttribute('role','button'); el.tabIndex=0;
+  el.setAttribute('aria-label',`${n.name}，${n.year}，点开对话`);
+  el.addEventListener('click',()=>{ sfx('paper'); open(id); });
+  el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); sfx('paper'); open(id); } });
+  stage.appendChild(el);
+});
+
+
+
+/* ---- UI 音效（展开纸 / 翻书），点一下播一次，短音效走小池子防打断 ---- */
+const SFX = { paper:{src:'assets/snd_paper.mp3', vol:0.80, pool:[], i:0},
+              page :{src:'assets/snd_page.mp3',  vol:0.85, pool:[], i:0} };
+Object.values(SFX).forEach(s=>{
+  for(let k=0;k<4;k++){ const a=new Audio(s.src); a.preload='auto'; a.volume=s.vol; s.pool.push(a); }
+});
+window.__sfx={paper:0,page:0};
+function sfx(k){
+  const s=SFX[k]; if(!s) return;
+  window.__sfx[k]=(window.__sfx[k]||0)+1;
+  const a=s.pool[s.i=(s.i+1)%s.pool.length];
+  try{ a.currentTime=0; const pr=a.play(); if(pr&&pr.catch) pr.catch(()=>{}); }catch(e){}
+}
+
+/* 界面配乐：开场结束后起，循环；进对话压下去，回地图抬起来 */
+const BGM=(()=>{
+  const a=new Audio('assets/bgm_map.mp3'); a.loop=true; a.preload='auto'; a.volume=0;
+  let target=0, started=false, tk=null;
+  const ramp=()=>{ const d=target-a.volume;
+    if(Math.abs(d)>0.004){ a.volume=Math.max(0,Math.min(1,a.volume+d*0.10)); }
+    else { a.volume=target; if(target===0){ /* 不暂停，留一点余量 */ } } };
+  function play(){ if(started) return; started=true;
+    const p=a.play(); if(p&&p.catch) p.catch(()=>{ started=false; });
+    if(tk) clearInterval(tk); tk=setInterval(ramp,60); }
+  function set(v){ target=v; if(!started&&v>0) play(); }
+  return {play,set,state:()=>({started,vol:+a.volume.toFixed(3),t:+a.currentTime.toFixed(2),paused:a.paused})};
+})();
+window.__bgm=BGM;
+
+const btnPrev=document.getElementById('btnPrev');
+
+function updatePg(){
+  if(!cur){ btnPrev.disabled=true; return; }
+  btnPrev.disabled = idx<=0;
+}
+
+function go(i){
+  if(!cur) return;
+  const lines=NPCS[cur].lines, notes=NPCS[cur].notes||{};
+  i=Math.max(0,Math.min(lines.length-1,i));
+  idx=i; finished=false;
+  stamp.classList.remove('on');
+  nextSign.textContent='继续'; nextSign.classList.remove('done');
+  clearInterval(timer); typing=false;
+  textEl.textContent=lines[idx];
+  noteEl.classList.remove('on'); noteEl.textContent='';
+  if(notes[idx]) showNote(notes[idx]);
+  updatePg();
+}
+
+function open(id){
+  BGM.set(0.20);
+  cur=id; idx=0; finished=false;
+  if(SEEN.delete(id)){                              // 重新点开＝回到未读
+    saveSeen();
+    document.querySelector(`.marker[data-npc="${id}"]`)?.classList.remove('done');
+  }
+  const n=NPCS[id];
+  plate.innerHTML=`<i></i><b>${n.name}</b><small>${n.year}</small>`;
+  plate.style.setProperty('--plate',`url("${ART[id].plate}")`);
+  document.getElementById('dlgBg').style.backgroundImage=`url("${ART[id].bg}")`;
+  fig.innerHTML=ART[id].body?`<img src="${ART[id].body}" alt="" style="height:100%;display:block">`:bodySVG(id);
+  stamp.classList.remove('on');
+  nextSign.textContent='继续';
+  nextSign.classList.remove('done');
+  leaf.classList.remove('run');
+  void leaf.offsetWidth;
+  leaf.classList.add('run');
+  dlg.classList.add('on');
+  setTimeout(()=>leaf.classList.remove('run'),760);
+  typeLine(n.lines[0], n.notes && n.notes[0]);
+  idx=0; updatePg();
+}
+
+function typeLine(str,note){
+  clearInterval(timer);
+  typing=true;
+  textEl.textContent='';
+  noteEl.classList.remove('on'); noteEl.textContent='';
+  let i=0;
+  timer=setInterval(()=>{
+    i++;
+    textEl.innerHTML=str.slice(0,i)+'<span class="caret"></span>';
+    if(i>=str.length){ clearInterval(timer); typing=false; textEl.textContent=str; if(note) showNote(note); updatePg(); }
+  },28);
+}
+
+function showNote(s){
+  noteEl.textContent=s;
+  noteEl.style.top='0px';
+  const h=noteEl.offsetHeight||0;
+  const box=noteEl.offsetParent, boxH=box?box.clientHeight:0;
+  let top=textEl.offsetTop+textEl.offsetHeight+8;
+  const maxTop=boxH-h-Math.round(boxH*0.115);   // 别压到纸带下沿的撕口
+  if(boxH && top>maxTop) top=Math.max(textEl.offsetTop+textEl.offsetHeight+2,maxTop);
+  noteEl.style.top=top+'px';
+  noteEl.classList.add('on');
+}
+
+function advance(){
+  if(!cur) return;
+  if(finished){ close(); return; }
+  const lines=NPCS[cur].lines;
+  const notes=NPCS[cur].notes||{};
+  if(typing){                       // 半句先补全
+    clearInterval(timer); typing=false;
+    textEl.textContent=lines[idx];
+    if(notes[idx]) showNote(notes[idx]);
+    updatePg();
+    return;
+  }
+  idx++;
+  if(idx<lines.length){ typeLine(lines[idx], notes[idx]); updatePg(); return; }
+  finish(); updatePg();
+}
+
+function finish(){
+  if(finished) return;
+  finished=true;
+  SEEN.add(cur); saveSeen();
+  document.querySelector(`.marker[data-npc="${cur}"]`)?.classList.add('done');
+  stamp.classList.add('on');
+  nextSign.textContent='点任意处返回';
+  nextSign.classList.add('done');
+  if(SEEN.size===3) setTimeout(()=>{ ending.classList.add('on'); },900);
+}
+
+function close(){
+  BGM.set(0.50);
+  dlg.classList.remove('on');
+  stamp.classList.remove('on');
+  nextSign.textContent='继续';
+  nextSign.classList.remove('done');
+  finished=false;
+  cur=null;
+}
+
+dlg.addEventListener('click',e=>{ if(!e.target.closest('#back')&&!e.target.closest('.pgbtn')){ sfx('page'); advance(); } });
+btnPrev.addEventListener('click',e=>{ e.stopPropagation(); if(btnPrev.disabled) return; sfx('page'); go(idx-1); });
+backBtn.addEventListener('click',e=>{ e.stopPropagation(); sfx('paper'); close(); });
+document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); ending.classList.remove('on'); close(); });
+
+/* 开场：书本展开。第一次点击带声音从头播，播完把画面交还小地图，UI 错峰浮现 */
+(()=>{
+  const book=document.getElementById('book'), intro=document.getElementById('intro'), v=document.getElementById('introV');
+  const tap=document.getElementById('introTap');
+  if(!intro||!v) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ intro.remove(); book.classList.remove('intro'); return; }
+  if(location.hash) { intro.remove();
+    addEventListener('pointerdown', ()=>BGM.set(0.50), {once:true});   // 深链进地图：首次点击起乐
+    return; }                                          // 自检与深链直接进地图
+  book.classList.add('intro');
+  document.querySelectorAll('.place').forEach((el,i)=>el.style.transitionDelay=(0.04*i)+'s');
+  document.querySelectorAll('.marker').forEach((el,i)=>el.style.transitionDelay=(0.10+0.07*i)+'s');
+  let done=false, started=false;
+  function finish(){
+    if(done) return; done=true;
+    intro.classList.add('off');
+    book.classList.remove('intro');
+    BGM.set(0.50);                                   // 开场结束，配乐接手
+    setTimeout(()=>intro.remove(), 620);
+  }
+  function start(sound){
+    if(started) return; started=true;
+    tap&&tap.classList.add('off');
+    v.muted=!sound; v.volume=0.9;
+    v.currentTime=0;
+    const p=v.play(); if(p&&p.catch) p.catch(()=>{ v.muted=true; v.play().catch(()=>{}); });
+  }
+  v.addEventListener('ended', finish);
+  v.addEventListener('error', finish);
+  intro.addEventListener('click', ()=>start(true));
+  addEventListener('keydown', ()=>{ if(!started) start(true); }, {once:true});
+  setTimeout(()=>{ if(!started) start(false); }, 8000);   // 演示时没人点，也照样播
+  addEventListener('pointerdown', ()=>{                   // 静音兜底那轮浏览器不让起乐，补一次
+    if(done && !BGM.state().started) BGM.set(0.50);
+  }, {passive:true});
+})();
+
+/* 自检：index.html#selftest —— 跑完整一轮，逐项报通过/失败 */
+if(location.hash==='#selftest'){
+  const out=document.createElement('pre');
+  out.style.cssText='position:absolute;inset:0;z-index:99;background:#fff;color:#111;font:15px/1.8 monospace;padding:24px;margin:0;white-space:pre-wrap';
+  document.body.appendChild(out);
+  setTimeout(()=>{
+    localStorage.removeItem('axis.north.seen'); SEEN.clear();
+    document.querySelectorAll('.marker').forEach(m=>m.classList.remove('done'));
+    const L=[]; const ok=(name,cond,extra='')=>L.push((cond?'通过  ':'失败  ')+name+(extra?'  ('+extra+')':''));
+    open('copper');
+    let n=0;
+    const tick=setInterval(()=>{
+      advance(); n++;
+      if(stamp.classList.contains('on') || n>120){
+        clearInterval(tick);
+        ok('走到结尾', stamp.classList.contains('on'), '点击数 '+n);
+        ok('末句完整', textEl.textContent===NPCS.copper.lines.at(-1), JSON.stringify(textEl.textContent));
+        ok('印章出现', stamp.classList.contains('on'));
+        ok('「继续」变提示', nextSign.textContent==='点任意处返回', nextSign.textContent);
+        ok('提示只出现一次', document.querySelectorAll('.hint').length===0);
+        ok('完成记录写入', SEEN.has('copper'), [...SEEN].join(','));
+        ok('地图标记变完成', document.querySelector('.marker[data-npc="copper"]').classList.contains('done'));
+        ok('结尾卡未误触发', !ending.classList.contains('on'));
+        advance();
+        ok('再点一次退出', !dlg.classList.contains('on'));
+        ok('退出后印章复位', !stamp.classList.contains('on'));
+        ok('退出后按钮复位', nextSign.textContent==='继续' && !nextSign.classList.contains('done'));
+        out.textContent=L.join('\n');
+      }
+    },30);
+  },600);
+}
+
+/* 深链：index.html#copper 直接打开某个人的对话 */
+if(location.hash){
+  const hid=location.hash.slice(1);
+  if(NPCS[hid]) setTimeout(()=>open(hid),450);
+}
+
+window.addEventListener('keydown',e=>{
+  if(e.key==='Escape') close();
+  if(e.key===' '&&cur){ e.preventDefault(); advance(); }
+});
+</script>
 </body>
 </html>
