@@ -182,6 +182,11 @@
           ],
           "supports": "天坛斋宫护河内环及门址、附属院落建筑；景山五亭、寿皇殿、绮望楼与园界。",
           "limits": "本地旧快照复核；新增天坛步道查询未成功获取数据，路网使用官方导览拓扑加模型折线，不是OSM实测路缘。"
+        },
+        {
+          "date": "2026-11-14",
+          "scope": "天坛北西铺地续修：本地复核public/data/buildings.json中42个附属建筑轮廓、七十二长廊way/31099286和既有公园外环/孔洞。对象清单见tiantan-north-west-review-2026-11-14.md。",
+          "status": "未刷新Overpass；9组北侧和11组西侧包络、接入口、路宽与折点是模型解释。地图不证明未定名建筑用途、实测院界或逐树位置；原坐标和快照不变。"
         }
       ],
       "verifiedOn": "2026-11-14",
@@ -967,7 +972,14 @@
       "supports": "东西天门横向通路、南北轴线、斋宫北东南三个方向入口、祈年殿东西支路和南北神厨/宰牲亭与路网的联系。",
       "limits": "导览图支持拓扑与相对关系，不提供可测量的路宽、折点或逐块铺装；院落硬地比例与逐树位置仍待测绘或现状照片。图像作者和开放许可待核实，不将原图打包、转载或用作运行时纹理。",
       "imageSource": "https://tiantanpark.cn/Public/static/themes/image/jjl/navigation_map2.jpg",
-      "evidenceRecord": "tiantan-ground-review-2026-11-14.md"
+      "evidenceRecord": "tiantan-ground-review-2026-11-14.md",
+      "localVerifications": [
+        {
+          "date": "2026-11-14",
+          "scope": "北西续修时复看同日先前下载的navigation_map2.jpg，核对长廊、神厨、宰牲亭与园内通路的相对联系。",
+          "status": "本次是本地底图复看，不称再次联网下载。导览图不支持新增未定名北西建筑的历史用途、精确入口、院界或满铺比例；图像作者与开放许可仍待核，未转载原图。"
+        }
+      ]
     },
     {
       "id": "JING-ROUTES",

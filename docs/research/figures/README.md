@@ -319,3 +319,19 @@
 - [天坛窄屏](tiantan-paths-mobile.png)：布局与浏览器检查，非全园视觉验收。
 
 证据、实际验证结果与限制见[本轮记录](../tiantan-ground-review-2026-11-14.md)。
+
+## 2026-11-14 · 天坛北部、西侧和长廊连接续修
+
+后续截图显示首轮仍遗漏北门两侧、西门附近与西南配房，长廊支路也不对齐。以下是项目模型校核，非实景或历史参考照片，亦非最终比赛验收。
+
+| 检查区域 | 修正前 | 修正后 |
+| --- | --- | --- |
+| 北门两侧和北天门 | [前](tiantan-north-before.png) | [后](tiantan-north-after.png) |
+| 西北独立排房 | [前](tiantan-northwest-before.png) | [后](tiantan-northwest-after.png) |
+| 西门、院落与小建筑 | [前](tiantan-west-before.png) | [后](tiantan-west-after.png) |
+| 西南配房 | [前](tiantan-southwest-before.png) | [后](tiantan-southwest-after.png) |
+| 神厨、宰牲亭及长廊 | [前](tiantan-corridor-before.png) | [后](tiantan-corridor-after.png) |
+
+Chromium独立校核页使用实际 `createLandmark`、`createForest`、`createMaterials` 和 `loadCityData`，1500×1000画布；正交相机相对目标 `[0,85,58]`，目标和垂直视野依次为 `[18,0,-56]/74`、`[-54,0,-37]/50`、`[-62,0,0]/61`、`[-45,0,46]/49`、`[38,0,-21]/23`。修正前由浏览器路由替换为提交 `aa7ba4f` 中的原铺地模块，其他模块和相机保持一致。基底是校核用平面，灯光独立设置，故与主应用色调不同；仅校核铺地、路网和植被相对关系。
+
+观察：北西遗漏群组已有硬地和接路；北附属院落短通道接入长廊，没有旧版横穿廊身的长支路；完整树冠避让新铺装。铺地范围与连接是概览解释，实地路缘、院内绿地、精确门洞和树池仍待补证。主应用另有[桌面](tiantan-access-app.png)、[390×844窄屏](tiantan-access-mobile.png)运行截图；实际测试结果及版本边界见[续修记录](../tiantan-north-west-review-2026-11-14.md)。
