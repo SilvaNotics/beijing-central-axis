@@ -18,7 +18,7 @@
 | 中段 | `forbidden-city`、`shejitan`、`taimiao`、`duanmen`、`jinshui` |
 | 南段 | `tiananmen`、`square`、`zhengyang`、`tiantan`、`xiannongtan`、`southern-road`、`yongdingmen` |
 
-上述目录目前是**分区接入示例**。交付正式章节时替换整个目录，不要把示例文案、示意小地图或工程骨架标记为最终作品。
+`public/chapters/north/` 已于 2026-11-14 接入正式「纸雕立体书地图」章节。`central/` 与 `south/` 仍为**分区接入示例**。交付这些分区的正式章节时替换对应目录，不要把示例文案、示意小地图或工程骨架标记为最终作品。北段交付说明见 [章节 README](../public/chapters/north/README.md) 和 [交付记录](../public/chapters/north/docs/handoff.md)。
 
 ## 入口登记
 

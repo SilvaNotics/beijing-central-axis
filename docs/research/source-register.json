@@ -658,7 +658,12 @@
       "reviewStatus": "既有研究记录汇编；本次未重复联网核验",
       "supports": "鼓楼46.7米、三重檐、五间三进深及券洞；钟楼47.9米、砖石主体和双檐歇山",
       "limits": "模型台基、楼梯、铃钟和构件比例仍有概化",
-      "evidenceRecord": "本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档"
+      "evidenceRecord": "本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "TOWER-CITY",
@@ -671,7 +676,12 @@
       "reviewStatus": "既有研究记录汇编；本次未重复联网核验",
       "supports": "两楼功能、区位与外观背景",
       "limits": "具体模型细部优先对应文物资料及照片",
-      "evidenceRecord": "本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档"
+      "evidenceRecord": "本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "BRIDGE-HERITAGE",
@@ -686,7 +696,12 @@
       "limits": "网页日期2020-06-09，不作为2026年逐尊现状调查；与BRIDGE-CITY四边各一只的介绍并列保留。采用其更具体的西四东二数量分布，尺寸、岸座、雕饰及逐尊姿态没有测绘支持",
       "evidenceRecord": "docs/research/wanning-guardians-review-2026-11-14.md；提取正文的关键结论及冲突记录，非原始网页完整归档",
       "verifiedTitle": "万宁桥",
-      "verifiedOn": "2026-11-14"
+      "verifiedOn": "2026-11-14",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "BRIDGE-CITY",
@@ -701,7 +716,12 @@
       "limits": "四只的概述与BRIDGE-HERITAGE明确的西四东二口径不同，未据此删除西侧下层两只；不支持推导逐尊坐标、尺度或完整现状雕刻，作者/图片许可待补",
       "evidenceRecord": "docs/research/wanning-guardians-review-2026-11-14.md；提取正文的关键结论及冲突记录，非原始网页完整归档",
       "verifiedTitle": "万宁桥",
-      "verifiedOn": "2026-11-14"
+      "verifiedOn": "2026-11-14",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "TEMPLE-MOUND",
@@ -998,7 +1018,12 @@
       "supports": "中峰位置、亭高17.4米、三层重檐、32根红柱、黄色屋面绿色剪边和四角攒尖。",
       "limits": "页面图片为夜间远景，不能支持斗拱、窗棂和逐层标高；未复制图片。图片版权标识为北京市公园管理中心，作者与授权许可未列出，待核。",
       "evidenceRecord": "evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭",
-      "publishedOn": "2019-12-11"
+      "publishedOn": "2019-12-11",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "JING-JIFANG-PARK",
@@ -1013,7 +1038,12 @@
       "supports": "辑芳与观妙亭成对同形；重檐八角攒尖、绿瓦黄剪边，亭高12.05米，建筑面积90.30平方米。",
       "limits": "建筑面积不是屋檐平面包络；未据此倒推檐深和逐构件尺寸。页面未提供可用于精细建模的逐图授权信息。",
       "evidenceRecord": "evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭",
-      "publishedOn": "2019-02-20"
+      "publishedOn": "2019-02-20",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "JING-ZHOUSHANG-PARK",
@@ -1028,7 +1058,12 @@
       "supports": "周赏与富览亭成对同形；重檐圆攒尖、孔雀蓝瓦紫晶色剪边，亭高11.75米，建筑面积76.36平方米。",
       "limits": "页面不提供圆亭檐口直径和立面测绘图；建筑面积不作屋顶直径；未复制图片。",
       "evidenceRecord": "evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭",
-      "publishedOn": "2019-02-20"
+      "publishedOn": "2019-02-20",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "JING-DPM-P38",
@@ -1043,7 +1078,12 @@
       "supports": "印刷页38：万春亭正方形面阔进深各17.01米、三层檐；八角亭直径10.41米、圆亭直径7.87米；梁枋青绿点金旋子彩画、内金柱间槛墙槛窗外檐装修。",
       "limits": "所获为独立单页，全文题名、作者、出版年份及图六至图八尚未核得，须补证；正文的斗拱出跳仅作参考，模型用简化叠块而非完整营造法式复原；原文形制年代不是当前实测认证。",
       "evidenceRecord": "evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭",
-      "pages": "下载文件第1页，即印刷页38；全文其他页面未取得"
+      "pages": "下载文件第1页，即印刷页38；全文其他页面未取得",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "TEMPLE-GUIDE-MAP",
@@ -1084,7 +1124,12 @@
       "reviewStatus": "通过网页抓取工具读取全文，页面标示发布日期2017-03-01；本轮只采用道路连接和楼前月台说明。",
       "supports": "前山、西侧、后山及东侧主路与五亭之间的游览联系；绮望楼前设宽敞月台。",
       "limits": "不是测绘或最新开放公告；不据此指定折点、路宽、阶数及院落边界。文中周赏亭约11.3米与既有管理方11.75米记录不同，本轮不改高度，仍采用JING-ZHOUSHANG-PARK；不复用旧交通、餐饮及开放信息。",
-      "evidenceRecord": "tiantan-ground-review-2026-11-14.md"
+      "evidenceRecord": "tiantan-ground-review-2026-11-14.md",
+      "northChapterUse": {
+        "recordedOn": "2026-11-14",
+        "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+        "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+      }
     },
     {
       "id": "PAL-CITY-WALL",
@@ -1446,6 +1491,11 @@
     "reviewedOn": "2026-11-14",
     "scope": "本地文档重整、ID与非空URL唯一性及文件引用核对；未重新联网核验全部来源，未改变原有verifiedOn或recordedOn。",
     "catalogue": "source-catalogue.md",
-    "history": "source-catalogue-history.md"
+    "history": "source-catalogue-history.md",
+    "northChapterIntegration": {
+      "recordedOn": "2026-11-14",
+      "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+      "scope": "PR #1 北段章节接入；沿用现有来源 ID，本轮未在线重核；人物台词为创作，素材许可仍依作者交付记录及待补事项。"
+    }
   }
 }

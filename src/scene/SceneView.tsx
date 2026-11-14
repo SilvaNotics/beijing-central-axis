@@ -26,8 +26,10 @@ export default function SceneView(props: SceneViewProps) {
   const controller = useRef<SceneController | null>(null);
   const propsRef = useRef(props); propsRef.current = props;
   const [ready, setReady] = useState(false);
+  const [shouldInitialize, setShouldInitialize] = useState(props.active !== false);
+  useEffect(() => { if (props.active !== false) setShouldInitialize(true); }, [props.active]);
   useEffect(() => {
-    if (!host.current || !labels.current) return;
+    if (!shouldInitialize || !host.current || !labels.current) return;
     const container = host.current, labelLayer = labels.current;
     let cancelled = false;
     const abort = new AbortController();
@@ -39,7 +41,7 @@ export default function SceneView(props: SceneViewProps) {
       }).catch(error => { if (!cancelled) { console.error('Atlas renderer unavailable:', error); propsRef.current.onReady?.('fallback'); } });
     }, 60);
     return () => { cancelled = true; abort.abort(); clearTimeout(start); controller.current?.dispose(); controller.current = null; };
-  }, []);
+  }, [shouldInitialize]);
   useEffect(() => {
     if (!ready) return;
     if (props.selection) controller.current?.focus(props.selection);

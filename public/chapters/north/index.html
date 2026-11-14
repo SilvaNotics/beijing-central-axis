@@ -262,25 +262,96 @@
   .place,.marker{transition:opacity .5s ease;}
   #book.intro .place,#book.intro .marker{opacity:0;}
 
+
+  /* 接入微调：保持纸雕地图比例，让窄屏正文和操作可读。 */
+  .chapter-tools{position:fixed;inset:12px 12px auto;z-index:90;display:flex;
+    justify-content:space-between;gap:8px;pointer-events:none;}
+  .chapter-tools a,.chapter-tools button,.card-close{pointer-events:auto;
+    border:1px solid var(--edge2);border-radius:4px;background:var(--paper);color:var(--ink);
+    padding:10px 14px;min-height:44px;font:16px var(--kai);text-decoration:none;cursor:pointer;}
+  .chapter-tools div{display:flex;gap:8px;}
+  .mobile-nav{display:none;}
+  .pcard{width:clamp(300px,30.2cqw,540px);max-height:calc(100cqh - 24px);overflow:auto;}
+  .pcard h4{font-size:max(18px,2.15cqh);padding-right:28px;}
+  .pcard dt{font-size:max(13px,1.28cqh);}
+  .pcard dd{font-size:max(14px,1.44cqh);}
+  .pcard .tail{font-size:max(14px,1.34cqh);}
+  .pcard small{font-size:max(12px,1.2cqh);}
+  .card-close{position:absolute;right:0;top:0;min-height:36px;padding:4px 8px;font-size:14px;}
+  #nextSign{border:0;background:none;}
+  #nextSign.done{pointer-events:none;}
+  .dialogue-caption{position:absolute;right:16px;top:16px;z-index:6;margin:0;padding:8px 12px;
+    max-width:calc(100% - 80px);background:var(--paper);font:14px/1.6 var(--kai);}
+  .marker:focus-visible .tag{opacity:1;}
+  #introTap{border:0;pointer-events:auto;min-height:44px;font-size:max(16px,1.92cqh);cursor:pointer;}
+  @media(max-width:900px){
+    html,body{width:100%;height:auto;min-height:100%;}
+    #book{width:100%;height:max(100svh,calc(56.25vw + 440px));aspect-ratio:auto;box-shadow:none;perspective:none;}
+    #stage{inset:76px 0 auto;height:56.25vw;}
+    #map{height:100%;}
+    #stage>.place,#stage>.marker{display:none;}
+    .mobile-nav{display:block;position:absolute;left:16px;right:16px;top:calc(56.25vw + 92px);}
+    .mobile-nav h2{font:20px var(--ming);margin:16px 0 8px;}
+    .mobile-nav p{font:14px/1.7 var(--kai);margin:8px 0;color:var(--ink2);}
+    .mobile-nav .places,.mobile-nav .people{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+    .mobile-nav button{min-height:44px;padding:10px 8px;border:1px solid var(--edge2);
+      background:var(--core);color:var(--ink);font:16px var(--kai);border-radius:4px;cursor:pointer;}
+    .mobile-nav button[aria-pressed=true]{border-color:var(--porter);background:var(--paper2);}
+    .pcard{position:fixed;left:16px!important;top:76px!important;width:calc(100vw - 32px);
+      max-height:calc(100svh - 96px);transform:none!important;padding-bottom:16px;z-index:70;}
+    #dlg{position:fixed;}
+    .dlg-figure{left:0;bottom:34%;height:55%;max-width:100%;}
+    .dlg-figure img{max-width:100%;object-fit:contain;object-position:left bottom;}
+    .dlg-sheet{left:12px;bottom:16px;width:calc(100% - 24px);height:auto;min-height:250px;
+      max-height:55svh;padding:42px 24px 28px;}
+    .dlg-box{position:relative;max-height:calc(55svh - 80px);overflow:auto;}
+    #dlgText{position:static;font-size:20px;line-height:1.7;}
+    #dlgNote{position:static!important;font-size:14px;line-height:1.7;margin-top:12px;padding-top:8px;}
+    #dlgText .caret{height:18px;width:2px;vertical-align:-2px;}
+    .plate{left:12px;bottom:calc(100% + 12px);height:auto;min-height:44px;padding:8px 16px;font-size:21px;}
+    .plate small{font-size:13px;margin-left:8px;}
+    .pgbtn,.next{top:0;bottom:auto;min-height:44px;width:auto;height:44px;padding:8px 12px;
+      font-size:16px;display:flex;align-items:center;}
+    .pgbtn{left:20px;right:auto;}
+    .next{right:20px;}
+    .next.done{position:static;margin:8px 0;font-size:14px;text-align:center;}
+    #stamp{right:4px;top:-46px;width:58px;}
+    #back{left:12px;top:72px;width:44px;height:100px;padding:8px;font-size:16px;}
+    .dialogue-caption{top:76px;right:12px;max-width:calc(100% - 80px);font-size:13px;}
+    #ending{position:fixed;}
+    .endcard{width:calc(100% - 32px);max-height:calc(100svh - 100px);overflow:auto;padding:40px 32px;}
+    .endcard h2{font-size:24px;}
+    .endcard p{font-size:17px;}
+    .endcard .cred{font-size:12px;}
+    .endcard button{font-size:16px;min-height:44px;padding:12px 24px;}
+    #intro video{object-fit:contain;}
+  }
+
 </style>
 </head>
 <body>
+<nav class="chapter-tools" aria-label="章节工具">
+  <a href="../../#/" data-return>返回中轴总览</a>
+  <div><button id="soundToggle" type="button" aria-pressed="false">声音：开</button>
+  <button id="introSkip" type="button">跳过开场</button></div>
+</nav>
 <h1 class="sr">中轴线北段 · 纸雕立体书地图</h1>
 <div id="book">
-  <div id="intro"><video id="introV" src="assets/intro_book.mp4" poster="assets/intro_poster.jpg" playsinline muted preload="auto"></video><div id="introTap">点一下，翻开</div></div>
+  <div id="intro"><video id="introV" src="assets/intro_book.mp4" poster="assets/intro_poster.jpg" playsinline muted preload="auto"></video><button id="introTap" type="button">点一下，翻开</button></div>
   <div id="stage">
     <img id="map" src="map.webp" alt="">
   </div>
 
   <div id="leaf"></div>
 
-  <section id="dlg" aria-live="polite">
+  <section id="dlg" role="dialog" aria-modal="true" aria-label="人物创作对话">
+    <p class="dialogue-caption">人物与经历为创作，跨时代讲述；小注另列史实线索。</p>
     <div class="dlg-bg" id="dlgBg"></div>
     <div class="dlg-figure" id="fig"></div>
 
     <div class="dlg-sheet">
       <div class="plate" id="plate"></div>
-      <div class="next" id="nextSign">继续</div>
+      <button class="next" id="nextSign" type="button">继续</button>
       <div class="strip"></div>
       <div class="fold"></div>
       <button class="pgbtn" id="btnPrev">上一条</button>
@@ -294,9 +365,9 @@
     <button id="back"><span>返回</span></button>
   </section>
 
-  <div id="ending">
+  <div id="ending" role="dialog" aria-modal="true" aria-labelledby="endingTitle">
     <div class="endcard">
-      <h2>三处都走过了</h2>
+      <h2 id="endingTitle">三处都走过了</h2>
       <p>钟楼、万宁桥、景山，三段话都收进了这本书。</p>
       <p>图上还有一处你没去——鼓楼。它不出声，更鼓早就歇了。</p>
       <button id="endClose">合上</button>
@@ -581,16 +652,36 @@ const PLACES=[
          ["五亭","自东向西：周赏、观妙、万春、辑芳、富览。万春居中，三重檐四角攒尖、黄琉璃瓦，为全城最高点；观妙在东、辑芳在西，八角重檐、绿琉璃瓦；周赏在东端、富览在西端，圆形重檐、蓝琉璃瓦"]],
    tail:"明崇祯十七年（1644），崇祯帝自缢于山东坡槐树。",
    src:"出处：首都之窗·景山公园；北京市公园管理中心"}];
-let openCard=null, openEl=null;
-const closeCard=()=>{ if(openCard){ openCard.classList.remove('on'); openEl&&openEl.classList.remove('open'); openCard=null; openEl=null; } };
+let openCard=null, openEl=null, cardTrigger=null;
+const mapControls=[];
+const mobileNav=document.createElement('nav');
+mobileNav.className='mobile-nav'; mobileNav.setAttribute('aria-label','北段导览');
+mobileNav.innerHTML='<h2>北段 · 纸雕地图</h2><p>地图为艺术示意。选择地名阅读介绍，或与三位人物对话。</p><div class="places"></div><h2>听一段往事</h2><div class="people"></div>';
+document.getElementById('book').appendChild(mobileNav);
+let dialogueTrigger=null, endingTimer=null;
+const returnLink=document.querySelector('[data-return]');
+if(window.parent!==window)returnLink.hidden=true;
+returnLink.addEventListener('click',event=>{
+  if(window.parent!==window){event.preventDefault();window.parent.postMessage({type:'axis:return'},window.location.origin);}
+});
+let soundMuted=false;
+document.getElementById('soundToggle').addEventListener('click',()=>{
+  soundMuted=!soundMuted;
+  const video=document.querySelector('video');if(video)video.muted=soundMuted;
+  Object.values(SFX).forEach(s=>s.pool.forEach(a=>a.muted=soundMuted));
+  BGM.mute(soundMuted);
+  const button=document.getElementById('soundToggle');
+  button.setAttribute('aria-pressed',String(soundMuted));button.textContent=soundMuted?'声音：关':'声音：开';
+});
+const closeCard=()=>{ if(openCard){ openCard.classList.remove('on'); openCard.inert=true; openEl&&openEl.classList.remove('open'); openEl&&openEl.setAttribute('aria-expanded','false'); openCard=null; openEl=null; } };
 PLACES.forEach(o=>{
   const d=document.createElement('div');
   d.className='place'; d.textContent=o.t;
   d.style.left=o.x; d.style.top=o.y; d.style.setProperty('--r',o.r);
 
   const card=document.createElement('div');
-  card.className='pcard';
-  card.innerHTML=`<h4>${o.t}</h4><dl>${o.rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>${o.tail?`<p class="tail">${o.tail}</p>`:''}<small>${o.src}</small>`;
+  card.className='pcard'; card.inert=true; card.setAttribute('role','region'); card.setAttribute('aria-label',o.t+'介绍');
+  card.innerHTML=`<button class="card-close" type="button" aria-label="关闭${o.t}介绍">关闭</button><h4>${o.t}</h4><dl>${o.rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>${o.tail?`<p class="tail">${o.tail}</p>`:''}<small>${o.src}</small>`;
   card.style.left=`calc(${o.x} + 5.4cqw)`;
   card.style.top=o.y;
   const oy=parseFloat(o.y);
@@ -598,16 +689,19 @@ PLACES.forEach(o=>{
   else if(oy<20) card.style.setProperty('--cy','0%');
   else if(oy>78) card.style.setProperty('--cy','-100%');
 
-  d.setAttribute('role','button'); d.tabIndex=0; d.setAttribute('aria-label',`${o.t}，点开介绍`);
-  const toggleCard=()=>{ sfx('paper');
+  d.setAttribute('role','button'); d.tabIndex=0; d.setAttribute('aria-expanded','false'); d.setAttribute('aria-label',`${o.t}，点开介绍`);
+  const toggleCard=()=>{ sfx('paper');cardTrigger=document.activeElement;
     if(openCard===card){ closeCard(); return; }
-    closeCard(); card.classList.add('on'); d.classList.add('open'); openCard=card; openEl=d; };
+    closeCard(); card.inert=false; card.classList.add('on'); d.classList.add('open'); d.setAttribute('aria-expanded','true'); openCard=card; openEl=d; };
   d.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleCard(); } });
-  d.addEventListener('click',e=>{
-    e.stopPropagation(); sfx('paper');
-    if(openCard===card){ closeCard(); return; }
-    closeCard(); card.classList.add('on'); d.classList.add('open'); openCard=card; openEl=d;
-  });
+  d.addEventListener('click',e=>{e.stopPropagation();toggleCard();});
+  card.addEventListener('click',e=>e.stopPropagation());
+  card.querySelector('.card-close').addEventListener('click',()=>{const target=cardTrigger;closeCard();target?.focus();});
+  const mobileButton=document.createElement('button');
+  mobileButton.type='button';mobileButton.textContent=o.t;
+  mobileButton.addEventListener('click',e=>{e.stopPropagation();toggleCard();card.querySelector('button').focus();});
+  mobileNav.querySelector('.places').appendChild(mobileButton);
+  mapControls.push(d);
   stage.appendChild(d); stage.appendChild(card);
 });
 document.addEventListener('click',()=>closeCard());
@@ -641,6 +735,12 @@ Object.entries(NPCS).forEach(([id,n])=>{
   el.addEventListener('click',()=>{ sfx('paper'); open(id); });
   el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); sfx('paper'); open(id); } });
   stage.appendChild(el);
+  const mobileButton=document.createElement('button');
+  mobileButton.type='button';mobileButton.dataset.npc=id;mobileButton.textContent=n.name;
+  mobileButton.setAttribute('aria-pressed','false');
+  mobileButton.addEventListener('click',()=>{sfx('paper');open(id);});
+  mobileNav.querySelector('.people').appendChild(mobileButton);
+  mapControls.push(el);
 });
 
 
@@ -655,7 +755,7 @@ window.__sfx={paper:0,page:0};
 function sfx(k){
   const s=SFX[k]; if(!s) return;
   window.__sfx[k]=(window.__sfx[k]||0)+1;
-  const a=s.pool[s.i=(s.i+1)%s.pool.length];
+  const a=s.pool[s.i=(s.i+1)%s.pool.length]; a.muted=soundMuted;
   try{ a.currentTime=0; const pr=a.play(); if(pr&&pr.catch) pr.catch(()=>{}); }catch(e){}
 }
 
@@ -670,7 +770,7 @@ const BGM=(()=>{
     const p=a.play(); if(p&&p.catch) p.catch(()=>{ started=false; });
     if(tk) clearInterval(tk); tk=setInterval(ramp,60); }
   function set(v){ target=v; if(!started&&v>0) play(); }
-  return {play,set,state:()=>({started,vol:+a.volume.toFixed(3),t:+a.currentTime.toFixed(2),paused:a.paused})};
+  return {play,set,mute:value=>{a.muted=value;},state:()=>({started,vol:+a.volume.toFixed(3),t:+a.currentTime.toFixed(2),paused:a.paused})};
 })();
 window.__bgm=BGM;
 
@@ -697,11 +797,15 @@ function go(i){
 
 function open(id){
   BGM.set(0.20);
+  clearTimeout(endingTimer);closeCard();dialogueTrigger=document.activeElement;
+  stage.inert=true;mobileNav.inert=true;
   cur=id; idx=0; finished=false;
   if(SEEN.delete(id)){                              // 重新点开＝回到未读
     saveSeen();
     document.querySelector(`.marker[data-npc="${id}"]`)?.classList.remove('done');
   }
+  const mobileButton=mobileNav.querySelector(`[data-npc="${id}"]`);
+  mobileButton.setAttribute('aria-pressed','false');
   const n=NPCS[id];
   plate.innerHTML=`<i></i><b>${n.name}</b><small>${n.year}</small>`;
   plate.style.setProperty('--plate',`url("${ART[id].plate}")`);
@@ -716,11 +820,13 @@ function open(id){
   dlg.classList.add('on');
   setTimeout(()=>leaf.classList.remove('run'),760);
   typeLine(n.lines[0], n.notes && n.notes[0]);
-  idx=0; updatePg();
+  idx=0; updatePg();backBtn.focus();
 }
 
 function typeLine(str,note){
   clearInterval(timer);
+  noteEl.classList.remove('on'); noteEl.textContent='';
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){typing=false;textEl.textContent=str;if(note)showNote(note);updatePg();return;}
   typing=true;
   textEl.textContent='';
   noteEl.classList.remove('on'); noteEl.textContent='';
@@ -769,10 +875,13 @@ function finish(){
   stamp.classList.add('on');
   nextSign.textContent='点任意处返回';
   nextSign.classList.add('done');
-  if(SEEN.size===3) setTimeout(()=>{ ending.classList.add('on'); },900);
+  mobileNav.querySelector(`[data-npc="${cur}"]`).setAttribute('aria-pressed','true');
+  if(SEEN.size===3) endingTimer=setTimeout(()=>{ ending.classList.add('on');dlg.inert=true;document.getElementById('endClose').focus(); },900);
 }
 
 function close(){
+  clearInterval(timer);typing=false;clearTimeout(endingTimer);
+  stage.inert=false;mobileNav.inert=false;dlg.inert=false;
   BGM.set(0.50);
   dlg.classList.remove('on');
   stamp.classList.remove('on');
@@ -780,9 +889,11 @@ function close(){
   nextSign.classList.remove('done');
   finished=false;
   cur=null;
+  if(dialogueTrigger?.isConnected)dialogueTrigger.focus();
 }
 
-dlg.addEventListener('click',e=>{ if(!e.target.closest('#back')&&!e.target.closest('.pgbtn')){ sfx('page'); advance(); } });
+dlg.addEventListener('click',e=>{ if(!e.target.closest('#back')&&!e.target.closest('.pgbtn')&&!e.target.closest('#nextSign')){ sfx('page'); advance(); } });
+nextSign.addEventListener('click',e=>{e.stopPropagation();sfx('page');advance();});
 btnPrev.addEventListener('click',e=>{ e.stopPropagation(); if(btnPrev.disabled) return; sfx('page'); go(idx-1); });
 backBtn.addEventListener('click',e=>{ e.stopPropagation(); sfx('paper'); close(); });
 document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); ending.classList.remove('on'); close(); });
@@ -792,32 +903,37 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
   const book=document.getElementById('book'), intro=document.getElementById('intro'), v=document.getElementById('introV');
   const tap=document.getElementById('introTap');
   if(!intro||!v) return;
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ intro.remove(); book.classList.remove('intro'); return; }
-  if(location.hash) { intro.remove();
+  const skip=document.getElementById('introSkip');
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ intro.remove(); skip.hidden=true;book.classList.remove('intro'); return; }
+  if(location.hash) { intro.remove();skip.hidden=true;
     addEventListener('pointerdown', ()=>BGM.set(0.50), {once:true});   // 深链进地图：首次点击起乐
     return; }                                          // 自检与深链直接进地图
-  book.classList.add('intro');
+  book.classList.add('intro');stage.inert=true;mobileNav.inert=true;
   document.querySelectorAll('.place').forEach((el,i)=>el.style.transitionDelay=(0.04*i)+'s');
   document.querySelectorAll('.marker').forEach((el,i)=>el.style.transitionDelay=(0.10+0.07*i)+'s');
   let done=false, started=false;
   function finish(){
     if(done) return; done=true;
-    intro.classList.add('off');
+    intro.classList.add('off');v.pause();skip.hidden=true;stage.inert=false;mobileNav.inert=false;
     book.classList.remove('intro');
-    BGM.set(0.50);                                   // 开场结束，配乐接手
+    BGM.set(0.50);
+    if(intro.contains(document.activeElement)||document.activeElement===skip){
+      (returnLink.hidden?document.getElementById('soundToggle'):returnLink).focus();
+    }
     setTimeout(()=>intro.remove(), 620);
   }
   function start(sound){
-    if(started) return; started=true;
+    if(done||started) return; started=true;
     tap&&tap.classList.add('off');
-    v.muted=!sound; v.volume=0.9;
+    v.muted=!sound||soundMuted; v.volume=0.9;
     v.currentTime=0;
     const p=v.play(); if(p&&p.catch) p.catch(()=>{ v.muted=true; v.play().catch(()=>{}); });
   }
   v.addEventListener('ended', finish);
   v.addEventListener('error', finish);
   intro.addEventListener('click', ()=>start(true));
-  addEventListener('keydown', ()=>{ if(!started) start(true); }, {once:true});
+  skip.addEventListener('click',finish);
+  document.getElementById('introTap').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();start(true);}});
   setTimeout(()=>{ if(!started) start(false); }, 8000);   // 演示时没人点，也照样播
   addEventListener('pointerdown', ()=>{                   // 静音兜底那轮浏览器不让起乐，补一次
     if(done && !BGM.state().started) BGM.set(0.50);
@@ -864,8 +980,19 @@ if(location.hash){
 }
 
 window.addEventListener('keydown',e=>{
-  if(e.key==='Escape') close();
-  if(e.key===' '&&cur){ e.preventDefault(); advance(); }
+  if(e.key==='Escape'){
+    if(ending.classList.contains('on')){ending.classList.remove('on');close();}
+    else if(cur)close();
+    else if(openCard){const target=cardTrigger;closeCard();target?.focus();}
+  }
+  if(e.key===' '&&cur&&!e.target.closest('button,a')){ e.preventDefault(); advance(); }
+  const modal=ending.classList.contains('on')?ending:cur?dlg:null;
+  if(e.key==='Tab'&&modal){
+    const controls=[...modal.querySelectorAll('button:not(:disabled),a[href]')].filter(el=>el.getClientRects().length);
+    const first=controls[0],last=controls.at(-1);
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  }
 });
 </script>
 </body>

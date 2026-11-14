@@ -826,6 +826,16 @@
 - 支持的结论：鼓楼46.7米、三重檐、五间三进深及券洞；钟楼47.9米、砖石主体和双檐歇山。
 - 限制与待补：模型台基、楼梯、铃钟和构件比例仍有概化。
 - 本地记录：本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="tower-city"></a>
 
@@ -840,6 +850,16 @@
 - 支持的结论：两楼功能、区位与外观背景。
 - 限制与待补：具体模型细部优先对应文物资料及照片。
 - 本地记录：本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="bridge-heritage"></a>
 
@@ -856,6 +876,16 @@
 - 本地记录：docs/research/wanning-guardians-review-2026-11-14.md；提取正文的关键结论及冲突记录，非原始网页完整归档。
 - 核验题名：万宁桥。
 - 原记录核验日期：2026-11-14。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="bridge-city"></a>
 
@@ -872,6 +902,16 @@
 - 本地记录：docs/research/wanning-guardians-review-2026-11-14.md；提取正文的关键结论及冲突记录，非原始网页完整归档。
 - 核验题名：万宁桥。
 - 原记录核验日期：2026-11-14。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="temple-mound"></a>
 
@@ -1207,6 +1247,16 @@
 - 限制与待补：页面图片为夜间远景，不能支持斗拱、窗棂和逐层标高；未复制图片。图片版权标识为北京市公园管理中心，作者与授权许可未列出，待核。。
 - 本地记录：evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭。
 - 发布日期：2019-12-11。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="jing-jifang-park"></a>
 
@@ -1223,6 +1273,16 @@
 - 限制与待补：建筑面积不是屋檐平面包络；未据此倒推檐深和逐构件尺寸。页面未提供可用于精细建模的逐图授权信息。。
 - 本地记录：evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭。
 - 发布日期：2019-02-20。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="jing-zhoushang-park"></a>
 
@@ -1239,6 +1299,16 @@
 - 限制与待补：页面不提供圆亭檐口直径和立面测绘图；建筑面积不作屋顶直径；未复制图片。。
 - 本地记录：evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭。
 - 发布日期：2019-02-20。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="jing-dpm-p38"></a>
 
@@ -1255,6 +1325,16 @@
 - 限制与待补：所获为独立单页，全文题名、作者、出版年份及图六至图八尚未核得，须补证；正文的斗拱出跳仅作参考，模型用简化叠块而非完整营造法式复原；原文形制年代不是当前实测认证。。
 - 本地记录：evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭。
 - 页码：下载文件第1页，即印刷页38；全文其他页面未取得。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="temple-guide-map"></a>
 
@@ -1303,6 +1383,16 @@
 - 支持的结论：前山、西侧、后山及东侧主路与五亭之间的游览联系；绮望楼前设宽敞月台。。
 - 限制与待补：不是测绘或最新开放公告；不据此指定折点、路宽、阶数及院落边界。文中周赏亭约11.3米与既有管理方11.75米记录不同，本轮不改高度，仍采用JING-ZHOUSHANG-PARK；不复用旧交通、餐饮及开放信息。。
 - 本地记录：[专题记录](tiantan-ground-review-2026-11-14.md)。
+**northChapterUse**
+
+```json
+{
+  "recordedOn": "2026-11-14",
+  "evidenceRecord": "docs/research/north-chapter-2026-11-14.md",
+  "limits": "仅记录北段章节沿用本来源的对应背景；本轮未在线重核，不能据此证明创作角色、逐句第一人称经历或所有小注。"
+}
+```
+
 
 <a id="pal-city-wall"></a>
 

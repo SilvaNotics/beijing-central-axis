@@ -19,7 +19,7 @@ Build a Chinese-language Beijing Central Axis web atlas with a cinematic Three.j
 
 - Preserve the boundary between the overview shell and teammates’ chapter projects. The default contract is an iframe URL; React, Vue, and vanilla chapter builds are all acceptable.
 - Chapter entries live in `src/data/heritage.ts`. Preserve IDs and URL contracts when replacing content. See `docs/integration.md`.
-- `public/chapters/north/`, `central/`, and `south/` contain **regional integration examples**, not the final authored chapters. Do not present them as final teammate work.
+- `public/chapters/north/` contains the merged formal paper-cut chapter; `central/` and `south/` remain **regional integration examples**. Do not present those examples as final teammate work.
 - North covers Jingshan, the Bell and Drum Towers, and Wanning Bridge. Central covers the Forbidden City, the Altar of Land and Grain (Shejitan), the Imperial Ancestral Temple (Taimiao), Duanmen Gate, and the Outer Golden Water Bridges. South covers Tiananmen Gate Tower, Tiananmen Square and its architectural ensemble, Zhengyangmen Gate, the Temple of Heaven (Tiantan), the Altar of Agriculture (Xiannongtan), the Southern Section Road Remains of the Central Axis, and Yongdingmen Gate.
 - Use sourced descriptions and keep factual references with the landmark data/research notes. Schematic geometry is an interpretation for navigation; never describe it as an exact surveyed model or historical reconstruction.
 - Bundle fonts and runtime assets locally, or use system fonts. The completed local build must not depend on CDN scripts, remote fonts, or online map tiles. No runtime AI/chat/generation feature is in scope.
