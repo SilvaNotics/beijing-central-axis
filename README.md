@@ -18,10 +18,12 @@ npm run dev
 | `npm run dev` | 启动开发服务器 |
 | `npm run build` | TypeScript 检查并生成 `dist/` |
 | `npm run preview` | 在本地检查生产构建 |
-| `npm test` | 运行单元测试 |
+| `npm test` | 单 worker 串行运行单元测试；主进程与 worker 分别限制 V8 老生代堆为 1024 MiB |
 | `npm run test:e2e` | 运行 Playwright 浏览器检查；需要已配置的浏览器 |
 
 浏览器检查需要本机已有 Playwright 对应浏览器；测试失败时先看错误原因，按团队当前环境配置处理。
+
+单元测试会创建完整的 Three.js 建筑模型。WSL 即使暴露很多 CPU，也可能只有较少内存；不要用 `--maxWorkers`、`--fileParallelism`、`--no-isolate` 或 `VITEST_MAX_WORKERS` 覆盖仓库的串行与隔离配置。每个测试文件使用独立子进程，结束后释放模型及原生几何缓冲区。堆限制不等于整个进程的内存上限。2026-11-14 的 OOM 证据、修复边界和本轮未执行测试的说明见 [测试资源排错记录](docs/testing-resources.md)。
 
 ## 浏览方式
 

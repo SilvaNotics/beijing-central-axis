@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "vitest run",
+    "test": "node --max-old-space-size=1024 ./node_modules/vitest/vitest.mjs run",
     "test:e2e": "npm run build && playwright test"
   },
   "dependencies": {
