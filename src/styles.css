@@ -57,4 +57,10 @@ button:hover,a:hover{color:#ffe0a1}button:focus-visible,a:focus-visible,[tabinde
 .civic-plan .civic-column{fill:#f1e1bc;stroke:none}
 .civic-plan .civic-steps{fill:#d1c4a5;stroke:#7c8073;stroke-width:.08;stroke-dasharray:none}
 .civic-plan .civic-plaza{fill:#a9a591;stroke:#d4c8aa;stroke-width:.2;stroke-dasharray:none}
+.civic-plan .civic-planting{fill:#4e664a;stroke:#929061;stroke-width:.22;stroke-dasharray:none}
 .civic-plan .civic-joint{fill:#8c8b7b;stroke:none}
+
+.mapped-plan[data-plan-site="xiannongtan"] .plan-roofs{fill:#637c65;stroke:#aec1a1}
+.mapped-plan[data-plan-site="bell-drum"] .plan-roofs{fill:#71766d;stroke:#bbc3ac}
+.mapped-plan[data-plan-site="wanning"] .plan-roofs{fill:#bcb4a0;stroke:#eee1ba}
+.civic-plan .civic-rail{fill:#d0c19f;stroke:none}

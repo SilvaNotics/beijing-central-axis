@@ -61,3 +61,13 @@ describe('palace side elevation',()=>{
     }
   });
 });
+
+for(const id of [42681366,42681367,42681368])it(`details tiny palace hut ${id} with windows and eave undersides`,()=>{
+  const hut=namedHall(id);expect(hut).toBeDefined();
+  for(const side of ['south','north','east','west']) {
+    const windows=hut.getObjectByName(`timber-windows-${side}`);
+    expect(windows,side).toBeDefined();
+    expect(windows!.children.length).toBeGreaterThan(2);
+  }
+  expect(hut.getObjectByName('timber-eave-underside')).toBeDefined();
+});

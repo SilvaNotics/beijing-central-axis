@@ -1,0 +1,82 @@
+{
+  "checkedOn": "2026-11-14",
+  "method": "复核仓库文件字节数、SHA-256和公开数据计数。本轮仅新增故宫barrier围墙历史时点查询；既有建筑、环境、湖泊及高德快照保持不变。",
+  "files": [
+    {
+      "path": "public/data/buildings.json",
+      "bytes": 2729656,
+      "sha256": "f0fcf33afdd94c804e4cb8c95d981cdf31d2eb13784143cc5e88ad6d5b291a8b"
+    },
+    {
+      "path": "public/data/context.geojson",
+      "bytes": 856300,
+      "sha256": "0e0a0033b49f333905d054354cc8c50955f63f86dbe45c8b97174916470f463f"
+    },
+    {
+      "path": "docs/research/osm-buildings.raw.json.gz",
+      "bytes": 898361,
+      "sha256": "6628d76b082ef962e64ffe5609411fcdacb437346eba16358bc9cb56f612c54c"
+    },
+    {
+      "path": "docs/research/osm-context.raw.json.gz",
+      "bytes": 171886,
+      "sha256": "71db65e1d3a026bb433a82cb87b5929f08cdddfe08cfac130d3cd432dafab655"
+    },
+    {
+      "path": "docs/research/osm-lakes.raw.json.gz",
+      "bytes": 15544,
+      "sha256": "2cd51bbf18bf4457d6c7de9b20e7ad7ac80ae0c03321b06135eb43374198c3ce"
+    },
+    {
+      "path": "docs/research/amap-points.json",
+      "bytes": 24098,
+      "sha256": "a578c5b453b51d5ea7f0aa63bb4c587ea43e120885ac9e4303eb8586c5a711db"
+    },
+    {
+      "path": "docs/research/amap-alignment-check.json",
+      "bytes": 1110,
+      "sha256": "b8c1b816a8a7042d7b63ab4f4f30ac81b6f03c2efccc25ce05854496fdbe68f9"
+    },
+    {
+      "path": "src/data/palace-walls.json",
+      "bytes": 30534,
+      "sha256": "0adb31970e0dad46c528de5985702c04bab0e4e022e47d0d48d3d1a8bd45fcee"
+    },
+    {
+      "path": "docs/research/osm-palace-walls.raw.json.gz",
+      "bytes": 10540,
+      "sha256": "838fc268eb97404cb1dedfeffea53369a89d5f7f4f6ee1008c0ca5764d2e5904"
+    },
+    {
+      "path": "docs/research/osm-palace-walls.overpass",
+      "bytes": 212,
+      "sha256": "de1a8c10723aba3961ead00cd87a68d00b8cb248a81c284dacfc7a2b95578033"
+    }
+  ],
+  "counts": {
+    "buildings": 12661,
+    "buildingsWithPositiveHeight": 532,
+    "buildingsWithPositiveLevels": 2563,
+    "buildingsWithRoofShape": 746,
+    "contextFeatures": 1641,
+    "roads": 1464,
+    "parks": 129,
+    "waterFeatures": 48,
+    "amapAlignmentPoints": 7,
+    "palaceWallWays": 189,
+    "palaceWallSourceSegments": 647,
+    "palaceWallEntranceNodes": 3
+  },
+  "palaceWallAcquisition": {
+    "acquiredOn": "2026-11-14",
+    "coordinateSystem": "WGS84",
+    "requestedSnapshot": "2026-11-13T07:08:00Z",
+    "responseServerBase": "2026-11-13T17:44:25Z",
+    "dateNote": "请求的历史时点与响应元数据中服务器更新基准不是同一时间字段，均原样记录。",
+    "queryFile": "docs/research/osm-palace-walls.overpass",
+    "rawFile": "docs/research/osm-palace-walls.raw.json.gz",
+    "runtimeFile": "src/data/palace-walls.json",
+    "license": "ODbL 1.0; © OpenStreetMap contributors",
+    "filtering": "保留189条原始开放way和3个入口节点；运行时按故宫边界裁切，与已渲染建筑/院墙去重，并在入口处留空。"
+  }
+}

@@ -4,6 +4,7 @@ import { project } from './geo';
 import type { CityData } from './geodata';
 import { createCityPlan } from './cityPlan';
 import { createForest } from './forest';
+import { zhengyangLayout } from './zhengyangLayout';
 import { southernRoadPath } from './southernRoad';
 import { bake, createLandmark } from './architecture';
 import type { Materials } from './materials';
@@ -86,7 +87,7 @@ export function createCity(m: Materials, data: CityData, sample = false): City {
     pick.position.set(x, 3, z); pick.userData.id = site.id; pickers.push(pick); object.add(pick);
   }
   // The route and every physical layer use the same geographic projection.
-  const centerline = [...landmarks.filter(site => !lateralSites.has(site.id) && !['square','southern-road'].includes(site.id)).map(site => project(site.coords)), ...southernRoadPath()].sort((a, b) => a[1] - b[1]);
+  const centerline = [...landmarks.filter(site => !lateralSites.has(site.id) && !['square','southern-road','zhengyang'].includes(site.id)).map(site => project(site.coords)), ...Object.values(zhengyangLayout(landmarks.find(s=>s.id==='zhengyang')!,data)).map(p=>{const [x,z]=project(landmarks.find(s=>s.id==='zhengyang')!.coords);return [x+p.x,z+p.z] as [number,number];}), ...southernRoadPath()].sort((a, b) => a[1] - b[1]);
   authored.add(path(centerline, .38, m.brass, .01));
 
   object.add(bake(authored),createForest(data,m));

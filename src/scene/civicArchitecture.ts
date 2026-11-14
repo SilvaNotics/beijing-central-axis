@@ -1,12 +1,50 @@
 import * as THREE from 'three';
 import type { Materials } from './materials';
-import { civicLayouts, civicColumnPositions, type CivicKind } from './civicLayout';
+import { civicLayouts, civicColumnPositions, flagCourt, type CivicKind } from './civicLayout';
 
 function box(g:THREE.Group,m:THREE.Material,x:number,y:number,z:number,w:number,h:number,d:number,name?:string) {
   const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);if(name)mesh.name=name;g.add(mesh);return mesh;
 }
 function cylinder(g:THREE.Group,m:THREE.Material,x:number,y:number,z:number,r:number,h:number) {
   const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,24),m);mesh.position.set(x,y,z);g.add(mesh);return mesh;
+}
+
+/** White inner balustrade and bronze perimeter, with aligned east/west entrances. */
+export function createFlagCourt(m:Materials,x:number,z:number) {
+  const g=new THREE.Group();g.name='国旗台';g.position.set(x,0,z);
+  box(g,m.park,0,.106,0,flagCourt.lawn,.025,flagCourt.lawn);
+  box(g,m.vermilion,0,.125,0,flagCourt.granite,.025,flagCourt.granite);
+  box(g,m.marble,0,.1475,0,flagCourt.platform,.045,flagCourt.platform);
+  for(const sign of [-1,1])box(g,m.stone,sign*.66,.127,0,.72,.025,flagCourt.entrance);
+  const white=new THREE.Group();white.name='flag-inner-balustrade';g.add(white);
+  const bronze=new THREE.Group();bronze.name='flag-outer-barrier';g.add(bronze);
+  for(const [host,size,material,bottom,height,count] of [[white,flagCourt.innerRail,m.marble,.15,.08,6],[bronze,flagCourt.outerRail,m.brass,.10,.10,14]] as const) {
+    for(let side=0;side<4;side++) {
+      const edge=new THREE.Group();edge.rotation.y=side*Math.PI/2;host.add(edge);
+      const entry=side%2===1;
+      const rail=(left:number,right:number)=>{
+        for(const yy of [.40,.90])box(edge,material,(left+right)/2,bottom+height*yy,size/2,right-left,.008,.012);
+      };
+      if(entry){rail(-size/2,-flagCourt.entrance/2);rail(flagCourt.entrance/2,size/2);}else rail(-size/2,size/2);
+      for(let i=0;i<count;i++) {
+        const u=-size/2+(i+.5)*size/count;
+        if(entry&&Math.abs(u)<flagCourt.entrance/2)continue;
+        const post=box(edge,material,u,bottom+height/2,size/2,.016,height,.016);post.name=host===bronze?'flag-bronze-post':'flag-stone-post';
+        cylinder(edge,material,u,bottom+height+.007,size/2,.012,.014);
+      }
+        if(entry)for(const u of [-flagCourt.entrance/2,flagCourt.entrance/2]){const post=box(edge,material,u,bottom+height/2,size/2,.020,height+.014,.020);post.name=host===bronze?'flag-bronze-post':'flag-stone-post';}
+    }
+  }
+  const pole=cylinder(g,m.stone,0,.17+flagCourt.poleHeight/2,0,.018,flagCourt.poleHeight);pole.name='flagpole';
+  const clothGeometry=new THREE.PlaneGeometry(.5,.33,16,8),p=clothGeometry.getAttribute('position');
+  for(let i=0;i<p.count;i++)p.setZ(i,.020*Math.sin((p.getX(i)+.25)*19)*((p.getX(i)+.25)/.5));clothGeometry.computeVertexNormals();
+  const cloth=new THREE.Mesh(clothGeometry,m.flagRed);cloth.position.set(.27,3.00,0);g.add(cloth);
+  const star=(x:number,y:number,r:number,turn=0)=>{
+    const points=Array.from({length:10},(_,i)=>{const a=Math.PI/2+i*Math.PI/5+turn,rr=i%2?r*.39:r;return new THREE.Vector2(x+Math.cos(a)*rr,y+Math.sin(a)*rr);});
+    const mesh=new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape(points)),m.goldLeaf);mesh.position.set(.27,3.00,.024);g.add(mesh);
+  };
+  star(-.15,.075,.034);for(const [xx,yy] of [[-.095,.13],[-.060,.09],[-.060,.04],[-.095,0]])star(xx,yy,.012,-.6);
+  return g;
 }
 function cornice(g:THREE.Group,m:Materials,x:number,z:number,w:number,d:number,y:number) {
   box(g,m.civicStone,x,y,z,w+.16,.12,d+.16);

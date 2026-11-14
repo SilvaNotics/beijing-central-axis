@@ -2,6 +2,8 @@ import type { CityData } from './geodata';
 import { localBuildingRing } from './geodata';
 import { pointInPolygon, project } from './geo';
 import { landmarks } from '../data/heritage';
+import { zhengyangPlatformRing } from './zhengyangLayout';
+import { palaceTerraces } from './palaceMassing';
 
 export const planBounds = { width: 640, depth: 1090, centerX: 45, centerZ: 3 };
 
@@ -34,12 +36,12 @@ export function createCityPlan(data: CityData, resolution = 2048, architecturalP
     holes: (feature.holes ?? []).map(ring => ring.map(project)),
   }));
   for (const building of data.buildings) {
-    const ring = localBuildingRing(building);
+    const ring = building.id===25109960?zhengyangPlatformRing(landmarks.find(s=>s.id==='zhengyang')!,data):localBuildingRing(building);
     const [x, z] = ring[0];
     const center: [number, number] = ring.slice(0,-1).reduce((sum, point) => [sum[0]+point[0],sum[1]+point[1]],[0,0]).map(value => value / Math.max(1,ring.length-1)) as [number, number];
     if (!architecturalPlan && protectedAreas.some(area => pointInPolygon(center,area.ring) && !area.holes.some(hole => pointInPolygon(center,hole)))) continue;
     const heritage = cores.some(c => Math.abs(x - c.p[0]) < c.w && Math.abs(z - c.p[1]) < c.d);
-    trace([ring]); ctx.fillStyle = heritage ? '#a28b68' : '#71766f'; ctx.fill();
+    trace([ring]); ctx.fillStyle = palaceTerraces.has(building.id)?'#c9bca4':heritage ? '#a28b68' : '#71766f'; ctx.fill();
     ctx.lineWidth = .055; ctx.strokeStyle = heritage ? '#6e5340' : '#505b58'; ctx.stroke();
   }
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';

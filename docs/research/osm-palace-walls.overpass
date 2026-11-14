@@ -1,0 +1,1 @@
+[out:json][timeout:60][date:"2026-11-13T07:08:00Z"];way["barrier"~"^(wall|city_wall)$"](39.912,116.386,39.9213,116.3955)->.walls;(.walls;node(w.walls)["entrance"];node(w.walls)["barrier"="gate"];);out tags geom;

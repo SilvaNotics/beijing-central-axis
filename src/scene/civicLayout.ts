@@ -1,3 +1,6 @@
+import type { CityData } from './geodata';
+import { squareGround } from './squareGround';
+import { squarePlantingBeds } from './centralGreenery';
 import { project } from './geo';
 import { wgs84ToGcj02 } from './geodata';
 
@@ -43,16 +46,17 @@ export const squareLocations={
   plaza:[116.3914649,39.9023598],monument:[116.3914248,39.903197],
   memorial:[116.391545,39.901114],flag:[116.3913049,39.9055772],
 } satisfies Record<string,[number,number]>;
-export type CivicPlanPart={kind:'roof'|'court'|'column'|'steps'|'plaza'|'joint';ring:[number,number][]};
-export function squarePlanParts():CivicPlanPart[] {
+export const flagCourt={platform:.6,granite:1.04,lawn:2.04,innerRail:.64,outerRail:2.12,entrance:.20,poleHeight:3.0};
+export type CivicPlanPart={kind:'roof'|'court'|'column'|'steps'|'plaza'|'joint'|'rail'|'planting';ring:[number,number][]};
+export function squarePlanParts(data?:CityData):CivicPlanPart[] {
   const parts:CivicPlanPart[]=[];
   const rect=(kind:CivicPlanPart['kind'],origin:[number,number],x:number,z:number,w:number,d:number)=>{
     const [ox,oz]=project(wgs84ToGcj02(origin));
     parts.push({kind,ring:[[-1,-1],[1,-1],[1,1],[-1,1]].map(([u,v])=>[ox+x+u*w/2,oz+z+v*d/2])});
   };
-  rect('plaza',squareLocations.plaza,0,0,50,88);
-  for(let z=-35;z<=35;z+=8)rect('joint',squareLocations.plaza,0,z,44,.045);
-  for(const x of [-20,-15,-10,-5,5,10,15,20])rect('joint',squareLocations.plaza,x,0,.045,84);
+  const ground=squareGround(data);parts.push({kind:'plaza',ring:ground.ring});
+  for(const line of ground.joints)parts.push({kind:'joint',ring:line});
+  for(const ring of squarePlantingBeds(data))parts.push({kind:'planting',ring});
   for(const [w,d] of [[5.06,6.15],[4.05,5.15],[2.55,3],[1.16,.72]])rect('court',squareLocations.monument,0,0,w,d);
   rect('court',squareLocations.memorial,0,0,12.2,10.8);
   rect('roof',squareLocations.memorial,0,0,9.5,7.8);
@@ -60,8 +64,15 @@ export function squarePlanParts():CivicPlanPart[] {
     for(let i=0;i<10;i++)rect('column',squareLocations.memorial,-4.35+i*8.7/9,side*3.65,.26,.26);
     for(let i=1;i<8;i++)rect('column',squareLocations.memorial,side*4.35,-3.65+i*7.3/8,.26,.26);
   }
-  rect('court',squareLocations.flag,0,0,1.2,1.2);
-  rect('column',squareLocations.flag,0,0,.15,.15);
+  rect('court',squareLocations.flag,0,0,flagCourt.lawn,flagCourt.lawn);
+  rect('court',squareLocations.flag,0,0,flagCourt.granite,flagCourt.granite);
+  rect('court',squareLocations.flag,0,0,flagCourt.platform,flagCourt.platform);
+  rect('column',squareLocations.flag,0,0,.045,.045);
+  for(const size of [flagCourt.innerRail,flagCourt.outerRail])for(const side of [-1,1]) {
+    rect('rail',squareLocations.flag,0,side*size/2,size,.02);
+    const run=(size-flagCourt.entrance)/2;
+    for(const end of [-1,1])rect('rail',squareLocations.flag,side*size/2,end*(flagCourt.entrance/2+run/2),.02,run);
+  }
   return parts;
 }
 export function civicPlanParts(layout:CivicLayout):CivicPlanPart[] {

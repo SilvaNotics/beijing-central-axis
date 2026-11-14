@@ -21,11 +21,16 @@ export function templeBoundary(site: Landmark) {
 export const moundCenterWgs: [number,number] = [(116.406345+116.4075687)/2,(39.8755654+39.8755884)/2];
 export function moundCenter(site: Landmark) { return localWgsPoint(moundCenterWgs,site); }
 
+export const moundInnerGates=[727026433,727026437,727026438,727026439];
+// The outer enclosure's east gate is incorrectly called 泰元门 in the bundled
+// source. It is 83 m from the altar; the actual Taiyuanmen is way 43925093.
+export const moundOuterGates=[43922669,43922668,43922697,43922670];
+export const moundStoneGates=new Set([...moundInnerGates,...moundOuterGates]);
 export const tiantanDetailedIds = new Set([
   43921139,43921121, // circular halls
   43921140,43921141,43921137,43921136,43921111,43921133, // prayer compound
   43921117,43921122,43921123,43921120,43922670, // vault compound and approach gates
-  727026433,727026437,727026438,727026439, // open Lingxing stone gates
+  ...moundStoneGates, // inner and outer open Lingxing stone gates
   31099286, // actual bent corridor outline
 ]);
 

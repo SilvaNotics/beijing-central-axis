@@ -6,9 +6,17 @@ import { loadCityData, localBuildingRing, localFootprintLayout } from '../scene/
 import { project } from '../scene/geo';
 import type { Landmark } from '../data/types';
 import { civicLayouts, civicPlanParts, squarePlanParts } from '../scene/civicLayout';
-import { southernRoadPath, roadPlanRings } from '../scene/southernRoad';
+import { southernRoadPath, roadPlanRings, roadPlanDetails } from '../scene/southernRoad';
 import { palaceHallProfiles, zhongheLayout } from '../scene/palaceArchitecture';
+import { palaceTerraces,palaceRaisedBuildings,palaceRoofCore,sharedPalaceTerrace } from '../scene/palaceMassing';
+import { palaceWallRuns } from '../scene/palaceWalls';
 import { roofPlanLines, mappedRoofForm } from '../scene/roofForms';
+import { agricultureCompounds } from '../scene/agricultureLayout';
+import { wanningLayout } from '../scene/wanningLayout';
+import { moundStoneGates, moundCenter } from '../scene/templeLayout';
+import { moundEnclosures } from '../scene/moundEnclosures';
+import { wallRuns } from '../scene/wallRuns';
+import { zhengyangPlatformRing, zhengyangCityRoofs } from '../scene/zhengyangLayout';
 
 interface Props { selection: string | null; focus: RegionId | 'all'; onSelect: (id: string) => void; viewRevision?: number; }
 const WIDTH = 880, HEIGHT = 1040, SCALE = .73;
@@ -30,6 +38,7 @@ function loadPlan() {
     const layers = landmarks.map(site => ({ id: site.id, roofs: '', walls: '', ridges: '' }));
     const roadLayer = layers.find(layer=>layer.id==='southern-road')!;
     for(const ring of roadPlanRings()) roadLayer.roofs += 'M'+ring.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z';
+    for(const line of roadPlanDetails())roadLayer.ridges+='M'+line.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L');
     for (const building of data.buildings) {
       const ring = localBuildingRing(building);
       const center = ring.reduce((sum,p) => [sum[0]+p[0]/ring.length,sum[1]+p[1]/ring.length],[0,0]);
@@ -39,26 +48,91 @@ function loadPlan() {
         const d = Math.max(Math.abs(center[0]-x)/(site.footprint[0]/20),Math.abs(center[1]-z)/(site.footprint[1]/20));
         if (d < distance) { nearest = index; distance = d; }
       });
+      if([25109960,439956436].includes(building.id))nearest=landmarks.findIndex(site=>site.id==='zhengyang');
       if (nearest < 0) continue;
       const layer = layers[nearest];
+      const site=landmarks[nearest], p=palaceRaisedBuildings.has(building.id)?palaceRoofCore(building,site):localFootprintLayout(building,site), [ox,oz]=project(site.coords);
+      const global=([u,v]:[number,number]):[number,number]=>[ox+p.x+u*Math.cos(p.rotation)+v*Math.sin(p.rotation),oz+p.z-u*Math.sin(p.rotation)+v*Math.cos(p.rotation)];
+      const worldPath=(points:[number,number][])=>'M'+points.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L');
+      if(moundStoneGates.has(building.id)) {
+        for(const u of [-.48,-.31,-.16,.16,.31,.48])layer.walls+=worldPath([[-.035,-.045],[.035,-.045],[.035,.045],[-.035,.045]].map(([x,z])=>global([x+u*p.width,z])))+'Z';
+        for(const [a,b] of [[-.48,-.31],[-.16,.16],[.31,.48]])layer.ridges+=worldPath([global([a*p.width,0]),global([b*p.width,0])]);
+        continue;
+      }
+      if(building.id===439956436) {
+        for(const [w,d,z] of [[6.4,2.24,.6],[6.12,1.99,.6],[4.42,1.45,-.96]]) {
+          layer.roofs+=worldPath([[-w/2,z-d/2],[w/2,z-d/2],[w/2,z+d/2],[-w/2,z+d/2]].map(point=>global(point as [number,number])))+'Z';
+          for(const line of roofPlanLines(w,d,'hip-gable'))layer.ridges+=worldPath(line.map(([u,v])=>global([u,v+z])));
+        }
+        continue;
+      }
+      if(building.id===25109960) {
+        layer.walls+=worldPath(zhengyangPlatformRing(site,data))+'Z';
+        for(const [w,d] of zhengyangCityRoofs) {
+          layer.roofs+=worldPath([[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2]].map(point=>global(point as [number,number])))+'Z';
+          for(const line of roofPlanLines(w,d,'hip-gable'))layer.ridges+=worldPath(line.map(global));
+        }
+        continue;
+      }
       const path = 'M'+ring.map(([x,z]) => `${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z';
+      if(palaceTerraces.has(building.id)){layer.walls+=path;continue;}
+      if(palaceRaisedBuildings.has(building.id)) {
+        layer.walls+=path;
+        layer.roofs+=worldPath([[-p.width/2,-p.depth/2],[p.width/2,-p.depth/2],[p.width/2,p.depth/2],[-p.width/2,p.depth/2]].map(point=>global(point as [number,number])))+'Z';
+        for(const line of roofPlanLines(p.width,p.depth,[638590122,638590123].includes(building.id)?'hipped':'hip-gable'))layer.ridges+=worldPath(line.map(global));
+        continue;
+      }
       const wall = building.building === 'wall' || /墙/.test(building.name ?? '');
       if (wall) layer.walls += path;
       else {
         layer.roofs += path;
-        const site=landmarks[nearest], p=localFootprintLayout(building,site), [ox,oz]=project(site.coords);
-        const form=palaceHallProfiles[building.id]?.roof??mappedRoofForm(building.roof);
-        const convert=([u,v]:[number,number])=>[440+(ox+p.x+u*Math.cos(p.rotation)+v*Math.sin(p.rotation)-45)*SCALE,520+(oz+p.z-u*Math.sin(p.rotation)+v*Math.cos(p.rotation)-3)*SCALE];
-        if(p.width>.9&&p.depth>.4)for(const line of roofPlanLines(p.width,p.depth,form))layer.ridges+='M'+line.map(point=>convert(point).join(',')).join('L');
+        const form=palaceHallProfiles[building.id]?.roof??([425993664,267371087].includes(building.id)?'hip-gable':mappedRoofForm(building.roof));
+        const area=Math.abs(ring.reduce((sum,a,i)=>{const b=ring[(i+1)%ring.length];return sum+a[0]*b[1]-b[0]*a[1];},0))/2;
+        const lines=roofPlanLines(p.width,p.depth,form).map(line=>line.map(global));
+        if(area/(p.width*p.depth)<.86) {
+          // Follow each wing rather than drawing a bounding-box ridge through its court.
+          const sign=ring.reduce((sum,a,i)=>{const b=ring[(i+1)%ring.length];return sum+a[0]*b[1]-b[0]*a[1];},0)>0?1:-1;
+          for(let i=0;i<ring.length;i++) {
+            const a=ring[i],b=ring[(i+1)%ring.length],dx=b[0]-a[0],dz=b[1]-a[1],length=Math.hypot(dx,dz);if(length<.1)continue;
+            const offset=Math.min(.16,p.depth*.2)*sign;
+            const shifted:[number,number][]=[a,b].map(([x,z])=>[x-dz/length*offset,z+dx/length*offset]);
+            for(const segment of wallRuns(shifted[0],shifted[1],[ring],true))layer.ridges+=worldPath(segment);
+          }
+        } else if(p.width>.9&&p.depth>.4)for(const line of lines)for(const segment of wallRuns(line[0],line[1],[ring],true))layer.ridges+=worldPath(segment);
       }
     }
+    const temple=landmarks.find(site=>site.id==='tiantan')!,templeLayer=layers.find(layer=>layer.id==='tiantan')!,enclosures=moundEnclosures(data.buildings,temple),[tx,tz]=project(temple.coords);
+    const templePath=(points:[number,number][])=>'M'+points.map(([x,z])=>`${440+(tx+x-45)*SCALE},${520+(tz+z-3)*SCALE}`).join('L');
+    for(const run of [...enclosures.inner,...enclosures.outer])templeLayer.walls+=templePath(run);
+    const [mx,mz]=moundCenter(temple);
+    for(const radius of [2.7455,1.9655,1.1825])templeLayer.ridges+=templePath(Array.from({length:65},(_,i)=>[mx+Math.sin(i/64*Math.PI*2)*radius,mz+Math.cos(i/64*Math.PI*2)*radius]))+'Z';
     const palace=landmarks.find(site=>site.id==='forbidden-city')!,middle=zhongheLayout(palace),[ox,oz]=project(palace.coords);
+    for(const run of palaceWallRuns(palace,data))layers.find(layer=>layer.id===palace.id)!.walls+='M'+[run.a,run.b].map(([x,z])=>`${440+(ox+x-45)*SCALE},${520+(oz+z-3)*SCALE}`).join('L');
+    const deck=sharedPalaceTerrace(palace,data);
+    if(deck.length)layers.find(layer=>layer.id==='forbidden-city')!.walls+='M'+deck.map(([x,z])=>`${440+(x+ox-45)*SCALE},${520+(z+oz-3)*SCALE}`).join('L')+'Z';
     const convert=([u,v]:[number,number])=>[440+(ox+middle.x+u-45)*SCALE,520+(oz+middle.z+v-3)*SCALE];
     const middleRing:[number,number][]=[[-middle.width/2,-middle.depth/2],[middle.width/2,-middle.depth/2],[middle.width/2,middle.depth/2],[-middle.width/2,middle.depth/2]];
     const layer=layers.find(layer=>layer.id==='forbidden-city')!;
     layer.roofs+='M'+middleRing.map(point=>convert(point).join(',')).join('L')+'Z';
     for(const line of roofPlanLines(middle.width,middle.depth,'pyramidal'))layer.ridges+='M'+line.map(point=>convert(point).join(',')).join('L');
-    const civic=[...squarePlanParts().map(part=>({id:'square',...part})),...Object.values(civicLayouts).flatMap(layout=>civicPlanParts(layout).map(part=>({id:layout.id,...part})))].map(part=>({id:part.id,kind:part.kind,path:'M'+part.ring.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z'}));
+    const agriculture=landmarks.find(site=>site.id==='xiannongtan')!,agricultureLayer=layers.find(layer=>layer.id===agriculture.id)!,[ax,az]=project(agriculture.coords);
+    for(const compound of agricultureCompounds(agriculture))for(const part of compound.parts) {
+      const c=Math.cos(part.turn??0),s=Math.sin(part.turn??0);
+      const convert=([u,v]:[number,number])=>[440+(ax+compound.x+part.x+u*c+v*s-45)*SCALE,520+(az+compound.z+part.z-u*s+v*c-3)*SCALE];
+      const round=part.kind==='granary'||part.kind==='well';
+      const sides=part.kind==='granary'?24:part.bays===6?6:4;
+      const ring:[number,number][]=round?Array.from({length:sides},(_,i)=>{const a=i/sides*Math.PI*2;return [Math.cos(a)*part.width/2,Math.sin(a)*part.depth/2];}):[[-part.width/2,-part.depth/2],[part.width/2,-part.depth/2],[part.width/2,part.depth/2],[-part.width/2,part.depth/2]];
+      agricultureLayer.roofs+='M'+ring.map(point=>convert(point).join(',')).join('L')+'Z';
+      const lines=round?ring.map(point=>[point,[0,0]] as [number,number][]):roofPlanLines(part.width,part.depth,part.roof);
+      for(const line of lines)agricultureLayer.ridges+='M'+line.map(point=>convert(point).join(',')).join('L');
+    }
+    const bridgeLayer=layers.find(layer=>layer.id==='wanning')!,bridgeSite=landmarks.find(site=>site.id==='wanning')!,[bx,bz]=project(bridgeSite.coords);
+    const bridge=wanningLayout(bridgeSite),c=Math.cos(bridge.rotation),s=Math.sin(bridge.rotation);
+    const bridgePoint=(x:number,z:number)=>`${440+(bx+bridge.x+x*c+z*s-45)*SCALE},${520+(bz+bridge.z-x*s+z*c-3)*SCALE}`;
+    bridgeLayer.roofs+='M'+[[-.85,-1.73],[.85,-1.73],[.85,1.73],[-.85,1.73]].map(([x,z])=>bridgePoint(x,z)).join('L')+'Z';
+    for(const x of [-.8,.8])bridgeLayer.ridges+=`M${bridgePoint(x,-1.73)}L${bridgePoint(x,1.73)}`;
+    for(let z=-1.5;z<=1.5;z+=.3)bridgeLayer.ridges+=`M${bridgePoint(-.8,z)}L${bridgePoint(.8,z)}`;
+    const civic=[...squarePlanParts(data).map(part=>({id:'square',...part})),...Object.values(civicLayouts).flatMap(layout=>civicPlanParts(layout).map(part=>({id:layout.id,...part})))].map(part=>({id:part.id,kind:part.kind,path:'M'+part.ring.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z'}));
     return { image: createCityPlan(data,2048,true).toDataURL(), layers, civic };
   }).catch(error => {planPromise=undefined;throw error;});
   return planPromise;
