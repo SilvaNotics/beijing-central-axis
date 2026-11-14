@@ -61,6 +61,19 @@ NODE_OPTIONS=--max-old-space-size=1024 npm run build
 
 本地同源构建不依赖在线瓦片、远程字体或 CDN。选择外部 HTTPS 章节时，网络、跨域和嵌入策略由该站点决定，不能再把该外部章节称为离线可用。
 
+### GitHub Pages
+
+站点地址：<https://silvanotics.github.io/beijing-central-axis/>。工作流位于 [`.github/workflows/pages.yml`](../.github/workflows/pages.yml)，使用 GitHub 官方 Pages Actions 发布完整 `dist/`，无需另建 `gh-pages` 分支或配置个人访问令牌。
+
+- 仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**；这是仓库首次启用时的一次性设置。
+- 推送到 `main` 后自动构建并发布；Actions 中的 **Deploy to GitHub Pages → Run workflow** 可对 `main` 手动重发。
+- 面向 `main` 的 pull request 只构建检查，不发布。需要恢复旧版时，在 `main` 撤销对应改动，由新提交触发重新发布。
+- 构建使用 Node.js `24.20.0`、`npm ci`、本地资料校验和 `npm run build`（含 TypeScript 检查）。保留 1024 MiB 构建堆限制；本工作流不运行 Vitest 或 Playwright，绿色部署不代表测试套件通过。
+- 主应用保留 `base: './'` 和 hash 路由；章节目录和素材随构建一起发布。可直接访问 `#/sample`、`#/chapter/north`、`#/chapter/central`、`#/chapter/south`，独立章节仍位于 `chapters/{regionId}/index.html`。
+- Action 版本固定到提交 SHA；工作流只授予读取源码的权限，发布 job 单独取得 `pages: write` 和 `id-token: write`。
+
+验证时检查实际站点下的首页、字体与地理数据、三个章节 iframe、独立打开和返回链接；GitHub Actions 成功只证明上传与发布完成。中段和南段仍为接入示例，托管不会改变其交付状态。
+
 ## 验证与交付
 
 改动完成后记录版本、构建输出和实际检查范围。运行时画面、键盘、窄屏、iframe 返回需要浏览器验证；编译成功不能替代这些检查。本轮实际状态见 [进度与验证](progress.md)。

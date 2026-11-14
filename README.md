@@ -2,6 +2,8 @@
 
 以北京中轴线为线索的中文交互式城市图志。项目把遗产点介绍、建筑模型、道路与水系组织在同一张地图中，以午后至黄昏的暖色光线呈现从钟鼓楼到永定门的空间序列。
 
+在线访问：[京华一线 · GitHub Pages](https://silvanotics.github.io/beijing-central-axis/)。主分支更新后由 GitHub Actions 自动构建发布，配置与操作见 [部署说明](docs/development.md#github-pages)。
+
 ## 项目内容
 
 - **城市总览**：Three.js 三维图景与可切换的二维地图，支持平移、缩放、方向调整、分区聚焦和遗产点选取。
