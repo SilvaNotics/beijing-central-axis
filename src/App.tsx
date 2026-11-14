@@ -19,7 +19,7 @@ export default function App() {
   const [flat, setFlat] = useState(false);
   const [bearing, setBearing] = useState(0);
   const [sceneStatus, setSceneStatus] = useState<'loading' | 'ready' | 'fallback'>('loading');
-  const [quality, setQuality] = useState<'cinematic' | 'balanced'>(() => window.matchMedia('(max-width: 700px)').matches ? 'balanced' : 'cinematic');
+  const [quality, setQuality] = useState<'cinematic' | 'balanced'>('balanced');
   const entryTrigger = useRef<HTMLElement | null>(null);
   const previousRoute = useRef(route);
   const landmark = landmarks.find(site => site.id === selection);

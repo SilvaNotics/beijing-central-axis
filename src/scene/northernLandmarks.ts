@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import type { Landmark } from '../data/types';
 import type { Materials } from './materials';
 import { mappedLayout } from './layouts';
+import { drumTowerDisplayOffset } from './bellDrumLayout';
 import { wanningLayout } from './wanningLayout';
+import { addWanningGuardians } from './wanningGuardians';
 import { roofGeometry, roofGables, roofSection, type RoofForm } from './roofForms';
 import { timberBody, timberEaves } from './timberArchitecture';
 
@@ -64,6 +66,7 @@ export function createBellDrum(site:Landmark,m:Materials) {
   const result=new THREE.Group();
   for(const id of [425993664,267371087]) {
     const p=mappedLayout(id,site),drum=id===267371087,tower=new THREE.Group();tower.name=p.name;tower.userData.osmId=id;tower.position.set(p.x,0,p.z);result.add(tower);
+    if(drum)tower.position.x+=drumTowerDisplayOffset(site);
     const w=p.w,d=p.d,baseHeight=drum?1.58:1.94;
     block(tower,m.darkStone,0,.04,0,w+.16,.08,d+.16);
     const base=masonry(tower,m,w,d,baseHeight,.08,drum);base.name='tower-base';
@@ -97,16 +100,6 @@ export function createBellDrum(site:Landmark,m:Materials) {
   return result;
 }
 
-function guardian(m:Materials) {
-  const g=new THREE.Group();g.name='镇水兽';
-  const round=(x:number,y:number,z:number,sx:number,sy:number,sz:number)=>{
-    const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,10,7),m.civicStone);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);g.add(mesh);
-  };
-  round(0,.07,.015,.095,.065,.17);round(0,.10,-.13,.075,.075,.065);round(0,.075,-.19,.055,.035,.05);
-  for(const side of [-1,1])for(const z of [-.065,.10]){round(side*.09,.035,z,.045,.025,.055);round(side*.045,.16,-.11,.018,.035,.02);}
-  block(g,m.civicStone,0,.015,0,.23,.03,.40);return g;
-}
-
 /** One north–south stone arch crossing an east–west channel. Units are 10 m. */
 export function createWanning(site:Landmark,m:Materials) {
   const result=new THREE.Group(),layout=wanningLayout(site),{length,width}=layout;
@@ -130,9 +123,7 @@ export function createWanning(site:Landmark,m:Materials) {
       const panel=block(result,m.marble,x,yy+.19,(z+next)/2,.045,.24,length/11-.045);panel.rotation.x=-Math.atan2(crown(next)-y,next-z);
       block(result,m.civicStoneDark,x+side*.025,yy+.19,(z+next)/2,.008,.025,length/11*.65);
     }
-    for(const bank of [-1,1]) {
-      const beast=guardian(m);beast.position.set(side*1.08,.17,bank*.56);beast.rotation.y=bank<0?Math.PI:0;result.add(beast);
-    }
   }
+  addWanningGuardians(result,m,width);
   return result;
 }

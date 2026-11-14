@@ -165,6 +165,11 @@
       "localVerifications": [
         {
           "date": "2026-11-14",
+          "scope": "鼓楼way/267371087：读取public/data/buildings.json的9点轮廓与src/data/building-layouts.json的原始中心，核对模型和既有钟鼓楼—万宁桥显示轴线的横向差为0.479421729场景单位。",
+          "status": "仅复核本地数据，未联网刷新；鼓楼向左0.479421729单位为用户要求的显示对齐，不是OSM坐标更正或实测迁移。原始坐标和快照不变。"
+        },
+        {
+          "date": "2026-11-14",
           "scope": "景山公园way 29201967的公开外环与原始osm-context.raw.json.gz逐点一致，context.geojson SHA-256与manifest一致；周边景山东街25093057、西街25081292、前街及后街路径用于地形避让。",
           "status": "只复核本地快照，未重查Overpass线上现状；公园范围不是山体等高线；道路显示宽度由既有等级默认值估计，6m园界退让、4m路缘余量和20m消坡为模型参数。"
         },
@@ -172,6 +177,38 @@
           "date": "2026-11-14",
           "scope": "景山树木穿建筑修正：核对public/data/buildings.json与src/data/building-layouts.json中的寿皇殿26390117、绮望楼26390236及五亭189309373、189309374、26390235、189309372、189309369。",
           "status": "只读取既有本地数据，未联网刷新。地图轮廓不包含程序补出的两侧配房与前殿，也不证明现实逐树位置；补充建筑及屋檐/台阶避让属于模型解释。"
+        },
+        {
+          "verifiedOn": "2026-11-14",
+          "files": [
+            "public/data/buildings.json",
+            "public/data/context.geojson",
+            "src/data/building-layouts.json"
+          ],
+          "supports": "天坛斋宫护河内环及门址、附属院落建筑；景山五亭、寿皇殿、绮望楼与园界。",
+          "limits": "本地旧快照复核；新增天坛步道查询未成功获取数据，路网使用官方导览拓扑加模型折线，不是OSM实测路缘。"
+        },
+        {
+          "date": "2026-11-14",
+          "scope": "天坛北西铺地续修：本地复核public/data/buildings.json中42个附属建筑轮廓、七十二长廊way/31099286和既有公园外环/孔洞。对象清单见tiantan-north-west-review-2026-11-14.md。",
+          "status": "未刷新Overpass；9组北侧和11组西侧包络、接入口、路宽与折点是模型解释。地图不证明未定名建筑用途、实测院界或逐树位置；原坐标和快照不变。"
+        },
+        {
+          "date": "2026-11-14",
+          "scope": "英华殿院墙衔接/走向：读取src/data/palace-walls.json中41657475、42509088、42311505与public/data/buildings.json中156196336的东侧长边；浏览器射线确认用户圈选墙段属于41657475及相邻42509088。",
+          "status": "仅复核既有本地数据，未重新联网；三条墙线的少数节点按相邻院墙方向作小于2.5米的显示校正，南端增加短转折保留建筑连接点；不改源WGS84记录或称为测绘纠错。"
+        },
+        {
+          "date": "2026-11-14",
+          "scope": "故宫东侧房屋接墙穿模：本地复核建筑40544224、40544225、40544226、649255320及围墙42681371、653251437、654664219；复核初次墙帽避让不足，四栋房屋改为外柱接合，墙身路径与墙帽分别检查。",
+          "status": "仅复核GEO-OVERPASS/GEO-OSM既有快照和项目模型，未联网刷新。墙帽高度、横向范围和7.5厘米端部伸出均为现有模型参数；此次检查不支持新的历史事实或实测尺寸。",
+          "record": "palace-collision-review-2026-11-14.md"
+        },
+        {
+          "date": "2026-11-14",
+          "scope": "其他疑似穿模圈选：本地复核新增40544875、40544228、40544234、42681366/67/68外柱接头，及654664225旁654664219与凹形立面重叠；其余圈选保留正常接合。",
+          "status": "未联网刷新或增加来源。既有建筑/院墙支持位置，0.065场景单位避让和柱廊接点是模型解释，不作实测或历史构造结论。",
+          "record": "palace-collision-more-review-2026-11-14.md"
         }
       ],
       "verifiedOn": "2026-11-14",
@@ -187,7 +224,12 @@
           "evidenceRecord": "osm-palace-walls.raw.json.gz；osm-palace-walls.overpass；data-manifest.json；evidence-matrix.md §04",
           "limits": "开放折线不可闭合成建筑面；入口不提供实测宽度，绝大多数围墙不提供高度。现状完整性、实际墙身尺寸和墙顶材质不能由OSM保证。"
         }
-      ]
+      ],
+      "interiorModelReview": {
+        "reviewedOn": "2026-11-14",
+        "record": "palace-interior-review-2026-11-14.md",
+        "status": "本轮渲染纠错沿用已归档建筑及189条独立围墙快照；未更新运行时地图数据。较早临时查询未持久归档，不计作新增数据快照或逐段现状证据。"
+      }
     },
     {
       "id": "IMG-HALL",
@@ -219,27 +261,49 @@
       "id": "IMG-TIANANMEN",
       "title": "天安门外观",
       "titleStyle": "研究用途描述，非逐字转录网页标题",
-      "publisher": "Wikimedia Commons文件页（作者及许可见原页）",
+      "publisher": "Wikimedia Commons",
+      "author": "Jp16103",
       "url": "https://commons.wikimedia.org/wiki/File:Tiananmen_Gate_2019.jpg",
       "kind": "视觉参考照片",
       "recordedOn": "2026-11-13",
-      "reviewStatus": "既有研究记录汇编；本次未重复联网核验",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接打开文件页核对作者、拍摄日期、CC BY-SA 4.0许可和原图地址；原图只在临时目录目视参照，未转载。",
       "supports": "五券门城台、重檐城楼、肖像与标语的位置关系",
       "limits": "仅作观察参照；不得把照片许可自动等同于可自由再分发；本项目未将参考照片作为运行时纹理",
-      "evidenceRecord": "既有研究文件"
+      "evidenceRecord": "既有研究文件",
+      "capturedOn": "2019-09-04",
+      "license": "CC BY-SA 4.0",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Tiananmen_Gate_2019.jpg",
+      "modelUseReview": {
+        "date": "2026-11-14",
+        "status": "文件页元数据已重新联网核验；照片只在临时目录目视对照，未转载。",
+        "scope": "首轮单独延柱造成柱子脱离房身，撤回该实现；后续按用户反馈收拢上层柱墙与屋面。城台16.19米采用TIAN-DPM，不由照片反推层高；照片也不证明柱脚坐标或实际结构。",
+        "record": "docs/research/evidence-matrix.md#09--天安门城楼-tiananmen"
+      }
     },
     {
       "id": "IMG-DUANMEN",
       "title": "端门外观",
       "titleStyle": "研究用途描述，非逐字转录网页标题",
-      "publisher": "Wikimedia Commons文件页（作者及许可见原页）",
+      "publisher": "Wikimedia Commons",
+      "author": "そらみみ",
       "url": "https://commons.wikimedia.org/wiki/File:Duanmen_Gate_of_the_Forbidden_City.jpg",
       "kind": "视觉参考照片",
       "recordedOn": "2026-11-13",
-      "reviewStatus": "既有研究记录汇编；本次未重复联网核验",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接打开文件页核对作者、拍摄日期、CC BY-SA 4.0许可和原图地址；原图只在临时目录目视参照，未转载。",
       "supports": "端门与天安门的体量及立面区别",
       "limits": "仅作观察参照；不得把照片许可自动等同于可自由再分发；本项目未将参考照片作为运行时纹理",
-      "evidenceRecord": "既有研究文件"
+      "evidenceRecord": "既有研究文件",
+      "capturedOn": "2016-08-26",
+      "license": "CC BY-SA 4.0",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/7/78/Duanmen_Gate_of_the_Forbidden_City.jpg",
+      "modelUseReview": {
+        "date": "2026-11-14",
+        "status": "文件页元数据已重新联网核验；照片只在临时目录目视对照，未转载。",
+        "scope": "照片用于确认宽城台与相对窄楼身，不据此反推楼身宽深；楼身尺制采用DUAN-DPM。城台高度、各檐标高及收边构造仍为概览解释。",
+        "record": "docs/research/evidence-matrix.md#07--端门-duanmen"
+      }
     },
     {
       "id": "IMG-PALACE",
@@ -392,9 +456,9 @@
       "url": "https://www.dpm.org.cn/explore/building/236465.html",
       "kind": "博物馆官方建筑资料",
       "recordedOn": "2026-11-13",
-      "reviewStatus": "2026-11-14通过联网正文提取复核官方建筑页；未归档原网页图片或取得转载授权",
-      "supports": "重檐庑殿顶、面阔十一间进深五间、35.05米总高及8.13米台基；殿前丹陛/月台及三层汉白玉基座，与瓦屋面应分开建模",
-      "limits": "官方记载支持的数字与照片推估须分别标明；构件节点、吻兽和彩画未作测绘复原",
+      "reviewStatus": "2026-11-14通过联网正文提取复核官方建筑页；未归档原网页图片或取得转载授权；同日栏杆修正再次直接下载正文核对“周围环以栏杆”；同日平台/灰顶回归修复再次直接下载正文，核对殿前月台、汉白玉基座及环栏；此项为恢复既有解释，不新增形制结论；2026-11-14台阶脱台修正仅本地复核引用边界，未再次联网；踏步进深、连接面及开口避让是模型算法，不是馆方测绘结论",
+      "supports": "重檐庑殿顶、面阔十一间进深五间、35.05米总高及8.13米台基；殿前丹陛/月台及三层汉白玉基座，与瓦屋面应分开建模；三层基座周围环以栏杆，支持补齐露出台沿的栏杆",
+      "limits": "官方记载支持的数字与照片推估须分别标明；构件节点、吻兽和彩画未作测绘复原；不提供栏杆间距及三处台阶开口的实测坐标",
       "evidenceRecord": "docs/research/palace-roof-review-2026-11-14.md",
       "verifiedOn": "2026-11-14"
     },
@@ -420,10 +484,11 @@
       "url": "https://www.dpm.org.cn/explore/building/236464.html",
       "kind": "博物馆官方建筑资料",
       "recordedOn": "2026-11-13",
-      "reviewStatus": "既有研究记录汇编；本次未重复联网核验",
-      "supports": "方形单檐四角攒尖、面积及平面形态参考",
-      "limits": "官方记载支持的数字与照片推估须分别标明；构件节点、吻兽和彩画未作测绘复原",
-      "evidenceRecord": "既有研究文件"
+      "reviewStatus": "2026-11-14直接下载并核对馆方网页正文；原网页图片未归档或转载",
+      "supports": "位于太和殿与保和殿之间；平面正方形、面阔进深各三间、单檐四角攒尖",
+      "limits": "馆方文字不提供本项目局部旋转角或建筑中心坐标；中心对齐与朝向沿用地图几何作模型解释，26.5米方形包络不是测绘成果",
+      "evidenceRecord": "docs/research/palace-roof-review-2026-11-14.md",
+      "verifiedOn": "2026-11-14"
     },
     {
       "id": "PAL-JIAOTAI",
@@ -616,10 +681,12 @@
       "url": "https://wwj.beijing.gov.cn/bjww/362760/362767/2020nwhhzrycr/10812184/10815278/index.html",
       "kind": "文物主管部门建筑资料",
       "recordedOn": "2026-11-13",
-      "reviewStatus": "既有研究记录汇编；本次未重复联网核验",
-      "supports": "长34.6米、宽17米、净跨7.2米、矢高3.5米；镇水兽数量记录",
-      "limits": "镇水兽资料有四/六座不同口径；当前四座模型为选取表现，不宣称逐座现状复原",
-      "evidenceRecord": "本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档"
+      "reviewStatus": "2026-11-14通过Exa网页正文提取核验；直接HTTP请求文物局页面返回403，未归档原始HTML；图片未核验或转载",
+      "supports": "长约34.6米、宽约17米、净跨约7.2米、拱高约3.5米；桥西现存四只（上下各两只）、桥东两只；东北护岸石兽为元代石雕",
+      "limits": "网页日期2020-06-09，不作为2026年逐尊现状调查；与BRIDGE-CITY四边各一只的介绍并列保留。采用其更具体的西四东二数量分布，尺寸、岸座、雕饰及逐尊姿态没有测绘支持",
+      "evidenceRecord": "docs/research/wanning-guardians-review-2026-11-14.md；提取正文的关键结论及冲突记录，非原始网页完整归档",
+      "verifiedTitle": "万宁桥",
+      "verifiedOn": "2026-11-14"
     },
     {
       "id": "BRIDGE-CITY",
@@ -629,10 +696,12 @@
       "url": "https://www.beijing.gov.cn/renwen/rwzyd/qxdw/gdshyqyxc/wnq/202309/t20230920_3263075.html",
       "kind": "政府文化说明",
       "recordedOn": "2026-11-13",
-      "reviewStatus": "既有研究记录汇编；本次未重复联网核验",
-      "supports": "石拱桥、澄清上闸及水陆关系背景",
-      "limits": "桥位必须另与实际道路/河道对应，不能只按POI点",
-      "evidenceRecord": "本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档"
+      "reviewStatus": "2026-11-14通过Exa网页正文提取核验；直接HTTP请求文物局页面返回403，未归档原始HTML；图片未核验或转载",
+      "supports": "元代石桥、澄清上闸及水陆关系；四边各一只的概述；东侧伏岸望水，西侧抓岸、身体一侧挂在岸沿外的姿态描述",
+      "limits": "四只的概述与BRIDGE-HERITAGE明确的西四东二口径不同，未据此删除西侧下层两只；不支持推导逐尊坐标、尺度或完整现状雕刻，作者/图片许可待补",
+      "evidenceRecord": "docs/research/wanning-guardians-review-2026-11-14.md；提取正文的关键结论及冲突记录，非原始网页完整归档",
+      "verifiedTitle": "万宁桥",
+      "verifiedOn": "2026-11-14"
     },
     {
       "id": "TEMPLE-MOUND",
@@ -655,10 +724,42 @@
       "url": "https://gygl.beijing.gov.cn/whgy/whgy_wsgc/201912/t20191206_885349.html",
       "kind": "管理机构修缮资料",
       "recordedOn": "2026-11-13",
-      "reviewStatus": "既有研究记录汇编；本次未重复联网核验",
-      "supports": "坛墙材料、瓦色、损毁与分期修复背景",
-      "limits": "外坛、内坛、圜丘壝墙不是同一种墙，应避免混用",
-      "evidenceRecord": "本轮已有会话研究摘记与场景代码；详见逐地标证据表，原网页/图片未完整归档"
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14通过网页抓取工具读取全文；未取得原始工程图纸。",
+      "supports": "天坛原设两重坛墙；清乾隆十二年以城砖包砌，内外墙联檐通脊并有雕花大脊；外坛墙灰瓦、总长6358.40米，内坛墙绿瓦、总长4115.20米；1995年外坛墙复建采用檐高3.68米、上宽1.29米、下宽2.56米的收分断面。",
+      "limits": "文字混合明代土墙、清代砖墙和现代分期修复信息，不能拼成单一年代的精确复原。外坛现存不完整；文章不提供完整逐段平面、墙帽节点或每座门楼的测绘尺寸。内坛墙、外坛墙与圜丘内外壝墙必须分开表达。",
+      "evidenceRecord": "docs/research/tiantan-wall-review-2026-11-14.md",
+      "localVerifications": [
+        {
+          "checkedOn": "2026-11-14",
+          "scope": "合并前静态几何审查",
+          "result": "修正天坛墙身重复抬高和三角面朝向；沿用既有高度及墙线，未重新联网或取得测绘尺寸。未执行测试或浏览器截图复核。",
+          "record": "tiantan-wall-review-2026-11-14.md#合并前静态几何复核"
+        }
+      ]
+    },
+    {
+      "id": "TEMPLE-INNER-WALL-2012",
+      "title": "跨十年 天坛内坛墙修缮月底完工",
+      "titleStyle": "网页标题",
+      "publisher": "中新网（转引《新京报》，采访天坛公园工程负责人）",
+      "url": "https://www.chinanews.com/cul/2012/07-18/4039652_2.shtml",
+      "kind": "公园修缮工程媒体采访",
+      "publishedOn": "2012-07-18",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "通过网页检索读取相关正文和同文第2页；属于媒体转引，不是原始工程报告。",
+      "supports": "内坛墙保存相对完整、周长约4115米；以隔墙分成祈谷坛与圜丘坛；有七座坛门。修缮恢复清乾隆样式，内坛墙檐部用绿色琉璃瓦、瓦面用灰色削割瓦。",
+      "limits": "报道未提供逐段墙线坐标、全部墙体尺寸、门楼立面或修缮竣工图纸；墙体颜色描述不能替代对每一墙段现状的现场核验。",
+      "evidenceRecord": "docs/research/tiantan-wall-review-2026-11-14.md",
+      "localVerifications": [
+        {
+          "checkedOn": "2026-11-14",
+          "scope": "合并前静态几何审查",
+          "result": "修正天坛墙身重复抬高和三角面朝向；沿用既有高度及墙线，未重新联网或取得测绘尺寸。未执行测试或浏览器截图复核。",
+          "record": "tiantan-wall-review-2026-11-14.md#合并前静态几何复核"
+        }
+      ]
     },
     {
       "id": "ZHENGYANG-FIRE-2020",
@@ -943,6 +1044,408 @@
       "limits": "所获为独立单页，全文题名、作者、出版年份及图六至图八尚未核得，须补证；正文的斗拱出跳仅作参考，模型用简化叠块而非完整营造法式复原；原文形制年代不是当前实测认证。",
       "evidenceRecord": "evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭",
       "pages": "下载文件第1页，即印刷页38；全文其他页面未取得"
+    },
+    {
+      "id": "TEMPLE-GUIDE-MAP",
+      "title": "导览全图",
+      "titleStyle": "官网原题",
+      "publisher": "天坛公园",
+      "url": "https://tiantanpark.cn/navigation_map.html",
+      "kind": "公园管理方官方导览图",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "直接下载网页和官方导览底图 navigation_map2.jpg，目视检查内坛北圆南方轮廓、内外坛墙、隔墙与门位；不是全园实测或逐路现场核验。",
+      "supports": "内坛北圆南方轮廓、南北分界墙、内外坛主要门位，以及园内主通路、斋宫北东南三个方向入口、祈年殿东西支路和南北神厨/宰牲亭与路网的联系。",
+      "limits": "导览图支持拓扑与相对关系，不提供可测量的路宽、折点、墙厚或逐块铺装；内坛圆弧墙线需结合门址作模型插值。院落硬地比例与逐树位置仍待测绘或现状照片。图像作者和开放许可待核实，不将原图打包、转载或用作运行时纹理。",
+      "imageSource": "https://tiantanpark.cn/Public/static/themes/image/jjl/navigation_map2.jpg",
+      "evidenceRecord": "tiantan-ground-review-2026-11-14.md",
+      "localVerifications": [
+        {
+          "date": "2026-11-14",
+          "scope": "北西续修时复看同日先前下载的navigation_map2.jpg，核对长廊、神厨、宰牲亭与园内通路的相对联系。",
+          "status": "本次是本地底图复看，不称再次联网下载。导览图不支持新增未定名北西建筑的历史用途、精确入口、院界或满铺比例；图像作者与开放许可仍待核，未转载原图。"
+        },
+        {
+          "date": "2026-11-14",
+          "scope": "重新下载同一官方导览底图，核对内坛北圆南方闭合墙线、南北隔墙及坛门位置。",
+          "status": "只用于墙线拓扑和门址关系；北圆墙段由门址建立模型插值，不将该导览图当作测绘平面。"
+        }
+      ]
+    },
+    {
+      "id": "JING-ROUTES",
+      "title": "皇家园林：景山公园",
+      "titleStyle": "网页原题",
+      "publisher": "北京旅游网",
+      "url": "https://www.visitbeijing.com.cn/article/47QrTf2Gatx",
+      "kind": "官方旅游介绍与线路",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "通过网页抓取工具读取全文，页面标示发布日期2017-03-01；本轮只采用道路连接和楼前月台说明。",
+      "supports": "前山、西侧、后山及东侧主路与五亭之间的游览联系；绮望楼前设宽敞月台。",
+      "limits": "不是测绘或最新开放公告；不据此指定折点、路宽、阶数及院落边界。文中周赏亭约11.3米与既有管理方11.75米记录不同，本轮不改高度，仍采用JING-ZHOUSHANG-PARK；不复用旧交通、餐饮及开放信息。",
+      "evidenceRecord": "tiantan-ground-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-CITY-WALL",
+      "title": "紫禁城的城垣",
+      "titleStyle": "馆方网页题名",
+      "publisher": "故宫博物院",
+      "url": "https://www.dpm.org.cn/explore/building/236441.html",
+      "kind": "博物馆建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本轮直接抓取并核对网页正文及配图。",
+      "supports": "外墙灰色砖面；宫城墙约9.90m，梯形断面、收分；墙顶城砖铺面、外侧品字形垛口、内侧宇墙及墙顶瓦件。",
+      "limits": "未提供项目OSM分段与现状测绘坐标；资料尺寸不转化为地图标签测值，概览结构和垛口间距为示意。",
+      "evidenceRecord": "palace-roof-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-UMEN",
+      "title": "午门",
+      "titleStyle": "馆方网页题名",
+      "publisher": "故宫博物院",
+      "url": "https://www.dpm.org.cn/explore/building/236454.html",
+      "kind": "博物馆建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接下载并核对官方网页正文；未采用或转载配图，原始HTML仅存本轮临时检查目录，未形成长期归档。",
+      "supports": "午门凹字形、12m墩台、正中三门与两掖门、两侧马道；正楼9间、面阔60.05m、进深25m、重檐庑殿顶；两翼13间雁翅楼和两端重檐攒尖方亭。",
+      "limits": "不提供项目逐点接墙测绘或券洞宽高；本轮采用中央三门，侧掖门、马道节点与钟鼓亭待补。接口坡道、檐口标高及翼楼局部尺寸为概览解释。",
+      "evidenceRecord": "palace-roof-review-2026-11-14.md",
+      "author": "石志敏"
+    },
+    {
+      "id": "PAL-SHENWUMEN",
+      "title": "神武门",
+      "titleStyle": "馆方网页题名",
+      "publisher": "故宫博物院",
+      "url": "https://www.dpm.org.cn/explore/building/236456.html",
+      "kind": "博物馆建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接下载并核对官方网页正文；未采用或转载配图，原始HTML仅存本轮临时检查目录，未形成长期归档。",
+      "supports": "神武门矩形、总高31m、三券门、面阔5间进深1间、四周围廊及汉白玉栏杆；东西山门通城墙和两侧马道；重檐庑殿顶。",
+      "limits": "不提供OSM轮廓分部标签、门台高度及券洞尺寸。门楼核心与两翼台面由地图接口推导；门外两组房屋的左右对称化及中轴导览线局部移位是用户要求的显示调整，不能据本文认定为测绘对称或官方路线。",
+      "evidenceRecord": "palace-roof-review-2026-11-14.md",
+      "author": "朱庆征"
+    },
+    {
+      "id": "PAL-CORNER-TOWER",
+      "title": "角楼",
+      "titleStyle": "馆方网页题名",
+      "publisher": "故宫博物院",
+      "url": "https://www.dpm.org.cn/explore/building/236522.html",
+      "kind": "博物馆建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14再次直接HTTP下载核对正文，并临时查看馆方配图；未将外部照片存入仓库。正文区分上层十字交叉歇山、中层抱厦歇山及下层半坡腰檐。",
+      "supports": "四角各一座；中心方亭8.73m见方、四面出抱厦，其中外向进深1.60m、内向3.98m；须弥座、石栏，三重檐复合歇山与黄琉璃瓦，总高27.50m。馆方配图可观察中心楼阁、四面小亭式抱厦及多层屋面关系。",
+      "limits": "项目用10m/场景单位把馆方中心与抱厦尺度转为示意十字平面；屋面交叠、构件、石栏尺寸、各角楼现场测绘及角部细节仍未复原，模型不等同于测绘成果。馆方配图未归档或转载。",
+      "evidenceRecord": "palace-roof-review-2026-11-14.md",
+      "author": "郑连章"
+    },
+    {
+      "id": "PAL-DONGHUAMEN",
+      "title": "东华门",
+      "titleStyle": "馆方网页题名",
+      "publisher": "故宫博物院",
+      "author": "苏怡",
+      "url": "https://www.dpm.org.cn/explore/building/236502.html",
+      "kind": "博物馆建筑说明及官网外景照片观察",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本轮通过Exa读取全文，并直接HTTP下载核对网页正文、撰稿人及官网外景配图；仅这两篇为本轮新增核验，不代表全部来源重核。原始HTML仅作临时检查，仓库长期原文归档待补。",
+      "supports": "东西华门形制相同：矩形红色城台、汉白玉须弥座、中央三券门且外方内圆；台上门楼为五间面阔、三间进深、四周出廊、黄琉璃瓦重檐庑殿顶，基座围汉白玉栏杆。文字说明各自朝向；官网外景照片用于核对红台在下、木构门楼在上及外口平直门楣。",
+      "limits": "没有给出本项目所需逐点接墙断面、门台高度、屋檐标高、券洞宽高或现状测绘。屋面包络、台高与相邻墙顶对齐、栏杆节距、门洞和外口内退深度均为概览解释；不能据形制相同断言所有尺寸完全相同。照片未转载，作者和开放许可未标示，需取得授权后才能作为交付图片。",
+      "referenceImages": [
+        {
+          "url": "https://img.dpm.org.cn/Uploads/Picture/dc/3912[1024].jpg",
+          "publisher": "故宫博物院",
+          "author": "官网未标明，待核",
+          "license": "未确认开放许可；仅目视参考，不随项目分发",
+          "viewedOn": "2026-11-14"
+        }
+      ],
+      "evidenceRecord": "palace-side-gates-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-XIHUAMEN",
+      "title": "西华门",
+      "titleStyle": "馆方网页题名",
+      "publisher": "故宫博物院",
+      "author": "苏怡",
+      "url": "https://www.dpm.org.cn/explore/building/236501.html",
+      "kind": "博物馆建筑说明及官网外景照片观察",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本轮通过Exa读取全文，并直接HTTP下载核对网页正文、撰稿人及官网外景配图；仅这两篇为本轮新增核验，不代表全部来源重核。原始HTML仅作临时检查，仓库长期原文归档待补。",
+      "supports": "东西华门形制相同：矩形红色城台、汉白玉须弥座、中央三券门且外方内圆；台上门楼为五间面阔、三间进深、四周出廊、黄琉璃瓦重檐庑殿顶，基座围汉白玉栏杆。文字说明各自朝向；官网外景照片用于核对红台在下、木构门楼在上及外口平直门楣。",
+      "limits": "没有给出本项目所需逐点接墙断面、门台高度、屋檐标高、券洞宽高或现状测绘。屋面包络、台高与相邻墙顶对齐、栏杆节距、门洞和外口内退深度均为概览解释；不能据形制相同断言所有尺寸完全相同。照片未转载，作者和开放许可未标示，需取得授权后才能作为交付图片。",
+      "referenceImages": [
+        {
+          "url": "https://img.dpm.org.cn/Uploads/Picture/dc/8238[1024].jpg",
+          "publisher": "故宫博物院",
+          "author": "官网未标明，待核",
+          "license": "未确认开放许可；仅目视参考，不随项目分发",
+          "viewedOn": "2026-11-14"
+        }
+      ],
+      "evidenceRecord": "palace-side-gates-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-WUYING",
+      "title": "武英殿",
+      "titleStyle": "馆方网页题名",
+      "publisher": "故宫博物院",
+      "author": "苏怡",
+      "url": "https://www.dpm.org.cn/explore/building/236500.html",
+      "kind": "博物馆建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接HTTP下载并核对正文及撰稿人；网页原始全文仅存临时目录，长期归档待补；未转载馆方配图。",
+      "supports": "正殿南向、面阔5间进深3间、黄琉璃歇山顶；后殿敬思殿与前殿以穿廊相连；地图H形轮廓拆分为前后殿及穿廊。",
+      "limits": "正文确定殿廊关系及屋面类型，不提供OSM分部顶点、殿檐标高、穿廊实测宽度或现状逐房清单。平台0.18、殿总高1.48及廊高0.88场景单位为概览解释，不标为实测复原。",
+      "evidenceRecord": "palace-interior-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-WENHUA",
+      "title": "文华殿",
+      "titleStyle": "馆方网页题名",
+      "publisher": "故宫博物院",
+      "author": "苏怡",
+      "url": "https://www.dpm.org.cn/explore/building/236531.html",
+      "kind": "博物馆建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接HTTP下载并核对正文及撰稿人；网页原始全文仅存临时目录，长期归档待补；未转载馆方配图。",
+      "supports": "主殿工字形平面；前殿南向、面阔5间进深3间、黄琉璃歇山顶；后殿主敬殿进深稍浅，前后以穿廊相连。",
+      "limits": "正文确定殿廊关系及屋面类型，不提供OSM分部顶点、殿檐标高、穿廊实测宽度或现状逐房清单。平台0.18、殿总高1.48及廊高0.88场景单位为概览解释，不标为实测复原。",
+      "evidenceRecord": "palace-interior-review-2026-11-14.md"
+    },
+    {
+      "id": "TIAN-DPM",
+      "title": "天安门“制度”琐谈",
+      "titleStyle": "故宫博物院页面及PDF所载题名",
+      "publisher": "故宫博物院",
+      "url": "https://www.dpm.org.cn/building/talk/223541.html",
+      "kind": "博物馆院刊建筑文章",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接HTTP打开馆方页面，并下载单页PDF摘录 https://img.dpm.org.cn/Uploads/pdf/1960/T00006_00.pdf ；以PDF文字层和扫描页目视核对。原始页面仅临时检查，长期归档待补。",
+      "supports": "印刷页6记天安门位于高16.19米墩台上；重檐歇山、面阔九间、进深五间、门洞五。",
+      "limits": "所获PDF是馆刊单页摘录而非完整测绘报告；OCR正文足以确定披露的数字和基本形制，但缺少逐檐标高、券洞逐座宽高和平面图。馆方配图未转载。",
+      "evidenceRecord": "docs/research/gate-proportions-review-2026-11-14.md"
+    },
+    {
+      "id": "TIAN-VISIT",
+      "title": "天安门城楼",
+      "titleStyle": "网页标题",
+      "publisher": "北京旅游网",
+      "url": "https://s.visitbeijing.com.cn/attraction/118289",
+      "kind": "官方旅游信息",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接HTTP下载并核对正文。",
+      "supports": "现存天安门由城台和城楼组成，总高34.7米；东西九间、南北五间、五券门；页面另行记述重建时城楼66×37米、高32米。",
+      "limits": "34.7米是现存总高，32米是1969至1970年重建城楼的历史叙述口径，不能互相替代；66×37米不是城台占地。正文未给各券洞尺寸、檐高和城台深度。图片未转载。",
+      "evidenceRecord": "docs/research/gate-proportions-review-2026-11-14.md"
+    },
+    {
+      "id": "DUAN-DPM",
+      "title": "从史料看端门",
+      "titleStyle": "馆方页面所载篇名",
+      "publisher": "故宫博物院",
+      "url": "https://www.dpm.org.cn/explode/others/252615.html",
+      "kind": "博物馆院刊史料文章",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接下载4页扫描PDF https://img.dpm.org.cn/Uploads/File/2020/05/06/u5eb2574fca697.pdf ，逐页渲染并目视核对；印刷页4转引《端门工程纪事》尺寸。",
+      "supports": "端门大楼下檐九间，通面阔187尺；进深五间，通进深85.9尺；并支持明清城楼及1955年修缮背景。",
+      "limits": "PDF是馆刊节选扫描，没有城台高度、各檐标高、完整立面或测绘图。模型按约0.32米/尺换算为约59.8×27.5米，换算和屋顶参数属于概览解释；不据节选页面断言全部构件尺寸。",
+      "evidenceRecord": "docs/research/gate-proportions-review-2026-11-14.md"
+    },
+    {
+      "id": "JINSHUI-SWJ",
+      "title": "中轴线上，寻访古桥趣闻……",
+      "titleStyle": "网页标题",
+      "publisher": "北京市水务局",
+      "author": "户力平",
+      "url": "https://swj.beijing.gov.cn/bmxx/shms/swhxc/202309/t20230921_3263495.html",
+      "kind": "水文化专题文章",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接HTTP下载，核对标题、日期、作者、正文和图像署名。",
+      "supports": "天安门前五座汉白玉桥对应五个门洞；东西另两座分别对应太庙和社稷坛大门；外侧公生桥更窄且为单孔。",
+      "limits": "文章没有给七座桥逐座中心、桥宽、栏长或测绘平面。模型只采用五座主桥对应券门、外侧两桥通往坛庙；栏板弧度和最小可见跨水长度是解释。文章配图未转载。",
+      "evidenceRecord": "docs/research/gate-proportions-review-2026-11-14.md"
+    },
+    {
+      "id": "JINSHUI-2019",
+      "title": "北京古桥知多少",
+      "titleStyle": "网页标题",
+      "publisher": "北京市人民政府",
+      "url": "https://www.beijing.gov.cn/renwen/sy/whkb/201903/t20190314_1865453.html",
+      "kind": "政府文化文章",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接HTTP下载并核对正文。",
+      "supports": "外金水桥共有七座，由内外金水桥体系区分；保留“七”“三”皆为奇数的桥梁等级叙述。",
+      "limits": "文章称七座皆三孔，与JINSHUI-SWJ所称两侧公生桥为单孔存在冲突。本轮没有可用测绘图裁决，模型不按任一口径伪造每桥三孔或单孔细部；只表达七桥及对应关系。",
+      "evidenceRecord": "docs/research/gate-proportions-review-2026-11-14.md"
+    },
+    {
+      "id": "YONG-DONGCHENG",
+      "title": "东城区文化和旅游局关于东城区政协第十五届二次会议第077号提案的答复意见（A类）",
+      "titleStyle": "网页标题",
+      "publisher": "北京市东城区文化和旅游局",
+      "url": "https://www.bjdch.gov.cn/zwgk/jytabl/202310/t20231026_3287607.html",
+      "kind": "文物主管部门官方答复",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接HTTP下载并核对正文。",
+      "supports": "2004年复建的现存永定门城楼总高26米，城台31.4×16.96米，二层七开间，灰筒瓦三重檐、重檐歇山阁楼式。",
+      "limits": "官方答复概述现存复建建筑，不给逐檐标高、屋面坡度、栏板节距和侧翼细部；不把1957年拆除的瓮城或箭楼混入现有城楼模型。",
+      "evidenceRecord": "docs/research/gate-proportions-review-2026-11-14.md"
+    },
+    {
+      "id": "YONG-REBUILD",
+      "title": "消失近半个世纪的永定门，如何重新屹立在北京中轴线的南段？",
+      "titleStyle": "网页标题",
+      "publisher": "北京日报",
+      "url": "https://news.bjd.com.cn/2022/08/09/10130975.shtml",
+      "kind": "原建设参与者采访",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14直接HTTP下载并核对正文。",
+      "supports": "现存复建城台31.41×16.96×8米、总高26.04米；灰瓦绿琉璃剪边、三重檐；引述历史原貌28.3×13.7×7.8米城台、24米通宽、10.8米进深及26米通高。",
+      "limits": "历史原貌测量转引与2005年正式亮相时的复建现状必须分列；正文不能证明每道檐口、门窗、栏杆和侧翼同旧貌一致。照片作者、许可和原图归档未用于运行资产。",
+      "evidenceRecord": "docs/research/gate-proportions-review-2026-11-14.md"
+    },
+    {
+      "id": "USR-PALACE-WALL-PLAN-20261114",
+      "title": "用户提供的故宫示意平面图（原题名待核）",
+      "publisher": "用户提供；原作者、出版机构待核",
+      "url": null,
+      "kind": "用户提供的示意图 / 本轮布局要求",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14通过WSL读取首张图；临时文件失效后，用户重发同一示意图，再次目视复核，并保留忽略目录下的工作副本；未联网原图溯源。",
+      "localReference": "C:/Users/20448/AppData/Local/Temp/codex-clipboard-6171e1d7-7ddd-4d4c-b860-9181081150c3.png",
+      "supports": "院落横纵关系与武英殿、内务府和御茶膳房附近显示布局参照；原始地图墙线与显式院界修补分开记录。",
+      "limits": "示意图不是测绘图；作者、原始网址、年代与许可待补。工作副本仅用于本地对照，未公开再分发或作为运行纹理；不支持实测尺寸及逐段现状认证。",
+      "evidenceRecord": "palace-wall-layout-review-2026-11-14.md"
+    },
+    {
+      "id": "USR-PALACE-WALL-FEEDBACK-20261114",
+      "title": "用户标注的故宫院墙衔接、内务府北接及南侧整排房屋问题",
+      "publisher": "本项目模型截图，由用户圈注和说明",
+      "url": null,
+      "kind": "用户反馈 / 模型校核，非实景照片",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本地读取本轮圈注、北接箭头及南侧整排截图；忽略目录保留工作副本，未作为历史照片或现状证据。",
+      "supports": "内务府右侧墙向北连接上方院界；删除其下方多余短尾；南侧横墙避开连续房屋立面；东侧服务房墙端接楼、消除越界；独立构件按用户纠正予以保留。",
+      "limits": "用户截图证明模型问题与期望接法，不证明真实遗产墙线、原始用途、测绘尺寸或完整建筑形制。",
+      "evidenceRecord": "palace-wall-layout-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-QIANQING",
+      "title": "乾清宫",
+      "publisher": "故宫博物院；撰稿人周苏琴",
+      "url": "https://www.dpm.org.cn/explore/building/236472.html",
+      "kind": "博物馆官方建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "2026-11-14通过Exa读取官方正文；未下载或转载外景照片。",
+      "supports": "乾清宫位于单层汉白玉石台基上；殿前有月台，正中丹陛接高台甬路与乾清门相连。",
+      "limits": "正文支持材料及空间关系，不提供前月台、甬路逐点测绘及本模型栏杆节点；未据此改变原地图轮廓。",
+      "evidenceRecord": "docs/research/qianqing-platform-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-GARDEN-IMPERIAL",
+      "title": "御花园",
+      "publisher": "故宫博物院；网页署名未提取，待补",
+      "url": "https://www.dpm.org.cn/explore/building/236519.html",
+      "kind": "博物馆官方建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本日通过Exa读取官方正文；配图没有下载、转载或作为运行纹理。",
+      "supports": "御花园在坤宁宫后；全园东西140米、南北80米；钦安殿为中心，园内松柏竹、山石与卵石甬路相间。",
+      "limits": "文字支持位置、整体范围与园林特征，不给逐树、花坛、屋檐或园界测绘坐标。模型种植带、通路、净距与树位均为解释；未将全园面积作为草坪面积。",
+      "evidenceRecord": "docs/research/palace-landscape-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-GARDEN-CINING",
+      "title": "慈宁宫花园",
+      "publisher": "故宫博物院；网页署名未提取，待补",
+      "url": "https://www.dpm.org.cn/explore/building/236536.html",
+      "kind": "博物馆官方建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本日通过Exa读取官方正文；配图没有下载、转载或作为运行纹理。",
+      "supports": "慈宁宫西南，南北约130米、东西50米；建筑集中北部，咸若馆前与临溪亭周围种植，南部有池及桥上亭。",
+      "limits": "文字支持位置、整体范围与园林特征，不给逐树、花坛、屋檐或园界测绘坐标。模型种植带、通路、净距与树位均为解释；未将全园面积作为草坪面积。",
+      "evidenceRecord": "docs/research/palace-landscape-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-GARDEN-JIANFU",
+      "title": "建福宫花园",
+      "publisher": "故宫博物院；网页署名未提取，待补",
+      "url": "https://www.dpm.org.cn/explore/building/236492.html",
+      "kind": "博物馆官方建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本日通过Exa读取官方正文；配图没有下载、转载或作为运行纹理。",
+      "supports": "内廷西北隅，西部以延春阁为中心，建筑与园景交错；占地约4020平方米，2006年复建工程竣工。",
+      "limits": "文字支持位置、整体范围与园林特征，不给逐树、花坛、屋檐或园界测绘坐标。模型种植带、通路、净距与树位均为解释；未将全园面积作为草坪面积。",
+      "evidenceRecord": "docs/research/palace-landscape-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-GARDEN-NINGSHOU",
+      "title": "宁寿宫花园（乾隆花园）",
+      "publisher": "故宫博物院；网页署名未提取，待补",
+      "url": "https://www.dpm.org.cn/explore/building/236440.html",
+      "kind": "博物馆官方建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本日通过Exa读取官方正文；配图没有下载、转载或作为运行纹理。",
+      "supports": "宁寿宫后区西路，南北160米、东西约40米，分四进院落，山石、树木、建筑交错；不是整片草坪。",
+      "limits": "文字支持位置、整体范围与园林特征，不给逐树、花坛、屋檐或园界测绘坐标。模型种植带、通路、净距与树位均为解释；未将全园面积作为草坪面积。",
+      "evidenceRecord": "docs/research/palace-landscape-review-2026-11-14.md"
+    },
+    {
+      "id": "PAL-INNER-BRIDGES",
+      "title": "故宫里的桥",
+      "publisher": "故宫博物院；网页署名未提取，待补",
+      "url": "https://www.dpm.org.cn/architectural_art/246281.html",
+      "kind": "博物馆官方建筑说明",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "本日通过Exa直接读取全文；原代码中已有该ID注释但登记缺失，本轮补登记。",
+      "supports": "太和门前五座内金水桥；武英门前三石桥、武英殿东断虹桥、协和门旁单侧石栏的半壁桥、文华殿后通文渊阁的桥，以及通南三所的三座门前三桥。",
+      "limits": "是部分桥梁列举，不能据此称宫内仅14座桥；不提供逐桥坐标、尺寸、栏板测绘和完整花园小桥清单。桥轴、净跨、间距、桥拱与栏板为本地河道和参考图约束下的模型解释。",
+      "evidenceRecord": "docs/research/palace-landscape-review-2026-11-14.md"
+    },
+    {
+      "id": "USR-PALACE-COURT-GREENERY-20261114",
+      "title": "用户指出文华殿东北空院应有绿地、石板路及独立构件的模型反馈",
+      "publisher": "本项目模型截图；用户提供截图与文字纠正",
+      "url": null,
+      "kind": "用户反馈 / 模型校核，非实景照片",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "通过WSL读取1a76423c截图，并与已保留的USR-PALACE-WALL-PLAN-20261114参考图目视对照。原图版权/原出处仍待补，不转载用户原图。",
+      "localReference": "C:/Users/20448/AppData/Local/Temp/codex-clipboard-1a76423c-2721-4423-8b0e-8f830c44b14c.png",
+      "supports": "定位文华殿东北、南三所南侧的空院显示缺漏；要求表示分块绿地和石板路，保留独立构件，不能继续自动连墙。",
+      "limits": "截图证明当前模型及用户要求，不证明实际种植边界、草坪材质、树种数量、路宽或影壁历史功能。参考示意图只用于空间关系；当前新增院落不是第五座已考证命名花园。",
+      "evidenceRecord": "docs/research/palace-court-landscape-review-2026-11-14.md"
     }
-  ]
+  ],
+  "documentationReview": {
+    "reviewedOn": "2026-11-14",
+    "scope": "本地文档重整、ID与非空URL唯一性及文件引用核对；未重新联网核验全部来源，未改变原有verifiedOn或recordedOn。",
+    "catalogue": "source-catalogue.md",
+    "history": "source-catalogue-history.md"
+  }
 }

@@ -39,7 +39,7 @@ describe('distinctive small landmarks',()=>{
     const high=new THREE.Raycaster(body.localToWorld(new THREE.Vector3(2,.53,0)),direction,0,4);
     expect(low.intersectObject(body,true)).toHaveLength(0);
     expect(high.intersectObject(body,true).length).toBeGreaterThan(0);
-    const beasts:THREE.Object3D[]=[];bridge.traverse(o=>{if(o.name==='镇水兽')beasts.push(o);});expect(beasts).toHaveLength(4);
+    const beasts:THREE.Object3D[]=[];bridge.traverse(o=>{if(o.name==='镇水兽')beasts.push(o);});expect(beasts).toHaveLength(6);
   });
   it('includes the agricultural altar, viewing terrace and distinct Xiannongtan compounds',()=>{
     const model=createLandmark(site('xiannongtan'),m,data);

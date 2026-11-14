@@ -1,8 +1,15 @@
 import { project } from './geo';
+import { palaceWaterConnections } from './palaceWaterConnections';
 import type { ContextFeature } from '../data/context';
 import type { Landmark } from '../data/types';
 export interface BuildingFootprint { id: number; ring: [number, number][]; height?: number; levels?: number; building?: string; roof?: string; name?: string; }
-export interface CityContext extends ContextFeature { holes?: [number, number][][]; }
+export interface CityContext extends ContextFeature {
+  holes?: [number, number][][];
+  osmId?: number;
+  geometryOrigin?: 'display-link';
+  displayId?: string;
+  sourceOsmIds?: number[];
+}
 export interface CityData { buildings: BuildingFootprint[]; context: CityContext[]; }
 
 /** WGS84 to GCJ-02, to align OSM geometry with the separately checked Amap anchors. */
@@ -48,10 +55,10 @@ async function readCityData(): Promise<CityData> {
       if (!ring || ring.length < 2) continue;
       const highway = f.properties.highway;
       const width = highway === 'primary' ? 32 : highway === 'secondary' ? 24 : highway === 'tertiary' ? 17 : 9;
-      context.push({ kind, name: f.properties.name || kind, coordinates: ring.map(wgs84ToGcj02), holes: holes.map((r: [number, number][]) => r.map(wgs84ToGcj02)), width });
+      context.push({ kind, osmId: f.properties.osmId, name: f.properties.name || kind, coordinates: ring.map(wgs84ToGcj02), holes: holes.map((r: [number, number][]) => r.map(wgs84ToGcj02)), width });
     }
   }
-  return { buildings: b.buildings, context };
+  return { buildings: b.buildings, context: [...context, ...palaceWaterConnections(context)] };
 }
 export function localBuildingRing(building: BuildingFootprint) { return building.ring.map(point => project(wgs84ToGcj02(point))); }
 

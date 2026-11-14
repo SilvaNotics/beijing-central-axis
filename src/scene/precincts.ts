@@ -16,10 +16,15 @@ export function localPalaceBoundary(site: Landmark): [number, number][] {
   });
 }
 
+/** Architectural orientation from the mapped palace wall, in the atlas plane. */
+export function palaceRoofRotation() {
+  const a=project(wgs84ToGcj02(palaceBoundary[0])),b=project(wgs84ToGcj02(palaceBoundary[1]));
+  return -Math.atan2(b[1]-a[1],b[0]-a[0]);
+}
+
 /** Remove tiny digitising-angle differences without growing a roof footprint. */
 export function alignPalaceRoof(layout: FootprintLayout): FootprintLayout {
-  const a=project(wgs84ToGcj02(palaceBoundary[0])),b=project(wgs84ToGcj02(palaceBoundary[1]));
-  const datum=-Math.atan2(b[1]-a[1],b[0]-a[0]);
+  const datum=palaceRoofRotation();
   const rotation=datum+Math.round((layout.rotation-datum)/(Math.PI/2))*(Math.PI/2);
   const delta=Math.abs(layout.rotation-rotation);
   if(delta>.05)return layout;

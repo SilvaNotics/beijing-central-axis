@@ -49,3 +49,18 @@ it('keeps Jingshan tree crowns inside its park boundary as well as trunks on the
     expect(tree.y).toBeCloseTo(jingshanHeight(site,tree.x-ox,tree.z-oz,data)+.025,6);
   }
 });
+
+it('keeps crowns off every new paved court and the full width of connected park walks',async()=>{
+  const {jingshanCourts,jingshanWalks}=await import('./jingshanLayout');
+  const {distanceToRing}=await import('./centralGreenery');
+  const courts=jingshanCourts(site),walks=jingshanWalks(site),conflicts:string[]=[];
+  for(const tree of forestPoints(data).filter(t=>t.region==='jingshan')) {
+    const point:[number,number]=[tree.x-ox,tree.z-oz],clearance=tree.radius*1.9+.12;
+    for(const c of courts)if(pointInPolygon(point,c.ring)||distanceToRing(point,c.ring)<clearance)conflicts.push(c.id);
+    for(const w of walks)if(distanceToRing(point,w.points,false)<w.width/2+clearance)conflicts.push(w.id);
+  }
+  expect(conflicts).toEqual([]);
+  for(const c of courts)for(const p of c.ring)expect(jingshanHeight(site,p[0],p[1],data)).toBeCloseTo(0,6);
+  // Each walk reaches another walk at an endpoint; none floats alone in the grove.
+  for(const w of walks)expect([w.points[0],w.points.at(-1)!].some(p=>walks.some(other=>other!==w&&distanceToRing(p,other.points,false)<other.width/2))).toBe(true);
+});

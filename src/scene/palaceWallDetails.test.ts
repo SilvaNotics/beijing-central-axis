@@ -16,6 +16,9 @@ it('gives the mapped gray-capped palace runs relief without filling the court or
     let run:THREE.Object3D|undefined;
     model.traverse(o=>{if(o.userData.osmId===id)run=o;});
     expect(run,`mapped wall ${id}`).toBeDefined();
+    const roof=run!.getObjectByName('mapped-concave-roof') as THREE.Mesh;
+    expect(roof,`gray roof on ${id}`).toBeDefined();
+    expect(roof.material===m.grayRoof,`preserves the dark gray roof on ${id}`).toBe(true);
     const details=run!.getObjectByName('polygon-facade-details');
     expect(details!.children.length).toBeGreaterThan(4);
     const materials:THREE.Material[]=[];

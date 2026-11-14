@@ -64,3 +64,5 @@ button:hover,a:hover{color:#ffe0a1}button:focus-visible,a:focus-visible,[tabinde
 .mapped-plan[data-plan-site="bell-drum"] .plan-roofs{fill:#71766d;stroke:#bbc3ac}
 .mapped-plan[data-plan-site="wanning"] .plan-roofs{fill:#bcb4a0;stroke:#eee1ba}
 .civic-plan .civic-rail{fill:#d0c19f;stroke:none}
+
+.mapped-plan[data-plan-site="yongdingmen"] .plan-roofs{fill:#71766d;stroke:#82a58a}

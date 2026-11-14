@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 
+// Software WebGL in the desktop test environment can take around 20 seconds to
+// construct and bake the city. Keep a bounded readiness check that tolerates
+// that setup cost without masking a fallback or persistent console failure.
+const SCENE_READY_TIMEOUT = 30_000;
+
 test('renders the full axis without browser errors or horizontal overflow', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', message => {
@@ -8,7 +13,7 @@ test('renders the full axis without browser errors or horizontal overflow', asyn
   page.on('pageerror', error => errors.push(error.message));
 
   await page.goto('/#/');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: SCENE_READY_TIMEOUT });
   await expect(page.locator('.region-row.region-active')).toHaveCount(0);
   await expect(page.locator('.map-legend')).toBeVisible();
   await expect(page.locator('[data-site="bell-drum"]')).toHaveCSS('opacity', '1');
@@ -22,7 +27,7 @@ test('renders the full axis without browser errors or horizontal overflow', asyn
 
 test('renders the Tiananmen square ensemble and its supporting landmarks', async ({ page }) => {
   await page.goto('/#/site/square');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: SCENE_READY_TIMEOUT });
   await expect(page.locator('.landmark-detail h2')).toHaveText('天安门广场及建筑群');
   for (const annotation of ['heroes', 'memorial', 'great-hall']) {
     await expect(page.locator(`[data-annotation="${annotation}"]`)).toHaveCSS('opacity', '1');
@@ -31,7 +36,7 @@ test('renders the Tiananmen square ensemble and its supporting landmarks', async
 
 test('shows the layered Tiantan plan and one unambiguous north indicator', async ({ page }) => {
   await page.goto('/#/site/tiantan');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: SCENE_READY_TIMEOUT });
   for (const annotation of ['prayer-hall', 'imperial-vault', 'circular-altar']) {
     await expect(page.locator(`[data-annotation="${annotation}"]`)).toHaveCSS('opacity', '1');
   }
@@ -53,13 +58,14 @@ test('shows the layered Tiantan plan and one unambiguous north indicator', async
   expect(Math.abs((await marker.boundingBox())!.width-markerWidth)).toBeLessThan(.5);
 });
 
-test('Shift drag rotates the scene and compass; ordinary drag pans', async ({ page }) => {
+test('Shift drag rotates the scene and compass; Ctrl and ordinary drag pan', async ({ page }) => {
   // Software WebGL can spend over two seconds on each pointer-driven frame.
-  // Four moves per gesture still exercise continuous dragging, while leaving
-  // time for the final reset animation within the same timeout.
-  test.setTimeout(60_000);
+  // Leave time for three drag gestures; reduced motion makes reset immediate.
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 800, height: 600 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#/');
-  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 15_000 });
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: SCENE_READY_TIMEOUT });
   const compass=page.locator('.north-marker');
   await expect(compass).toHaveAttribute('data-bearing',/[1-9]/);
   const before=Number(await compass.getAttribute('data-bearing'));
@@ -72,14 +78,20 @@ test('Shift drag rotates the scene and compass; ordinary drag pans', async ({ pa
     throw new Error('No unobstructed canvas drag target');
   });
   const {x,y}=point;
+  const landmark=page.locator('[data-site="forbidden-city"]');
+  const labelBefore=await landmark.boundingBox();
+  await page.mouse.move(x,y);await page.keyboard.down('Control');await page.mouse.down();
+  await page.mouse.move(x+60,y+20,{steps:2});await page.mouse.up();await page.keyboard.up('Control');
+  expect(Math.abs(Number(await compass.getAttribute('data-bearing'))-before)).toBeLessThan(.3);
+  await expect.poll(async()=>Math.abs((await landmark.boundingBox())!.x-labelBefore!.x)).toBeGreaterThan(10);
   await page.mouse.move(x,y);await page.keyboard.down('Shift');await page.mouse.down();
-  await page.mouse.move(x+140,y-35,{steps:4});await page.mouse.up();await page.keyboard.up('Shift');
+  await page.mouse.move(x+140,y-35,{steps:2});await page.mouse.up();await page.keyboard.up('Shift');
   await expect.poll(async()=>Math.abs(Number(await compass.getAttribute('data-bearing'))-before)).toBeGreaterThan(10);
   const rotated=Number(await compass.getAttribute('data-bearing'));
-  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-60,y+20,{steps:4});await page.mouse.up();
+  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-60,y+20,{steps:2});await page.mouse.up();
   expect(Math.abs(Number(await compass.getAttribute('data-bearing'))-rotated)).toBeLessThan(.3);
   await page.getByRole('button',{name:'全轴总览'}).click();
-  await expect.poll(async()=>Math.abs(Number(await compass.getAttribute('data-bearing'))-before)).toBeLessThan(.3);
+  await expect.poll(async()=>Math.abs(Number(await compass.getAttribute('data-bearing'))-before), { timeout: 15_000 }).toBeLessThan(.3);
 });
 
 test('keeps each chapter independently reachable and returns focus to the atlas', async ({ page }) => {

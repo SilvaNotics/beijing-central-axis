@@ -5,12 +5,13 @@ import { landmarks } from '../data/heritage';
 import { createLandmark } from './architecture';
 import type { CityData } from './geodata';
 import type { Materials } from './materials';
-import { project } from './geo';
+import { zhongheLayout } from './palaceArchitecture';
 
 const palette:Record<string,THREE.MeshBasicMaterial>={};
 const materials=new Proxy(palette,{get:(target,key:string)=>target[key]??=new THREE.MeshBasicMaterial()}) as unknown as Materials;
 const site=landmarks.find(site=>site.id==='forbidden-city')!;
-const palace=createLandmark(site,materials,{buildings:bundled.buildings as CityData['buildings'],context:[]});
+const data:CityData={buildings:bundled.buildings as CityData['buildings'],context:[]};
+const palace=createLandmark(site,materials,data);
 palace.updateMatrixWorld(true);
 const byId=(id:number)=>{let result:THREE.Object3D|undefined;palace.traverse(object=>{if(object.userData.osmId===id)result=object;});return result!;};
 const roofs=(object:THREE.Object3D)=>{const result:THREE.Mesh[]=[];object.traverse(child=>{if(child instanceof THREE.Mesh&&child.material===materials.gold)result.push(child);});return result;};
@@ -21,12 +22,13 @@ describe('documented palace silhouettes and proportions',()=>{
       expect(new THREE.Box3().setFromObject(byId(id)).max.y).toBeCloseTo(height,2);
     });
   }
-  it('gives Zhonghedian one pointed roof at the checked Amap position',()=>{
+  it('gives Zhonghedian one pointed roof on the aligned three-hall axis',()=>{
     const middle=palace.getObjectByName('中和殿')!;
     expect(roofs(middle)).toHaveLength(1);
-    const origin=project(site.coords),checked=project([116.397065,39.917875]);
-    expect(middle.position.x).toBeCloseTo(checked[0]-origin[0],5);
-    expect(middle.position.z).toBeCloseTo(checked[1]-origin[1],5);
+    const aligned=zhongheLayout(site,data);
+    expect(middle.position.x).toBeCloseTo(aligned.x,5);
+    expect(middle.position.z).toBeCloseTo(aligned.z,5);
+    expect(middle.rotation.y).toBeCloseTo(aligned.rotation,5);
     const mesh=roofs(middle)[0],vertices=mesh.geometry.getAttribute('position');
     mesh.geometry.computeBoundingBox();const top=mesh.geometry.boundingBox!.max.y;
     for(let i=0;i<vertices.count;i++)if(vertices.getY(i)>top-1e-5) {

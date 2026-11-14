@@ -62,6 +62,7 @@ export function createMaterials() {
   const tileNormal = texture('tile', true);
   const stone = texture('stone');
   const ground = texture('ground');
+  const cityBrick = texture('brick');
   const granite=naturalSurface('granite'),soil=naturalSurface('soil'),rock=naturalSurface('rock'),bark=naturalSurface('bark');
   tiles.repeat.set(2, 2);
   tileNormal.repeat.set(2, 2);
@@ -71,6 +72,7 @@ export function createMaterials() {
     // Weathered cinnabar and glazed tile sit inside the same dusk palette instead of reading as pure RGB primaries.
     wall: make('#813a30', .93, texture('brick')),
     grayBrick: make('#777970', .95, texture('brick')),
+    cityWallBrick: new THREE.MeshStandardMaterial({ color: '#9c9787', roughness: .97, map: cityBrick, bumpMap: cityBrick, bumpScale: .004 }),
     weatheredStone:new THREE.MeshStandardMaterial({color:'#aca48d',roughness:1,map:granite,bumpMap:granite,bumpScale:.009,vertexColors:true}),
     cutEarth:new THREE.MeshStandardMaterial({color:'#827159',roughness:1,map:soil,bumpMap:soil,bumpScale:.012,vertexColors:true}),
     gardenRock:new THREE.MeshStandardMaterial({color:'#a5a394',roughness:1,map:rock,bumpMap:rock,bumpScale:.018,vertexColors:true}),

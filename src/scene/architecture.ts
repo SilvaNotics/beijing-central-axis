@@ -1,3 +1,5 @@
+import { createTiantanGround } from './tiantanGround';
+import { createTiantanWalls } from './tiantanWalls';
 import * as THREE from 'three';
 import type { Landmark } from '../data/types';
 import type { Materials } from './materials';
@@ -6,15 +8,24 @@ import { project, pointInPolygon } from './geo';
 import { mappedLayout, palaceAxis, jingshanPavilions } from './layouts';
 import { localPalaceBoundary, alignPalaceRoof } from './precincts';
 import { createPalaceGarden } from './palaceGarden';
+import { createPalaceLandscape } from './palaceLandscape';
+import { createPalacePaving, createInnerJinshuiBridges, palaceWaterAreas } from './palaceWater';
 import { createPalaceWalls } from './palaceWalls';
+import { clipPalaceFootprint, createPalaceCityWalls } from './palaceCityWalls';
+import { createPalaceGates, palaceGateIds, shenwuForecourtLayout } from './palaceGates';
+import { axisThroughShenwu } from './axisRoute';
 import { createRoadRemains } from './roadRemains';
-import { jinshuiLayout, tiananmenDepth, tiananmenWidth, tiananmenPortals } from './gateLayout';
+import { jinshuiLayout } from './gateLayout';
+import { createDuanmen } from './duanmen';
+import { createTiananmen } from './tiananmen';
+import { createYongdingmen } from './yongdingmen';
 import { templeBoundary, moundCenter, tiantanDetailedIds, moundInnerGates, moundOuterGates, layoutCorners } from './templeLayout';
 import { createCivicBuilding, createMonument, createFlagCourt } from './civicArchitecture';
 import { civicLayouts, squareLocations } from './civicLayout';
-import { timberBody, timberEaves } from './timberArchitecture';
+import { timberBody, timberEaves, timberRoofApron } from './timberArchitecture';
 import { wallRuns } from './wallRuns';
 import { polygonBuilding, polygonRoof } from './polygonBuildings';
+import { polygonRoofDetails } from './polygonRoofDetails';
 import { palaceTerraces,palaceRaisedBuildings,palaceRoofCore,sharedPalaceTerrace } from './palaceMassing';
 import { palacePlatform } from './palacePlatforms';
 import { zhengyangLayout, zhengyangCityPlatform, zhengyangCityRoofs } from './zhengyangLayout';
@@ -30,6 +41,7 @@ import { createBellDrum, createWanning } from './northernLandmarks';
 import { agricultureCompounds } from './agricultureLayout';
 import { roofGeometry, roofSection, roofGables, mappedRoofForm, type RoofForm } from './roofForms';
 import { palaceHallProfiles, zhongheLayout, zhongheProfile, type HallProfile } from './palaceArchitecture';
+import { palaceSideHallLayout } from './palaceSideHalls';
 export { roofGeometry } from './roofForms';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
@@ -138,10 +150,10 @@ function hall(group: THREE.Group, m: Materials, x: number, z: number, w: number,
   timberBody(facade,m,w,d,h,y+floor,true,profile);
   const eaveY = y + h + floor;
   const roofRise = h * .61;
-  const roof = new THREE.Mesh(roofGeometry(roofW, roofD, roofRise,double?'hipped':form), roofMat);
+  const roof = new THREE.Mesh(roofGeometry(roofW, roofD, roofRise,double && form !== 'pyramidal' ? 'hipped' : form), roofMat);
   roof.position.set(x, eaveY, z); group.add(roof);
   timberEaves(facade,m,roofW,roofD,w*.8,d*.8,eaveY);
-  roofRidges(group,m,x,z,roofW,roofD,roofRise,eaveY,double?'hipped':form);
+  roofRidges(group,m,x,z,roofW,roofD,roofRise,eaveY,double && form !== 'pyramidal' ? 'hipped' : form);
   if(!double) {
     const gables=roofGables(roofW,roofD,roofRise,form,m.wood);gables.position.set(x,eaveY,z);group.add(gables);
     if(form==='pyramidal')cylinder(group,m.goldLeaf,x,eaveY+roofRise+.08,z,.07,.16);
@@ -149,14 +161,18 @@ function hall(group: THREE.Group, m: Materials, x: number, z: number, w: number,
   }
   if (double) {
     const upperBase = eaveY + h * .58;
-    timberBody(facade,m,w*.75,d*.66,h*.32,upperBase,false);
+    // Extend the whole room through the lower roof, keeping its columns,
+    // enclosure and windows together beneath the existing upper eave.
+    const upperRoom=timberBody(facade,m,w*.75,d*.66,h*.90,eaveY,false,{enclosure:'flush'});
+    timberRoofApron(upperRoom,roof,m.ridge);
     const upperRise = h * .48;
     const upper = new THREE.Mesh(roofGeometry(w * .8, d * .72, upperRise,form), roofMat);
     upper.position.set(x, upperBase + h * .32, z); group.add(upper);
     timberEaves(facade,m,w*.8,d*.72,w*.60,d*.50,upperBase+h*.32,false);
     roofRidges(group,m,x,z,w*.8,d*.72,upperRise,upperBase+h*.32,form);
     const gables=roofGables(w*.8,d*.72,upperRise,form,m.wood);gables.position.set(x,upperBase+h*.32,z);group.add(gables);
-    box(group,m.ridge,x,upperBase+h*.80+.02,z,roofSection(w*.8,d*.72,upperRise,1,form).w*2,.04,.08);
+    if (form === 'pyramidal') cylinder(group,m.goldLeaf,x,upperBase+h*.80+.07,z,.045,.10);
+    else box(group,m.ridge,x,upperBase+h*.80+.02,z,roofSection(w*.8,d*.72,upperRise,1,form).w*2,.04,.08);
   }
   // Shallow stone stairs, a geometric rather than painted detail.
   if(!fitFootprint) for (let step = 0; step < 5; step++) box(group, m.stone, x, y + .025 + step * .045, z + d / 2 + .78 - step * .12, w * .52, .09, .76 - step * .12);
@@ -196,22 +212,46 @@ function footprintSolid(group: THREE.Group, ring: [number, number][], height: nu
   mesh.position.y = y; group.add(mesh); return mesh;
 }
 
-function footprintBuilding(group: THREE.Group, m: Materials, building: BuildingFootprint, site: Landmark, roofMat: THREE.Material, minimumSide = .22, offsetX = 0) {
-  const raw = localFootprintLayout(building, site);
+function pointSegmentDistance(p:[number,number],a:[number,number],b:[number,number]) {
+  const dx=b[0]-a[0],dz=b[1]-a[1],length=dx*dx+dz*dz;
+  const t=length?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dz)/length)):0;
+  return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dz);
+}
+
+function palaceBoundaryGap(ring:[number,number][],boundary:[number,number][]) {
+  let gap=Infinity;
+  for(const point of ring)for(let i=0;i<boundary.length;i++)gap=Math.min(gap,pointSegmentDistance(point,boundary[i],boundary[(i+1)%boundary.length]));
+  return gap;
+}
+
+function footprintBuilding(group: THREE.Group, m: Materials, building: BuildingFootprint, site: Landmark, roofMat: THREE.Material, minimumSide = .22, offsetX = 0, display?: ReturnType<typeof shenwuForecourtLayout>, data?:CityData) {
+  const raw = display ?? localFootprintLayout(building, site);
   const p = site.id==='forbidden-city' ? alignPalaceRoof(raw) : raw;
-  if (Math.max(p.width, p.depth) < minimumSide) return;
+  if (Math.max(p.width, p.depth) < (site.id==='forbidden-city'?.02:minimumSide)) return;
   if(building.building==='gate') {
     const gate=masonryTempleGate(m,p,site.id==='tiantan'?m.green:roofMat);gate.name=building.name??String(building.id);gate.userData.osmId=building.id;gate.position.set(p.x+offsetX,0,p.z);gate.rotation.y=p.rotation;group.add(gate);return;
   }
   const [ox,oz] = project(site.coords);
-  const ring = localBuildingRing(building).map(([x,z]):[number,number] => [x-ox,z-oz]);
+  const ring = display?.ring ?? localBuildingRing(building).map(([x,z]):[number,number] => [x-ox,z-oz]);
   const area = Math.abs(ring.reduce((sum,[x,z],i) => {
     const next = ring[(i+1)%ring.length]; return sum+x*next[1]-next[0]*z;
   },0))/2;
   const isWall = building.building === 'wall' || /墙/.test(building.name ?? '');
+  // All perimeter footprints are assembled together so polygon seams have no parapets.
+  if(site.id==='forbidden-city'&&/城墙/.test(building.name??''))return;
+  if(site.id==='forbidden-city') {
+    const boundary=localPalaceBoundary(site),clipped=clipPalaceFootprint(ring,boundary);
+    if(clipped.length<3&&palaceBoundaryGap(ring,boundary)>1.5)return;
+    if(clipped.length>=3&&(clipped.length!==ring.length||clipped.some((point,i)=>Math.hypot(point[0]-ring[i][0],point[1]-ring[i][1])>1e-5))) {
+      const item=polygonBuilding(clipped,m,roofMat,.48);
+      item.name=building.name??String(building.id);item.userData.osmId=building.id;item.position.x=offsetX;group.add(item);return;
+    }
+  }
   if(site.id==='forbidden-city'&&palaceTerraces.has(building.id)) {
     const stairs=building.id===638449433?{side:1 as const,run:1.5}:building.id===638467894?{side:-1 as const,run:1.6}:undefined;
-    const item=palacePlatform(ring,palaceTerraces.get(building.id)!,m,stairs);
+    const approach=building.id===638981261?data?.buildings.find(b=>b.id===638807694):undefined;
+    const connected=approach?[localBuildingRing(approach).map(([x,z]):[number,number]=>[x-ox,z-oz])]:[];
+    const item=palacePlatform(ring,palaceTerraces.get(building.id)!,m,stairs,building.id===638807694,connected);
     item.userData.osmId=building.id;item.position.x=offsetX;group.add(item);return;
   }
   if(site.id==='forbidden-city'&&palaceRaisedBuildings.has(building.id)) {
@@ -234,12 +274,15 @@ function footprintBuilding(group: THREE.Group, m: Materials, building: BuildingF
   }
   if(!isWall&&building.building!=='ruins'&&area/(p.width*p.depth)<.86) {
     const item=polygonBuilding(ring,m,roofMat,Math.max(.40,Math.min(.85,p.height*.8)));
+    if(building.id===40542466)item.add(polygonRoofDetails(item.getObjectByName('mapped-concave-roof') as THREE.Mesh,m));
     item.name=building.name??String(building.id);item.userData.osmId=building.id;item.position.x=offsetX;group.add(item);return;
   }
   if (isWall || building.building === 'ruins') {
     const height = isWall ? (/城墙/.test(building.name ?? '') ? 1 : .38) : building.building === 'ruins' ? .4 : .7;
-    footprintSolid(group,ring,height,isWall ? m.wall : m.vermilion);
-    footprintSolid(group,ring,.08,isWall ? m.grayRoof : roofMat,height);
+    const item=new THREE.Group();item.name=building.name??String(building.id);item.userData.osmId=building.id;
+    footprintSolid(item,ring,height,isWall ? m.wall : m.vermilion);
+    footprintSolid(item,ring,.08,isWall ? m.grayRoof : roofMat,height);
+    group.add(item);
     return;
   }
   const width = Math.max(.08, p.width-.04), depth = Math.max(.08, p.depth-.04), height = Math.max(.32, Math.min(2.2, p.height));
@@ -247,7 +290,11 @@ function footprintBuilding(group: THREE.Group, m: Materials, building: BuildingF
   item.name = building.name ?? String(building.id); item.userData.osmId = building.id;
   item.position.set(p.x + offsetX, 0, p.z); item.rotation.y = p.rotation;
   box(item,m.darkStone,0,.035,0,width,.07,depth);
-  if(width>.65&&depth>.38)timberBody(item,m,width*.84,depth*.78,height,.07,false);
+  // A percentage inset removes metres from the ends of a long row of rooms.
+  // Bound the eaves clearance so the complete mapped range has a timber body.
+  const bodyW=site.id==='forbidden-city'?width-Math.min(.32,width*.16):width*.84;
+  const bodyD=site.id==='forbidden-city'?depth-Math.min(.28,depth*.22):depth*.78;
+  if(width>.65&&depth>.38)timberBody(item,m,bodyW,bodyD,height,.07,false);
   else {
     // Normalize the timber details before scaling: fixed-size window frames and
     // brackets would overwhelm a two-to-six metre hut if used at full size.
@@ -258,18 +305,18 @@ function footprintBuilding(group: THREE.Group, m: Materials, building: BuildingF
   const rise=Math.min(.72,Math.max(.16,height*.55)),form=mappedRoofForm(building.roof);
   const roof=new THREE.Mesh(roofGeometry(width,depth,rise,form),roofMat);roof.position.y=height+.09;item.add(roof);
   const gables=roofGables(width,depth,rise,form,m.wood);gables.position.y=height+.09;item.add(gables);
-  timberEaves(item,m,width,depth,width*.70,depth*.64,height+.09,false);
+  timberEaves(item,m,width,depth,site.id==='forbidden-city'?bodyW*.9:width*.70,site.id==='forbidden-city'?bodyD*.9:depth*.64,height+.09,false);
   if(form==='pyramidal')cylinder(item,m.goldLeaf,0,height+.09+rise+.04,0,.035,.08);
   else box(item,m.ridge,0,height+.10+rise*.98,0,roofSection(width,depth,rise,1,form).w*2,.045,.055);
   group.add(item);
 }
 
-function osmBuildings(group: THREE.Group, m: Materials, data: CityData | undefined, site: Landmark, excludes: Set<number>, roofMat: THREE.Material | ((building: BuildingFootprint) => THREE.Material), include?: (layout: ReturnType<typeof localFootprintLayout>) => boolean, offsetX = 0) {
+function osmBuildings(group: THREE.Group, m: Materials, data: CityData | undefined, site: Landmark, excludes: Set<number>, roofMat: THREE.Material | ((building: BuildingFootprint) => THREE.Material), include?: (layout: ReturnType<typeof localFootprintLayout>, building:BuildingFootprint) => boolean, offsetX = 0) {
   if (!data) return;
   for (const building of data.buildings) {
     if (excludes.has(building.id)) continue;
     const layout = localFootprintLayout(building, site);
-    if (!include || include(layout)) footprintBuilding(group,m,building,site,typeof roofMat === 'function' ? roofMat(building) : roofMat, .22, offsetX);
+    if (!include || include(layout,building)) footprintBuilding(group,m,building,site,typeof roofMat === 'function' ? roofMat(building) : roofMat, .22, offsetX, site.id==='forbidden-city' ? shenwuForecourtLayout(site,data,building.id) : undefined,data);
   }
 }
 
@@ -321,54 +368,74 @@ function palace(group: THREE.Group, m: Materials, w: number, d: number, imperial
   if (imperial) {
     const boundary = localPalaceBoundary(site);
     const axisX = palaceAxis.map(id => mappedLayout(id, site).x).reduce((sum, x) => sum + x, 0) / palaceAxis.length;
-    footprintSolid(group, boundary, .045, m.paving);
-    if(data)group.add(createPalaceWalls(site,data,m));
-    // Broad stone courts and a continuous axial walk make the hierarchy legible from the overview.
-    court(group, m, axisX, d * .175, 31, 44);
-    court(group, m, axisX, -d * .235, 25, 32);
-    box(group, m.stone, axisX, .12, .3, 5.5, .08, d - 8);
-    box(group, m.brass, axisX, .17, .3, .12, .02, d - 8);
+    group.add(createPalacePaving(site,data,m,axisX,d));
+    if(data)group.add(createPalaceCityWalls(site,data,m));
+    const water = palaceWaterAreas(site,data).map(area=>area.ring);
+    const [palaceX,palaceZ]=project(site.coords);
+    const stripe=axisThroughShenwu([[palaceX+axisX,palaceZ+.3-(d-8)/2],[palaceX+axisX,palaceZ+.3+(d-8)/2]],site,data);
+    for(let i=1;i<stripe.length;i++) {
+      const a:[number,number]=[stripe[i-1][0]-palaceX,stripe[i-1][1]-palaceZ],b:[number,number]=[stripe[i][0]-palaceX,stripe[i][1]-palaceZ];
+      for(const [from,to] of wallRuns(a,b,water)) {
+        const mesh=box(group,m.brass,(from[0]+to[0])/2,.17,(from[1]+to[1])/2,.12,.02,Math.hypot(to[0]-from[0],to[1]-from[1]));
+        mesh.rotation.y=Math.atan2(to[0]-from[0],to[1]-from[1]);
+      }
+    }
+    if(data)group.add(createInnerJinshuiBridges(site,data,m));
     const sharedDeck=data?sharedPalaceTerrace(site,data):[];
     if(sharedDeck.length){const deck=palacePlatform(sharedDeck,.813,m,undefined,true);deck.name='three-hall-shared-terrace';deck.position.y=.002;group.add(deck);}
-    for (const id of palaceAxis) mappedHall(group, site, m, id, id === 638449347 ? 1.7 : id === 638981229 ? .85 : 1.2, id === 638449347 || id === 638473398 || id === 638981317, undefined, data);
-    const middleLayout=zhongheLayout(site),middle=new THREE.Group();middle.name='中和殿';
+    for (const id of palaceAxis.filter(id => !data || !palaceGateIds.some(gateId => gateId === id))) mappedHall(group, site, m, id, id === 638449347 ? 1.7 : id === 638981229 ? .85 : 1.2, id === 638449347 || id === 638473398 || id === 638981317, undefined, data);
+    const middleLayout=zhongheLayout(site,data),middle=new THREE.Group();middle.name='中和殿';
     middle.position.set(middleLayout.x,0,middleLayout.z);
+    middle.rotation.y=middleLayout.rotation;
     hall(middle,m,0,0,middleLayout.width,middleLayout.depth,.8,m.gold,false,0,true,zhongheProfile,sharedDeck.length>0);group.add(middle);
     for (const id of [40631331,40631343,40631116,40631121,685316170,40631788,40631798,40631806,40631817,40631826,40631832,40593735,40606461,40592355,40592356]) {
       mappedHall(group, site, m, id, .7, false, undefined, data);
     }
     for (const id of [43512262,43519304]) {
-      const p = mappedLayout(id, site);
-      court(group,m,p.x,p.z,p.w+2.5,p.d+2.8);
-      for (const dz of [-1.3, 1.3]) hall(group,m,p.x,p.z+dz,p.w*.48,p.d*.42,.82);
+      const building=data?.buildings.find(b=>b.id===id);
+      if(building) {
+        const [ox,oz]=project(site.coords),ring=localBuildingRing(building).map(([x,z]):[number,number]=>[x-ox,z-oz]);
+        const item=new THREE.Group();item.name=building.name??String(id);item.userData.osmId=id;group.add(item);
+        footprintSolid(item,ring,.18,m.marble);
+        const layout=palaceSideHallLayout(building,site);
+        for(const name of ['front','rear','corridor'] as const) {
+          const p=layout[name],part=new THREE.Group();part.name=`palace-side-hall-${name}`;
+          part.position.set(p.x,0,p.z);part.rotation.y=p.rotation;item.add(part);
+          const corridor=name==='corridor';
+          if(corridor) {
+            part.rotation.y+=Math.PI/2;
+            timberBody(part,m,p.depth,p.width*.78,.48,.18,false,{frontBays:3,sideBays:1,enclosure:'flush'});
+            const roof=new THREE.Mesh(roofGeometry(p.depth,p.width,.22,'gable'),m.gold);roof.position.y=.66;part.add(roof);
+            const gables=roofGables(p.depth,p.width,.22,'gable',m.wood);gables.position.y=.66;part.add(gables);
+            timberEaves(part,m,p.depth,p.width,p.depth*.95,p.width*.75,.66,false);
+            roofRidges(part,m,0,0,p.depth,p.width,.22,.66,'gable');
+          } else hall(part,m,0,0,p.width,p.depth,1,m.gold,false,0,true,
+            {roof:'hip-gable',double:false,height:1.48,platform:.18,frontBays:5,sideBays:3},true);
+        }
+      } else mappedHall(group,site,m,id,.82,false);
     }
-    const garden = mappedLayout(40795244, site);
-    court(group,m,axisX,garden.z,16,11,false);
-    box(group,m.stone,axisX,.10,garden.z,2.2,.09,11);
-    box(group,m.stone,axisX,.10,garden.z,16,.09,1.6);
+    if(data)group.add(createPalaceLandscape(site,data,m));
     group.add(createPalaceGarden(site,m,data));
     const detailed = new Set([
-      ...palaceAxis,42424174,
+      ...palaceAxis,...palaceGateIds,42424174,
       ...[40631331,40631343,40631116,40631121,685316170,40631788,40631798,40631806,40631817,40631826,40631832,40593735,40606461,40592355,40592356,43512262,43519304],
     ]);
     // Wall centres sit on the boundary; include their full footprint without a
     // centre-only clipping test. The moat remains the mapped water polygon.
-    const minX=Math.min(...boundary.map(p=>p[0]))-1, maxX=Math.max(...boundary.map(p=>p[0]))+1;
-    const minZ=Math.min(...boundary.map(p=>p[1]))-1, maxZ=Math.max(...boundary.map(p=>p[1]))+1;
     detailed.add(638156366);
-    osmBuildings(group,m,data,site,detailed,building=>/房|库|所|厕所/.test(building.name ?? '')?m.grayRoof:m.gold,layout=>layout.x>minX&&layout.x<maxX&&layout.z>minZ&&layout.z<maxZ);
-    const meridian = data?.buildings.find(building=>building.id===638156366);
-    if (meridian) {
-      const [ox,oz]=project(site.coords), ring=localBuildingRing(meridian).map(([x,z]):[number,number]=>[x-ox,z-oz]);
-      footprintSolid(group,ring,1.2,m.wall);
-      const north=Math.min(...ring.map(p=>p[1])), south=Math.max(...ring.map(p=>p[1]));
-      hall(group,m,axisX,north+1.3,6.0,2.0,1.05,m.gold,true,1.2);
-      for(const side of [-1,1]) {
-        const wing=new THREE.Group();wing.position.set(axisX+side*5.1,1.2,(north+south)/2);wing.rotation.y=Math.PI/2;
-        hall(wing,m,0,0,south-north-1.3,1.05,.42,m.gold);group.add(wing);
-        hall(group,m,axisX+side*5.1,south-.9,1.65,1.65,.65,m.gold,true,1.2);
-      }
-    }
+    osmBuildings(group,m,data,site,detailed,building=>/房|库|所|厕所/.test(building.name ?? '')?m.grayRoof:m.gold,(layout,building)=>{
+      const ring=localBuildingRing(building).map(([x,z]):[number,number]=>[x-project(site.coords)[0],z-project(site.coords)[1]]);
+      return clipPalaceFootprint(ring,boundary).length>=3||palaceBoundaryGap(ring,boundary)<=1.5;
+    });
+    if (data) group.add(...createPalaceGates(site, data, m, (parent, part) => {
+      const upper = new THREE.Group(); upper.name = part.name;
+      upper.position.set(part.x, part.elevation, part.z); upper.rotation.y = part.rotation;
+      // Gate stairs/railings belong to the deck, not a generic hall platform.
+      hall(upper, m, 0, 0, part.width, part.depth, 1, m.gold, part.profile.double, 0, true, part.profile, true);
+      parent.add(upper);
+    }));
+    // Buildings must exist before wall ends can meet their actual lower facade.
+    if(data)group.add(createPalaceWalls(site,data,m,group));
   } else {
     court(group,m,0,0,w*.92,d*.92);
     enclosure(group,m,w,d,1.2,m.wall);
@@ -426,6 +493,8 @@ function circularWall(group: THREE.Group,m: Materials,radius:number,height:numbe
 
 function heaven(group: THREE.Group, m: Materials, _w: number, _d: number, site: Landmark, data?: CityData) {
   if(!data)return;
+  group.add(createTiantanGround(site,data,m));
+  group.add(createTiantanWalls(site,data,m));
   const byId=(id:number)=>data.buildings.find(b=>b.id===id)!;
   const at=(id:number)=>localFootprintLayout(byId(id),site);
   const prayer=at(43921139),vault=at(43921121),prayerGate=at(43921137);
@@ -661,19 +730,18 @@ function squareEnsemble(group: THREE.Group, m: Materials, site: Landmark, data?:
   }
 }
 
-function gate(group: THREE.Group, m: Materials, w: number, d: number, kind: 'general' | 'tiananmen' | 'duanmen' | 'zhengyang') {
-  const tiananmen = kind === 'tiananmen';
+function gate(group: THREE.Group, m: Materials, w: number, d: number, kind: 'general' | 'duanmen' | 'zhengyang') {
   const zhengyang = kind === 'zhengyang';
   const duanmen = kind === 'duanmen';
-  const baseW = tiananmen ? tiananmenWidth : Math.min(w, duanmen ? 12 : 8);
-  const baseD = tiananmen ? tiananmenDepth : Math.min(d, duanmen ? 6.5 : 5);
-  const wallHeight = tiananmen ? 3.0 : duanmen ? 2.55 : 2.6;
+  const baseW = Math.min(w, duanmen ? 12 : 8);
+  const baseD = Math.min(d, duanmen ? 6.5 : 5);
+  const wallHeight = duanmen ? 2.55 : 2.6;
   box(group, m.darkStone, 0, .08, 0, baseW + 1.4, .16, baseD + 1.5);
   const facade=new THREE.Shape();
   facade.moveTo(-baseW/2,0);facade.lineTo(baseW/2,0);facade.lineTo(baseW/2,wallHeight);facade.lineTo(-baseW/2,wallHeight);facade.closePath();
-  const count = tiananmen || duanmen ? 5 : zhengyang ? 1 : 3;
+  const count = duanmen ? 5 : zhengyang ? 1 : 3;
   for(let i=0;i<count;i++) {
-    const xx=tiananmen?tiananmenPortals[i]:(i-(count-1)/2)*(baseW/(count+1));
+    const xx=(i-(count-1)/2)*(baseW/(count+1));
     const radius=i===Math.floor(count/2)?.48:.40, height=1.95;
     const opening=new THREE.Path();
     opening.moveTo(xx-radius,.12);opening.lineTo(xx+radius,.12);opening.lineTo(xx+radius,height-radius);
@@ -684,23 +752,10 @@ function gate(group: THREE.Group, m: Materials, w: number, d: number, kind: 'gen
   const wall=new THREE.Mesh(new THREE.ExtrudeGeometry(facade,{depth:baseD,bevelEnabled:false,curveSegments:14}),m.wall);
   wall.position.z=-baseD/2;group.add(wall);
   box(group, m.stone, 0, wallHeight+.06, 0, baseW + .28, .16, baseD + .32);
-  const towerWidth = tiananmen ? baseW*.80 : duanmen ? baseW*.78 : baseW*.88;
-  const towerDepth = tiananmen ? baseD*.70 : duanmen ? baseD*.76 : baseD*.82;
-  hall(group, m, 0, 0, towerWidth, towerDepth, tiananmen ? 2.15 : duanmen ? 1.65 : 1.9, zhengyang ? m.grayRoof : m.gold, true, wallHeight+.06);
+  const towerWidth = duanmen ? baseW*.78 : baseW*.88;
+  const towerDepth = duanmen ? baseD*.76 : baseD*.82;
+  hall(group, m, 0, 0, towerWidth, towerDepth, duanmen ? 1.65 : 1.9, zhengyang ? m.grayRoof : m.gold, true, wallHeight+.06);
   for (const face of [-1,1]) for (let i = -6; i <= 6; i++) box(group, m.stone, i * baseW / 13, wallHeight+.22, face*baseD/2, .12,.34,.30);
-  if (tiananmen) {
-    box(group,m.stone,0,2.47,baseD/2+.045,.62,.86,.045);
-    box(group,m.window,0,2.47,baseD/2+.072,.49,.72,.025);
-    for(const side of [-1,1]) {
-      box(group,m.stone,side*baseW*.273,2.49,baseD/2+.045,baseW*.36,.38,.045);
-      box(group,m.wall,side*baseW*.273,2.49,baseD/2+.073,baseW*.33,.22,.018);
-    }
-    for (const side of [-1,1]) {
-      box(group,m.stone,side*(baseW*.62),1.3,baseD*.45,.18,2.6,.18);
-      const cloud=new THREE.Mesh(new THREE.TorusGeometry(.25,.035,5,18),m.stone);cloud.rotation.x=Math.PI/2;cloud.position.set(side*baseW*.62,2.6,baseD*.45);group.add(cloud);
-      box(group,m.darkStone,side*(baseW*.48),.46,baseD/2+1.0,.62,.55,1.15);
-    }
-  }
   if (duanmen) {
     for(const side of [-1,1]) {
       box(group,m.wall,side*baseW*.55,wallHeight*.70,1.7,2.3,wallHeight*.9,2.2);
@@ -755,26 +810,40 @@ export function createLandmark(site: Landmark, m: Materials, data?: CityData): T
     case 'temple': if (site.id === 'taimiao') ancestralTemple(group,m,site,data); else heaven(group, m, w, d, site, data); break;
     case 'gate':
       if(site.id==='zhengyang')zhengyangGate(group,m,site,data);
-      else gate(group, m, w, d, site.id === 'tiananmen' ? 'tiananmen' : site.id === 'duanmen' ? 'duanmen' : 'general');
+      else if(site.id==='tiananmen')createTiananmen(group,m);
+      else if(site.id==='duanmen')createDuanmen(group,m);
+      else if(site.id==='yongdingmen')createYongdingmen(group,m);
+      else gate(group, m, w, d, 'general');
       if(site.id==='zhengyang'&&data)group.add(createArrowTower(site,m,data));
       break;
     case 'tower': group.add(createBellDrum(site,m)); break;
     case 'bridge': {
       if(site.id==='jinshui') {
         const [ox,oz]=project(site.coords);
-        for(const bridge of jinshuiLayout()) {
-          const x=bridge.x-ox,north=bridge.northZ-oz,south=bridge.southZ-oz,river=bridge.riverZ-oz;
-          // The approach reaches the matching opening; only the river span has
-          // the raised stone railings. This preserves the forecourt between them.
-          box(group,m.stone,x,.10,(north+south)/2,bridge.width,.18,south-north);
+        for(const bridge of jinshuiLayout(data?.context)) {
+          const x=bridge.x-ox,north=bridge.northZ-oz;
+          const waterNorth=bridge.crossingNorthZ-oz,waterSouth=bridge.crossingSouthZ-oz;
+          if(bridge.portal!==null&&north<waterNorth) {
+            const approach=new THREE.Group();approach.name='jinshui-causeway';group.add(approach);
+            box(approach,m.paving,x,.055,(north+waterNorth)/2,bridge.width,.11,waterNorth-north);
+          }
+          const bridgeGroup=new THREE.Group();
+          bridgeGroup.name=bridge.portal===null?'jinshui-lateral-bridge':'jinshui-principal-bridge';
+          bridgeGroup.userData.portal=bridge.portal;
+          group.add(bridgeGroup);
+          // The long north segment is a paved causeway, not part of the bridge.
+          // This group contains only the span between the mapped water banks.
+          box(bridgeGroup,m.stone,x,.13,waterNorth,bridge.width,.26,.18);
+          box(bridgeGroup,m.stone,x,.13,waterSouth,bridge.width,.26,.18);
+          const waterSpan=waterSouth-waterNorth;
           for(let i=0;i<12;i++) {
-            const z=river-1.5+(i+.5)*.25, rise=.10*Math.sin((i+.5)/12*Math.PI);
-            box(group,m.marble,x,.20+rise,z,bridge.width,.10,.252);
+            const z=waterNorth+(i+.5)*waterSpan/12, rise=.10*Math.sin((i+.5)/12*Math.PI);
+            box(bridgeGroup,m.marble,x,.20+rise,z,bridge.width,.10,waterSpan/12+.015);
             for(const side of [-1,1]) {
               const px=x+side*(bridge.width/2-.035);
-              box(group,m.marble,px,.40+rise,z,.065,.35,.065);
-              box(group,m.marble,px,.57+rise,z,.07,.05,.255);
-              box(group,m.marble,px,.33+rise,z,.045,.12,.255);
+              box(bridgeGroup,m.marble,px,.40+rise,z,.065,.35,.065);
+              box(bridgeGroup,m.marble,px,.57+rise,z,.07,.05,waterSpan/12+.018);
+              box(bridgeGroup,m.marble,px,.33+rise,z,.045,.12,waterSpan/12+.018);
             }
           }
         }

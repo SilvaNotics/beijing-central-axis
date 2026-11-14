@@ -7,15 +7,16 @@ function block(group:THREE.Group,material:THREE.Material,x:number,y:number,z:num
   const mesh=new THREE.Mesh(cube,material);mesh.position.set(x,y,z);mesh.scale.set(w,h,d);group.add(mesh);return mesh;
 }
 
-/** Recessed enclosure and a continuous, open perimeter colonnade.
+/** Recessed enclosure and a continuous, open perimeter colonnade by default.
+ * Flush infill joins the columns for the exposed room between double eaves.
  * Dimensions include the veranda; all details remain under the supplied roof.
  * Ornament is schematic, informed by Palace Museum exterior photographs.
  */
-export function timberBody(group:THREE.Group,m:Materials,width:number,depth:number,height:number,base:number,rich=true,counts?:{frontBays:number;sideBays:number}) {
+export function timberBody(group:THREE.Group,m:Materials,width:number,depth:number,height:number,base:number,rich=true,options?:{frontBays?:number;sideBays?:number;enclosure?:'flush'}) {
   const body=new THREE.Group();body.position.y=base;group.add(body);
-  const porch=Math.min(.30,Math.min(width,depth)*.13);
-  const wallW=width-porch*2,wallD=depth-porch*2;
   const radius=Math.min(.065,height*.055,Math.min(width,depth)*.055);
+  const porch=options?.enclosure==='flush'?radius:Math.min(.30,Math.min(width,depth)*.13);
+  const wallW=width-porch*2,wallD=depth-porch*2;
   const core=block(body,m.vermilion,0,height*.48,0,wallW,height*.96,wallD);core.name='timber-enclosure';
   const faces=[
     {name:'south',span:width,cross:depth,angle:0},
@@ -28,7 +29,7 @@ export function timberBody(group:THREE.Group,m:Materials,width:number,depth:numb
     const windows=new THREE.Group();windows.name=`timber-windows-${face.name}`;facade.add(windows);
     const columns=new THREE.Group();columns.name=`timber-columns-${face.name}`;facade.add(columns);
     const span=face.span-radius*2,outer=face.cross/2-radius,wall=face.cross/2-porch;
-    const specified=counts?(face.name==='north'||face.name==='south'?counts.frontBays:counts.sideBays):undefined;
+    const specified=face.name==='north'||face.name==='south'?options?.frontBays:options?.sideBays;
     const bays=specified??Math.max(1,Math.min(rich?11:14,Math.round(span/(rich?.66:.72))));
     const spacing=span/bays;
     // Stone column shoes and slender red shafts are separate from the doors.
@@ -69,6 +70,46 @@ export function timberBody(group:THREE.Group,m:Materials,width:number,depth:numb
     }
   }
   return body;
+}
+
+/** A shallow tile apron following the actual roof where a flush upper room emerges.
+ * This is a schematic transition, not a measured historical construction detail.
+ */
+export function timberRoofApron(body:THREE.Group,roof:THREE.Mesh,material:THREE.Material) {
+  const core=body.getObjectByName('timber-enclosure') as THREE.Mesh;
+  const halfW=core.scale.x/2,halfD=core.scale.z/2;
+  const perimeter:THREE.Vector2[]=[];
+  const corners=[[-1,-1],[1,-1],[1,1],[-1,1]];
+  for(let side=0;side<4;side++) {
+    const a=corners[side],b=corners[(side+1)%4];
+    const length=side%2===0?halfW*2:halfD*2;
+    const steps=Math.max(4,Math.min(16,Math.ceil(length/.3)));
+    for(let i=0;i<steps;i++)perimeter.push(new THREE.Vector2(a[0]+(b[0]-a[0])*i/steps,a[1]+(b[1]-a[1])*i/steps));
+  }
+  body.updateWorldMatrix(true,false);roof.updateWorldMatrix(true,false);
+  const ray=new THREE.Raycaster(),down=new THREE.Vector3(0,-1,0).transformDirection(body.matrixWorld);
+  const positions:number[]=[],indices:number[]=[];
+  // The inner lip sits slightly inside the wall; the outer edge settles onto tiles.
+  for(const [outset,lift] of [[-.012,.055],[.045,.030],[.11,.006]]) {
+    for(const point of perimeter) {
+      const x=point.x*(halfW+outset),z=point.y*(halfD+outset);
+      ray.set(body.localToWorld(new THREE.Vector3(x,core.scale.y+10,z)),down);
+      const hit=ray.intersectObject(roof,false)[0];
+      // Small/narrow halls can place part of the room beyond the lower roof.
+      // Leave those models unchanged rather than fabricate a surface height.
+      if(!hit)return;
+      positions.push(x,body.worldToLocal(hit.point).y+lift,z);
+    }
+  }
+  const count=perimeter.length;
+  for(let ring=0;ring<2;ring++)for(let i=0;i<count;i++) {
+    const a=ring*count+i,b=a+count,c=ring*count+(i+1)%count,d=c+count;
+    indices.push(a,c,b,b,c,d);
+  }
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  geometry.setIndex(indices);geometry.computeVertexNormals();
+  const apron=new THREE.Mesh(geometry,material);apron.name='timber-roof-apron';body.add(apron);
 }
 
 /** A downward-facing soffit with a hole above the room and visible rafter ends. */

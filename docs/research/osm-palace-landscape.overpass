@@ -1,0 +1,1 @@
+[out:json][timeout:35];(way["bridge"](39.912,116.386,39.9213,116.3955);way["leisure"="garden"](39.912,116.386,39.9213,116.3955);relation["leisure"="garden"](39.912,116.386,39.9213,116.3955););out tags geom;

@@ -1,3 +1,5 @@
+import { jingshanCourts, jingshanWalks } from './jingshanLayout';
+import { distanceToRing } from './centralGreenery';
 import * as THREE from 'three';
 import type { Landmark } from '../data/types';
 import { mappedLayout, jingshanPavilions } from './layouts';
@@ -64,11 +66,11 @@ export function jingshanHeight(site:Landmark,x:number,z:number,data?:CityData) {
     if(r<terraceRadius){height=peak.height;break;}
     if(r<terraceRadius+.85)height=peak.height+(height-peak.height)*smooth((r-terraceRadius)/.85);
   }
-  return Math.max(0,height)*smooth(Math.min(1,clearance/2));
+  const courtDistance=Math.min(...jingshanCourts(site).map(c=>pointInPolygon([x,z],c.ring)?0:distanceToRing([x,z],c.ring)));
+  return Math.max(0,height)*smooth(Math.min(1,clearance/2))*smooth(Math.min(1,courtDistance/.8));
 }
 export function jingshanPaths(site:Landmark):[number,number][][] {
-  const peaks=jingshanPeaks(site),middle=peaks.find(p=>p.osmId===26390235)!;
-  return [peaks.map(p=>[p.x,p.z]),[[middle.x,middle.z+13],[middle.x-4,middle.z+10],[middle.x+3,middle.z+7],[middle.x-2.7,middle.z+4],[middle.x,middle.z]]];
+  return jingshanWalks(site).map(walk=>walk.points);
 }
 export function createJingshanTerrain(site:Landmark,m:Materials,data?:CityData) {
   const group=new THREE.Group();group.name='景山连续山体';
@@ -88,21 +90,28 @@ export function createJingshanTerrain(site:Landmark,m:Materials,data?:CityData) 
   }
   geometry.setIndex(indices);
   geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.computeVertexNormals();const hill=new THREE.Mesh(geometry,m.hillEarth);hill.name='jingshan-ground';group.add(hill);
-  for(const path of jingshanPaths(site)) {
+  for(const walk of jingshanWalks(site)) {
+    const path=walk.points;
     const vertices:number[]=[],indices:number[]=[];
     for(let segment=1;segment<path.length;segment++) {
       const a=path[segment-1],b=path[segment],dx=b[0]-a[0],dz=b[1]-a[1],length=Math.hypot(dx,dz),steps=Math.ceil(length/.16);
       for(let j=0;j<steps;j++) {
         const quad:number[]=[];
         for(const t of [j/steps,(j+1)/steps])for(const side of [-1,1]) {
-          const x=a[0]+dx*t-dz/length*.075*side,z=a[1]+dz*t+dx/length*.075*side;quad.push(x,jingshanHeight(site,x,z,data)+.055,z);
+          const x=a[0]+dx*t-dz/length*walk.width/2*side,z=a[1]+dz*t+dx/length*walk.width/2*side;quad.push(x,jingshanHeight(site,x,z,data)+.055,z);
         }
         if([0,3,6,9].some(i=>jingshanClearance(site,quad[i],quad[i+2],data)<=.01))continue;
         const base=vertices.length/3;vertices.push(...quad);
         indices.push(base,base+1,base+2,base+1,base+3,base+2);
       }
     }
-    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();const mesh=new THREE.Mesh(g,m.stone);mesh.name='jingshan-hill-path';group.add(mesh);
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.setAttribute('uv',new THREE.Float32BufferAttribute(vertices.flatMap((_,i)=>i%3===0?[vertices[i]/1.6,vertices[i+2]/1.6]:[]),2));g.computeVertexNormals();const mesh=new THREE.Mesh(g,m.stone);mesh.name='jingshan-hill-path';group.add(mesh);
+  }
+  for(const court of jingshanCourts(site)) {
+    const g=new THREE.ShapeGeometry(new THREE.Shape(court.ring.map(([x,z])=>new THREE.Vector2(x,-z))));g.rotateX(-Math.PI/2);
+    const p=g.getAttribute('position'),uv=g.getAttribute('uv');
+    for(let i=0;i<p.count;i++)uv.setXY(i,p.getX(i)/1.6,p.getZ(i)/1.6);
+    const mesh=new THREE.Mesh(g,m.stone);mesh.position.y=.045;mesh.name=`jingshan-court-${court.id}`;mesh.receiveShadow=true;group.add(mesh);
   }
   return group;
 }

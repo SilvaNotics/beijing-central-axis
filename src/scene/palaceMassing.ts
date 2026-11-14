@@ -8,6 +8,8 @@ import { alignPalaceRoof } from './precincts';
 export const palaceTerraces=new Map<number,number>([
   [638449433,.813],[638449259,.813],[638449270,.813],
   [638467894,.813],[638460864,.813],[638460865,.813],[638981252,.20],
+  // PAL-QIANQING: front moon terrace and raised approach, not roofed halls.
+  [638981261,.20],[638807694,.20],
 ]);
 export const palaceRaisedBuildings=new Set([
   638507747,638507769,638507783,638507841,638590169,638590140,

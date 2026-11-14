@@ -106,7 +106,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   let aspect = 1;
   const controls = new OrbitControls(camera, renderer.domElement);
   failedInitCleanup.push(() => controls.dispose());
-  // OrbitControls swaps PAN for ROTATE while Shift is held on pointer-down.
+  // The pointer-down handler keeps Ctrl drags panning despite OrbitControls' modifier swap.
   controls.enableRotate = true;
   controls.rotateSpeed = .55;
   controls.minPolarAngle = .12; controls.maxPolarAngle = 1.35;
@@ -169,7 +169,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
       if (id === 'sample') { target.z += 8; }
       if (s.id === 'tiantan') {
         const prayer=mappedLayout(43921139,s),vault=mappedLayout(43921121,s);
-        target.x+=prayer.x;target.z+=(prayer.z+vault.z)/2+4;extent=Math.max(90,70/Math.max(.45,aspect));
+        target.x+=prayer.x;target.z+=(prayer.z+vault.z)/2+4;extent=Math.max(188,140/Math.max(.45,aspect));
       }
       if (s.id === 'southern-road') extent = Math.max(155,48/Math.max(.45,aspect));
       fit(target, extent);
@@ -284,7 +284,13 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     renderer.setSize(width, height);
     if (activeFocus === 'all') overview(false); else invalidate();
   };
-  const onPointerDown = (e: PointerEvent) => { if (e.button === 1) e.preventDefault(); down = { x: e.clientX, y: e.clientY }; animation = null; };
+  const onPointerDown = (e: PointerEvent) => {
+    // OrbitControls swaps ROTATE back to PAN when Ctrl is held; Shift still rotates.
+    const action = e.ctrlKey && !e.shiftKey ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
+    controls.mouseButtons.LEFT = controls.mouseButtons.MIDDLE = controls.mouseButtons.RIGHT = action;
+    if (e.button === 1) e.preventDefault();
+    down = { x: e.clientX, y: e.clientY }; animation = null;
+  };
   const onPointerUp = (e: PointerEvent) => {
     if (e.shiftKey || e.button !== 0 || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) return;
     const rect = renderer.domElement.getBoundingClientRect();
@@ -297,7 +303,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   const onVisibility = () => { if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else invalidate(); };
   document.addEventListener('visibilitychange', onVisibility);
   controls.addEventListener('change', invalidate);
-  renderer.domElement.addEventListener('pointerdown', onPointerDown);
+  renderer.domElement.addEventListener('pointerdown', onPointerDown, true);
   renderer.domElement.addEventListener('pointerup', onPointerUp);
   renderer.domElement.addEventListener('webglcontextlost', onContextLost);
   const observer = new ResizeObserver(resize); observer.observe(container); resize();
@@ -314,7 +320,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     active: value => { if(active===value)return; active = value; if (value) { animation = null; invalidate(); } else { cancelAnimationFrame(frame); frame = 0; } },
     dispose: () => {
       disposed = true; cancelAnimationFrame(frame); observer.disconnect(); controls.dispose();
-      renderer.domElement.removeEventListener('pointerdown', onPointerDown);
+      renderer.domElement.removeEventListener('pointerdown', onPointerDown, true);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       sun.dispose(); document.removeEventListener('visibilitychange', onVisibility);
