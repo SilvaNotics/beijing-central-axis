@@ -1,3 +1,5 @@
+import { jingshanCourts, jingshanWalks } from './jingshanLayout';
+import { tiantanGround } from './tiantanGround';
 import type { CityData } from './geodata';
 import { localBuildingRing } from './geodata';
 import { pointInPolygon, project } from './geo';
@@ -29,6 +31,22 @@ export function createCityPlan(data: CityData, resolution = 2048, architecturalP
     trace([feature.coordinates.map(project), ...(feature.holes ?? []).map(r => r.map(project))]);
     ctx.fillStyle = '#3d5445'; ctx.fill('evenodd');
     ctx.strokeStyle = '#697560'; ctx.lineWidth = .14; ctx.stroke();
+  }
+  const temple = landmarks.find(site => site.id === 'tiantan')!;
+  const paving = tiantanGround(temple,data), [tx,tz] = project(temple.coords);
+  const world = ([x,z]: [number,number]): [number,number] => [x+tx,z+tz];
+  ctx.fillStyle = '#b1a793'; ctx.strokeStyle = '#b1a793'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const court of paving.courts) { trace([court.ring.map(world)]); ctx.fill(); }
+  for (const path of paving.paths) {
+    ctx.beginPath(); path.points.map(world).forEach(([x,z],i) => i ? ctx.lineTo(x,z) : ctx.moveTo(x,z));
+    ctx.lineWidth = path.width; ctx.stroke();
+  }
+  const hill = landmarks.find(site=>site.id==='jingshan')!, [jx,jz] = project(hill.coords);
+  const hillPoint = ([x,z]:[number,number]):[number,number] => [x+jx,z+jz];
+  for(const court of jingshanCourts(hill)) { trace([court.ring.map(hillPoint)]); ctx.fill(); }
+  for(const walk of jingshanWalks(hill)) {
+    ctx.beginPath();walk.points.map(hillPoint).forEach(([x,z],i)=>i?ctx.lineTo(x,z):ctx.moveTo(x,z));
+    ctx.lineWidth=walk.width;ctx.stroke();
   }
   const cores = landmarks.map(s => ({ p: project(s.coords), w: s.footprint[0] / 20, d: s.footprint[1] / 20 }));
   const protectedAreas = data.context.filter(feature => feature.kind === 'park' || feature.kind === 'water').map(feature => ({

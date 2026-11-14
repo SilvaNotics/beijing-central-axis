@@ -1,3 +1,4 @@
+import { createTiantanGround } from './tiantanGround';
 import * as THREE from 'three';
 import type { Landmark } from '../data/types';
 import type { Materials } from './materials';
@@ -426,6 +427,7 @@ function circularWall(group: THREE.Group,m: Materials,radius:number,height:numbe
 
 function heaven(group: THREE.Group, m: Materials, _w: number, _d: number, site: Landmark, data?: CityData) {
   if(!data)return;
+  group.add(createTiantanGround(site,data,m));
   const byId=(id:number)=>data.buildings.find(b=>b.id===id)!;
   const at=(id:number)=>localFootprintLayout(byId(id),site);
   const prayer=at(43921139),vault=at(43921121),prayerGate=at(43921137);

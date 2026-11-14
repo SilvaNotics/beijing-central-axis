@@ -1,0 +1,6 @@
+[out:json][timeout:90][date:"2026-11-13T07:08:00Z"];
+(
+  way[highway~"^(footway|path|pedestrian|steps|service)$"](39.8725,116.3985,39.8870,116.4145);
+  way["area:highway"](39.8725,116.3985,39.8870,116.4145);
+);
+out geom;

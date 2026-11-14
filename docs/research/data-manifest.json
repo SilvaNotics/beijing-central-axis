@@ -1,6 +1,6 @@
 {
   "checkedOn": "2026-11-14",
-  "method": "复核仓库文件字节数、SHA-256和公开数据计数。本轮仅新增故宫barrier围墙历史时点查询；既有建筑、环境、湖泊及高德快照保持不变。",
+  "method": "复核仓库文件字节数、SHA-256和公开数据计数。本轮仅新增故宫barrier围墙历史时点查询；既有建筑、环境、湖泊及高德快照保持不变。 天坛/景山铺地轮次仅复核既有快照；天坛步道查询未成功，保留失败查询记录，不增加地理要素计数。",
   "files": [
     {
       "path": "public/data/buildings.json",
@@ -51,6 +51,11 @@
       "path": "docs/research/osm-palace-walls.overpass",
       "bytes": 212,
       "sha256": "de1a8c10723aba3961ead00cd87a68d00b8cb248a81c284dacfc7a2b95578033"
+    },
+    {
+      "path": "docs/research/osm-tiantan-paths.overpass",
+      "bytes": 221,
+      "sha256": "d11d196947a04ee7c03b29868a51060a693e6b73e6996c11f32d05edcb9998df"
     }
   ],
   "counts": {
@@ -78,5 +83,12 @@
     "runtimeFile": "src/data/palace-walls.json",
     "license": "ODbL 1.0; © OpenStreetMap contributors",
     "filtering": "保留189条原始开放way和3个入口节点；运行时按故宫边界裁切，与已渲染建筑/院墙去重，并在入口处留空。"
+  },
+  "tiantanPathAttempt": {
+    "attemptedOn": "2026-11-14",
+    "queryFile": "docs/research/osm-tiantan-paths.overpass",
+    "status": "failed-no-snapshot",
+    "result": "主端点HTTP406；镜像请求超时。保留查询供后续重试，不计入道路或原始快照数。",
+    "runtime": "src/scene/tiantanGround.ts uses official guide topology and existing building anchors; no downloaded pedestrian ways."
   }
 }

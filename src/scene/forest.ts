@@ -1,11 +1,12 @@
+import { tiantanGround, templePavingClearance } from './tiantanGround';
 import * as THREE from 'three';
 import type { CityData } from './geodata';
 import { localBuildingRing } from './geodata';
 import { project, pointInPolygon } from './geo';
 import { landmarks } from '../data/heritage';
 import { mappedLayout } from './layouts';
-import { jingshanHeight, jingshanPeaks, jingshanPaths, jingshanClearance } from './jingshanTerrain';
-import { jingshanBuildingBounds } from './jingshanLayout';
+import { jingshanHeight, jingshanPeaks, jingshanClearance } from './jingshanTerrain';
+import { jingshanCourts, jingshanWalks, jingshanBuildingBounds } from './jingshanLayout';
 import { treeCrown, treeBranches, type TreeSpecies } from './treeGeometry';
 import { moundCenter } from './templeLayout';
 import { localPalaceBoundary } from './precincts';
@@ -55,6 +56,7 @@ export function forestPoints(data:CityData):ForestPoint[] {
     const buildings=buildingBounds.filter(b=>b.maxX>=minX&&b.minX<=maxX&&b.maxZ>=minZ&&b.minZ<=maxZ);
     const site=landmarks.find(s=>s.id===siteId)!,[originX,originZ]=project(site.coords);
     const authoredBounds=siteId==='jingshan'?jingshanBuildingBounds(site):[];
+    const paving=siteId==='tiantan'?tiantanGround(site,data):undefined;
     const prayer=mappedLayout(43921139,landmarks.find(s=>s.id==='tiantan')!),vault=mappedLayout(43921121,landmarks.find(s=>s.id==='tiantan')!);
     const [moundX,moundZ]=moundCenter(landmarks.find(s=>s.id==='tiantan')!);
     const peaks=jingshanPeaks(site);
@@ -72,15 +74,18 @@ export function forestPoints(data:CityData):ForestPoint[] {
       const height=species==='cypress'?1.45+random()*.9:species==='pine'?1.1+random()*.7:1.3+random()*.75;
       const radius=species==='cypress'?.68+random()*.30:species==='pine'?.55+random()*.3:.52+random()*.35;
       const tree:ForestPoint={x,z,y,height,radius,shade,species,region:siteId};
-      if(siteId==='jingshan') {
+      if(paving&&templePavingClearance([lx,lz],paving)<radius*1.9+.12)continue;
+      if(siteId==='jingshan'||siteId==='tiantan') {
         const clearance=radius*1.9+.12;
         const overlaps=(px:number,pz:number,b:typeof buildingBounds[number])=>Math.hypot(Math.max(b.minX-px,0,px-b.maxX),Math.max(b.minZ-pz,0,pz-b.maxZ))<clearance;
         if(authoredBounds.some(b=>overlaps(lx,lz,b))||buildings.some(b=>overlaps(x,z,b)))continue;
       }
       if(siteId==='jingshan'&&jingshanClearance(site,lx,lz,data)<radius*1.9+.12)continue;
-      if(siteId==='jingshan'&&jingshanPaths(site).some(path=>path.some((a,i)=>{
-        if(!i)return false;const b=path[i-1],dx=b[0]-a[0],dz=b[1]-a[1],l2=dx*dx+dz*dz,t=Math.max(0,Math.min(1,((lx-a[0])*dx+(lz-a[1])*dz)/l2));return Math.hypot(lx-a[0]-dx*t,lz-a[1]-dz*t)<tree.radius*.8+.16;
-      })))continue;
+      if(siteId==='jingshan') {
+        const point:[number,number]=[lx,lz],clearance=radius*1.9+.12;
+        if(jingshanWalks(site).some(walk=>distanceToRing(point,walk.points,false)<walk.width/2+clearance))continue;
+        if(jingshanCourts(site).some(court=>pointInPolygon(point,court.ring)||distanceToRing(point,court.ring)<clearance))continue;
+      }
       if(!dryCrown(x,z,tree.radius))continue;
       result.push(tree);accepted++;
     }

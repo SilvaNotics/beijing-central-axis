@@ -307,3 +307,15 @@
 - `src/data/palace-walls.json` SHA-256：`0adb31970e0dad46c528de5985702c04bab0e4e022e47d0d48d3d1a8bd45fcee`。
 - `src/scene/architecture.ts` SHA-256：`d5e14f5910f2e7d3399f00dbc43be3cfa11903647cc077f107485f9134f3c406`。
 - `src/components/FlatMap.tsx` SHA-256：`de8048b423025373d72477a13fb7c61e68ababb59a9c91d3ba9258af535a2a63`。
+
+## 2026-11-14 · 天坛与景山铺地和道路连接
+
+以下均为本项目模型截图，桌面1440×1000、窄屏390×844。桌面修正后截图临时隐藏详情面板以便观察；院落近景使用实际场景拖动与缩放。道路折点、路宽和院内硬铺比例为导览示意，未以这些截图证明现状准确性。
+
+- [天坛修正前](tiantan-paths-before.png)：只有丹陛桥，斋宫内仍为草地。
+- [天坛路网修正后](tiantan-paths-overview.png)：横向和侧向通路、附属院落接入。
+- [斋宫院落近景](tiantan-courtyard-after.png)：护河内铺地、三向入口连接及树冠留白。
+- [景山修正后](jingshan-paving-after.png)：寿皇殿与绮望楼铺地、前后山通路及东西登山连接。
+- [天坛窄屏](tiantan-paths-mobile.png)：布局与浏览器检查，非全园视觉验收。
+
+证据、实际验证结果与限制见[本轮记录](../tiantan-ground-review-2026-11-14.md)。

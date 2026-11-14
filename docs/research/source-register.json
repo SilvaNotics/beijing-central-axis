@@ -172,6 +172,16 @@
           "date": "2026-11-14",
           "scope": "景山树木穿建筑修正：核对public/data/buildings.json与src/data/building-layouts.json中的寿皇殿26390117、绮望楼26390236及五亭189309373、189309374、26390235、189309372、189309369。",
           "status": "只读取既有本地数据，未联网刷新。地图轮廓不包含程序补出的两侧配房与前殿，也不证明现实逐树位置；补充建筑及屋檐/台阶避让属于模型解释。"
+        },
+        {
+          "verifiedOn": "2026-11-14",
+          "files": [
+            "public/data/buildings.json",
+            "public/data/context.geojson",
+            "src/data/building-layouts.json"
+          ],
+          "supports": "天坛斋宫护河内环及门址、附属院落建筑；景山五亭、寿皇殿、绮望楼与园界。",
+          "limits": "本地旧快照复核；新增天坛步道查询未成功获取数据，路网使用官方导览拓扑加模型折线，不是OSM实测路缘。"
         }
       ],
       "verifiedOn": "2026-11-14",
@@ -943,6 +953,35 @@
       "limits": "所获为独立单页，全文题名、作者、出版年份及图六至图八尚未核得，须补证；正文的斗拱出跳仅作参考，模型用简化叠块而非完整营造法式复原；原文形制年代不是当前实测认证。",
       "evidenceRecord": "evidence-matrix.md §03；methodology.md 景山五亭；figures/README.md 景山五亭",
       "pages": "下载文件第1页，即印刷页38；全文其他页面未取得"
+    },
+    {
+      "id": "TEMPLE-GUIDE-MAP",
+      "title": "导览全图",
+      "titleStyle": "官网原题",
+      "publisher": "天坛公园",
+      "url": "https://tiantanpark.cn/navigation_map.html",
+      "kind": "公园管理方官方导览图",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "直接下载网页，并目视检查其官方导览底图 navigation_map2.jpg；不是全园实测或逐路现场核验。",
+      "supports": "东西天门横向通路、南北轴线、斋宫北东南三个方向入口、祈年殿东西支路和南北神厨/宰牲亭与路网的联系。",
+      "limits": "导览图支持拓扑与相对关系，不提供可测量的路宽、折点或逐块铺装；院落硬地比例与逐树位置仍待测绘或现状照片。图像作者和开放许可待核实，不将原图打包、转载或用作运行时纹理。",
+      "imageSource": "https://tiantanpark.cn/Public/static/themes/image/jjl/navigation_map2.jpg",
+      "evidenceRecord": "tiantan-ground-review-2026-11-14.md"
+    },
+    {
+      "id": "JING-ROUTES",
+      "title": "皇家园林：景山公园",
+      "titleStyle": "网页原题",
+      "publisher": "北京旅游网",
+      "url": "https://www.visitbeijing.com.cn/article/47QrTf2Gatx",
+      "kind": "官方旅游介绍与线路",
+      "recordedOn": "2026-11-14",
+      "verifiedOn": "2026-11-14",
+      "reviewStatus": "通过网页抓取工具读取全文，页面标示发布日期2017-03-01；本轮只采用道路连接和楼前月台说明。",
+      "supports": "前山、西侧、后山及东侧主路与五亭之间的游览联系；绮望楼前设宽敞月台。",
+      "limits": "不是测绘或最新开放公告；不据此指定折点、路宽、阶数及院落边界。文中周赏亭约11.3米与既有管理方11.75米记录不同，本轮不改高度，仍采用JING-ZHOUSHANG-PARK；不复用旧交通、餐饮及开放信息。",
+      "evidenceRecord": "tiantan-ground-review-2026-11-14.md"
     }
   ]
 }
