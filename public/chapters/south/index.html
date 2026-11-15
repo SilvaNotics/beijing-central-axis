@@ -1,23 +1,330 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="color-scheme" content="light" />
-<meta name="description" content="北京中轴线南段 · 从天安门到永定门分区接入示例。独立页面，用于替换接入与导航演示。" />
-<title>南段 · 分区接入示例</title>
-<style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Microsoft YaHei","PingFang SC",sans-serif;line-height:1.75}a{color:inherit;text-underline-offset:.25em}button,a{-webkit-tap-highlight-color:transparent}a:focus-visible{outline:3px solid currentColor;outline-offset:6px}p{margin:0 0 1.25rem}h1,h2{font-weight:500;line-height:1.25}h1{margin:.75rem 0 1.5rem;font-family:"Songti SC","Noto Serif CJK SC",SimSun,serif;font-size:clamp(2.75rem,7vw,5.5rem);letter-spacing:.08em}h2{font-size:1.25rem;margin:0 0 .75rem}.skip{position:absolute;left:1rem;top:-5rem;z-index:5;padding:.5rem 1rem;background:var(--paper);color:var(--ink)}.skip:focus{top:1rem}.frame{max-width:1280px;margin:0 auto;padding:2rem clamp(1.25rem,5vw,5rem) 3rem}.topline{display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.75rem;letter-spacing:.12em}.tag{border:1px solid currentColor;padding:.25rem .65rem;display:inline-block}.back{text-decoration:none;display:inline-block;padding:.5rem 0;white-space:nowrap}.hero{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,6vw,6rem);align-items:center;margin:4rem 0}.eyebrow{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase}.intro{max-width:29rem;font-size:.95rem}.intro-note{font-size:.75rem;opacity:.72;max-width:30rem}.map{margin:0;position:relative}.map svg{display:block;width:100%;height:auto}.map figcaption{font-size:.7rem;letter-spacing:.08em;margin-top:.75rem;text-align:right}.map text{font-family:"Microsoft YaHei","PingFang SC",sans-serif}.sequence{display:flex;gap:1rem;flex-wrap:wrap;margin:1.75rem 0 0;padding:0;list-style:none;font-size:.8rem}.sequence a{text-decoration:none;display:inline-block;border-bottom:1px solid;padding:.5rem .1rem}.sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;padding-top:2rem}.section{scroll-margin-top:2rem}.number{font-size:.7rem;letter-spacing:.15em;display:block;margin-bottom:1rem}.section p{font-size:.85rem;opacity:.78;margin:0}.foot{display:flex;justify-content:space-between;gap:1.5rem;margin-top:3rem;padding-top:1.5rem;font-size:.7rem;border-top:1px solid var(--line)}@media(max-width:720px){.frame{padding-top:1rem}.topline{font-size:.65rem;letter-spacing:.04em}.hero{grid-template-columns:1fr;margin:2.5rem 0;gap:2rem}h1{font-size:clamp(2.6rem,11vw,4rem)}.map{max-width:32rem;width:100%;margin:auto}.sections{grid-template-columns:1fr;gap:1.75rem}.section{padding-bottom:1.5rem;border-bottom:1px solid var(--line)}.foot{flex-direction:column;gap:.5rem}.sequence{gap:.75rem}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}body{--paper:#e7dec8;--ink:#343931;--line:#a89f88;background:var(--paper);color:var(--ink)}.frame{max-width:1360px}.topline{border-bottom:1px solid var(--line);padding-bottom:1.25rem}.hero{grid-template-columns:1fr 1.1fr}.map{background:#393f35;color:#eee7ce;padding:1.25rem;transform:rotate(-1deg)}.map figcaption{color:#c7c8ad}.eyebrow{color:#6b6443}.sections{border-top:3px solid #454b3c}.number{color:#706640}.section h2{max-width:20rem}.sequence a:hover{color:#75612b}.intro-note{padding-top:1rem;border-top:1px solid var(--line)}@media(max-width:720px){.hero{grid-template-columns:1fr}.map{transform:none}}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="北京中轴线南段互动地图，包含天安门、正阳门、天坛、先农坛、道路遗存与永定门的故事、配音和影像。">
+<title>京华入墨 · 中轴拾光</title>
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<a class="skip" href="#content">跳至正文</a>
-<div class="frame">
-<header class="topline"><span class="tag">分区接入示例</span><a class="back" data-return href="../../#/">← 返回中轴总览</a></header>
-<main id="content">
-<div class="hero"><div><div class="eyebrow">03 / SOUTHERN CITY</div><h1>向南行，<br>见都城</h1><p class="intro">从天安门城楼和广场建筑群向南，连接正阳门、天坛、先农坛、中轴南段道路遗存与永定门。以一条展开的路径呈现分区范围，为后续的城市叙事留出空间。</p><p class="intro-note">南段 · 从天安门到永定门<br>此页用于演示独立章节接入。正式图文与交互由分区作者替换。</p><nav aria-label="本页节点"><ul class="sequence"><li><a href="#square">天安门城楼 · 广场及建筑群</a></li><li><a href="#altars">天坛 · 先农坛</a></li><li><a href="#city">正阳门 · 道路遗存 · 永定门</a></li></ul></nav></div><figure class="map"><svg viewBox="0 0 480 450" role="img" aria-labelledby="map-title map-desc"><title id="map-title">南段路径和两侧节点示意</title><desc id="map-desc">从天安门城楼与广场经过正阳门、中轴南段道路遗存到永定门，天坛与先农坛在道路两侧。图形不代表距离或面积比例。</desc><path d="M222 30h40v375h-40z" fill="#c4af72" opacity=".2"/><path d="M242 26V415" stroke="#d3be7c" stroke-width="2" stroke-dasharray="7 7"/><a href="#square" aria-label="查看天安门城楼和广场接入位置"><path d="M192 53h100v23H192z" fill="#b46b4a"/><path d="M185 53l57-14 57 14z" fill="#ddbb7e"/><text x="319" y="70" fill="#eee7ce" font-size="13">天安门城楼</text><path d="M182 94h120v76H182z" fill="#b3aa84" opacity=".45"/><text x="242" y="129" fill="#eee7ce" font-size="12" text-anchor="middle">天安门广场</text><text x="242" y="149" fill="#eee7ce" font-size="10" text-anchor="middle">及建筑群</text></a><a href="#city" aria-label="查看正阳门及南段道路接入位置"><path d="M215 191h54v23h-54z" fill="#c38e5c"/><path d="M209 191l33-14 33 14z" fill="#ddbb7e"/><text x="319" y="209" fill="#eee7ce" font-size="13">正阳门</text><text x="242" y="345" fill="#dfd5b8" text-anchor="middle" font-size="11">中轴南段道路遗存</text><path d="M214 383h56v23h-56z" fill="#c38e5c"/><path d="M208 383l34-14 34 14z" fill="#ddbb7e"/><text x="319" y="401" fill="#eee7ce" font-size="13">永定门</text></a><a href="#altars" aria-label="查看天坛和先农坛接入位置"><rect x="64" y="244" width="97" height="67" fill="#637457"/><rect x="324" y="244" width="97" height="67" fill="#637457"/><path d="M242 279H161m81 0h82" fill="none" stroke="#9eaa83" stroke-dasharray="3 5"/><rect x="91" y="256" width="42" height="27" fill="none" stroke="#ded9b2"/><circle cx="373" cy="269" r="16" fill="none" stroke="#ded9b2"/><text x="112" y="301" fill="#eee7ce" text-anchor="middle" font-size="12">先农坛</text><text x="373" y="301" fill="#eee7ce" text-anchor="middle" font-size="12">天坛</text></a><text x="17" y="25" fill="#d8c689" font-size="11">北 N ↑</text><text x="17" y="432" fill="#c7c8ad" font-size="10" letter-spacing="2">GATE / SQUARE / ROAD / ALTAR</text></svg><figcaption>节点关系示意 · 非比例地图</figcaption></figure></div>
-<div class="sections"><section class="section" id="square"><span class="number">01 / 城市公共空间</span><h2>天安门城楼 · 广场及建筑群</h2><p>这里保留广场一带的内容入口。未来章节可用自己的图文和交互方式组织多个建筑节点。</p></section><section class="section" id="altars"><span class="number">02 / 轴线两侧</span><h2>天坛 · 先农坛</h2><p>小地图将两个节点安排在主路径两侧，便于识别分区关系，不表达实际面积与距离。</p></section><section class="section" id="city"><span class="number">03 / 沿路向南</span><h2>正阳门 · 道路遗存 · 永定门</h2><p>从门、路到南端节点，详细内容由章节作者接续。整个页面可独立替换，不影响主应用入口。</p></section></div>
-</main>
-<footer class="foot"><span>北京中轴 · 独立章节示例 / SOUTH</span><span>本地资源 · 自包含页面 · 可整体替换</span></footer>
+<div id="axis-ink-opening" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg"
+       viewBox="0 0 1000 1000"
+       preserveAspectRatio="none">
+    <defs>
+      <filter id="axisIntroSpread"
+              x="-45%" y="-45%" width="190%" height="190%"
+              color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise"
+                      baseFrequency=".009 .013"
+                      numOctaves="3"
+                      seed="19"
+                      result="inkNoise"/>
+        <feDisplacementMap in="SourceGraphic"
+                           in2="inkNoise"
+                           scale="63"
+                           xChannelSelector="R"
+                           yChannelSelector="G"/>
+        <feGaussianBlur stdDeviation="7"/>
+      </filter>
+
+      <filter id="axisIntroBloom"
+              x="-50%" y="-50%" width="200%" height="200%">
+        <feTurbulence type="fractalNoise"
+                      baseFrequency=".012 .018"
+                      numOctaves="3"
+                      seed="19"
+                      result="bloomNoise"/>
+        <feDisplacementMap in="SourceGraphic"
+                           in2="bloomNoise"
+                           scale="83"/>
+        <feGaussianBlur stdDeviation="15"/>
+      </filter>
+
+      <filter id="axisIntroPaper"
+              x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise"
+                      baseFrequency=".6"
+                      numOctaves="3"
+                      stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+      </filter>
+
+      <radialGradient id="axisIntroPaperColor">
+        <stop offset="0" stop-color="#fbf5e5"/>
+        <stop offset=".65" stop-color="#f3ecda"/>
+        <stop offset="1" stop-color="#e8dec6"/>
+      </radialGradient>
+
+      <mask id="axisIntroReveal"
+            maskUnits="userSpaceOnUse"
+            x="0" y="0" width="1000" height="1000"
+            style="mask-type:luminance">
+        <rect width="1000" height="1000" fill="white"/>
+        <circle data-ink-hole
+                cx="500" cy="560" r="0"
+                fill="black"
+                filter="url(#axisIntroSpread)"/>
+      </mask>
+    </defs>
+
+    <!-- 宣纸层随水墨扩散而被揭开 -->
+    <g mask="url(#axisIntroReveal)">
+      <rect width="1000" height="1000"
+            fill="url(#axisIntroPaperColor)"/>
+      <rect width="1000" height="1000"
+            fill="#9b9279" opacity=".065"
+            filter="url(#axisIntroPaper)"/>
+
+      <!-- 低对比远山淡墨 -->
+      <path d="M0 730 110 590 170 660 260 450
+               365 640 430 580 545 750
+               670 630 790 700 900 490 1000 650
+               V1000H0Z"
+            fill="#7d8a72" opacity=".055"/>
+    </g>
+
+    <!-- 晕染前缘，不使用规则描边 -->
+    <circle data-ink-halo
+            cx="500" cy="560" r="0"
+            fill="none"
+            stroke="#61725a"
+            stroke-width="72"
+            opacity="0"
+            filter="url(#axisIntroBloom)"/>
+
+    <circle data-ink-edge
+            cx="500" cy="560" r="0"
+            fill="none"
+            stroke="#46523f"
+            stroke-width="22"
+            opacity="0"
+            filter="url(#axisIntroSpread)"/>
+  </svg>
+
+  <div data-ink-title>
+    京华入墨
+    <small>一卷京华 · 入画相逢</small>
+  </div>
 </div>
-<script>document.querySelector('[data-return]').addEventListener('click',function(event){if(window.parent!==window){event.preventDefault();window.parent.postMessage({type:'axis:return'},window.location.origin);}});</script>
+<main class="page">
+  <header>
+    <div>
+      <div class="kicker">一卷京华 · 入墨成诗</div>
+      <h1>京华入墨 · 中轴拾光</h1>
+      <div class="hint">循一线京华，听六处风物。与画中人相逢。</div>
+    </div>
+    <a class="chapter-return" data-return href="../../#/">← 返回中轴总览</a>
+    <div class="progress" aria-live="polite">
+      已游览 <strong id="progress">0 / 6</strong>
+    </div>
+  </header>
+
+  <div class="tools">
+    <button class="btn" id="musicToggleHome" type="button" aria-pressed="true">音乐：开</button>
+    <button class="btn" id="reset" type="button">重置进度</button>
+  </div>
+
+  <section class="map" aria-label="北京中轴线互动地图">
+    <img id="mapImage" alt="北京中轴线水墨地图" hidden>
+    <div class="empty-map" id="mapEmpty">
+      <h2>展开一卷京华</h2>
+      <p>地图尚未载入。也可以直接使用下方景点入口。</p>
+    </div>
+    <div class="hotspots" id="hotspots" hidden></div>
+  </section>
+
+  <nav class="destinations" id="destinations" aria-label="景点入口"></nav>
+  <p class="status" id="pageStatus" role="status"></p>
+</main>
+
+<dialog id="story" aria-labelledby="storyTitle">
+  <section class="stage" id="stage">
+    <div class="background" id="background" aria-hidden="true"></div>
+    <div class="wash" aria-hidden="true"></div>
+
+    <svg class="landscape" viewBox="0 0 1400 700"
+         preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <filter id="landBlur"><feGaussianBlur stdDeviation="5"/></filter>
+      </defs>
+      <g fill="#687b68" filter="url(#landBlur)">
+        <path opacity=".45"
+          d="M0 450 100 310 170 360 280 150 370 330 450 280 580 460
+          700 380 820 440 970 180 1080 350 1220 230 1400 420V700H0Z"/>
+        <path opacity=".35"
+          d="M0 550 170 420 260 480 410 340 530 510 670 410
+          790 530 940 380 1100 510 1250 390 1400 540V700H0Z"/>
+      </g>
+    </svg>
+
+    <div class="scene-top">
+      <div class="location">
+        <small>中轴拾光 · 入画相逢</small>
+        <h2 id="storyTitle">景点故事</h2>
+      </div>
+      <div class="scene-tools">
+        <button id="musicToggle" type="button" aria-pressed="true">音乐：开</button>
+        <button id="settingsToggle" type="button" aria-expanded="false">声音设置</button>
+        <button id="openVideo" type="button">看视频</button>
+        <button id="closeStory" type="button">返回地图</button>
+      </div>
+    </div>
+
+    <aside class="settings" id="settings" aria-label="声音设置" hidden>
+      <h3>听风 · 听人语</h3>
+      <label><input id="autoRead" type="checkbox" checked> 自动朗读对话</label>
+      <label>朗读方式
+        <select id="voiceMode" aria-label="选择朗读方式">
+          <option value="cast">人物配音</option>
+          <option value="system">系统语音</option>
+        </select>
+      </label>
+      <label>系统声音
+        <select id="voiceSelect" aria-label="选择系统朗读声音"></select>
+      </label>
+      <label>朗读速度 <span id="rateLabel">1.00</span>
+        <input id="readRate" type="range" min="0.65" max="1.2"
+               step="0.05" value="1">
+      </label>
+      <label>音乐音量
+        <input id="musicVolume" type="range" min="0" max="0.5"
+               step="0.01" value="0.16">
+      </label>
+      <p class="hint">人物配音使用本地音频；修订后的台词和缺少配音的句子使用系统语音。
+      系统朗读取决于设备可用的中文声音。背景音乐可通过上方按钮关闭。</p>
+      <button class="btn" id="closeSettings" type="button">收起设置</button>
+    </aside>
+
+    <div class="poem" id="poem" aria-hidden="true"></div>
+    <div class="seal" aria-hidden="true">京华拾光</div>
+
+    <div class="cast">
+      <img class="portrait" id="portrait" alt="" hidden>
+    </div>
+
+    <div class="texture" aria-hidden="true"></div>
+
+    <div class="dialogue">
+      <!-- 只让背景晕染，不扭曲文字和按钮 -->
+      <svg class="paper-art" viewBox="0 0 1200 300"
+           preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <filter id="paperEdge" x="-10%" y="-20%" width="120%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency=".018 .055"
+                          numOctaves="3" seed="23" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise"
+                               scale="17" xChannelSelector="R"
+                               yChannelSelector="G"/>
+          </filter>
+          <filter id="inkBloom" x="-15%" y="-30%" width="130%" height="160%">
+            <feTurbulence type="fractalNoise" baseFrequency=".014 .043"
+                          numOctaves="3" seed="16" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise"
+                               scale="23"/>
+            <feGaussianBlur stdDeviation="5"/>
+          </filter>
+          <linearGradient id="paperColor" x1="0" x2="1">
+            <stop stop-color="#ece3c9" stop-opacity=".95"/>
+            <stop offset=".2" stop-color="#fcf5e5" stop-opacity=".97"/>
+            <stop offset=".72" stop-color="#faf3e1" stop-opacity=".97"/>
+            <stop offset="1" stop-color="#e8dfc6" stop-opacity=".94"/>
+          </linearGradient>
+          <radialGradient id="inkStain">
+            <stop stop-color="#78816b" stop-opacity=".17"/>
+            <stop offset="1" stop-color="#78816b" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <path d="M57 30Q220 12 417 24T804 21Q1032 10 1146 34
+                 Q1182 64 1160 136Q1185 233 1137 266
+                 Q968 289 744 273T365 280Q155 290 45 260
+                 Q18 204 35 153Q15 74 57 30Z"
+              fill="#7b8063" opacity=".24" filter="url(#inkBloom)"/>
+
+        <path d="M58 30Q220 12 417 24T804 21Q1032 10 1146 34
+                 Q1182 64 1160 136Q1185 233 1137 266
+                 Q968 289 744 273T365 280Q155 290 45 260
+                 Q18 204 35 153Q15 74 58 30Z"
+              fill="url(#paperColor)" filter="url(#paperEdge)"/>
+
+        <ellipse cx="110" cy="58" rx="190" ry="75" fill="url(#inkStain)"/>
+        <ellipse cx="1090" cy="235" rx="210" ry="90" fill="url(#inkStain)"/>
+
+        <g fill="none" stroke-linecap="round" filter="url(#paperEdge)">
+          <path d="M77 34Q280 19 467 32M524 30Q843 18 1119 39"
+                stroke="#70765c" stroke-opacity=".27" stroke-width="2.8"/>
+          <path d="M51 59Q28 121 44 170M42 195Q36 243 76 259"
+                stroke="#697157" stroke-opacity=".31" stroke-width="3"/>
+          <path d="M1144 58Q1166 100 1153 157M1157 187Q1171 244 1120 261"
+                stroke="#6b7358" stroke-opacity=".25" stroke-width="3.3"/>
+          <path d="M94 267Q307 284 502 267M608 272Q916 287 1105 267"
+                stroke="#6b7056" stroke-opacity=".28" stroke-width="2.5"/>
+        </g>
+
+        <g fill="#74795e" opacity=".11">
+          <ellipse cx="55" cy="80" rx="13" ry="4"/>
+          <ellipse cx="1128" cy="265" rx="19" ry="5"/>
+          <ellipse cx="186" cy="25" rx="29" ry="3"/>
+          <circle cx="1151" cy="238" r="4"/>
+          <circle cx="69" cy="250" r="3"/>
+        </g>
+      </svg>
+
+      <svg class="bamboo" viewBox="0 0 200 140" aria-hidden="true">
+        <g fill="none" stroke="#4b6148" stroke-linecap="round">
+          <path d="M186 135Q145 60 110 5" stroke-width="3"/>
+          <path d="M150 77 84 47M164 101 104 95M129 37 171 20"
+                stroke-width="1.5"/>
+        </g>
+        <g fill="#485e44">
+          <path d="M142 70Q91 4 96 47Q114 70 142 70Z"/>
+          <path d="M130 63Q61 27 79 58Q106 69 130 63Z"/>
+          <path d="M147 83Q96 57 105 89Q126 97 147 83Z"/>
+          <path d="M165 102Q119 85 126 114Q146 119 165 102Z"/>
+          <path d="M135 43Q172 1 174 25Q158 45 135 43Z"/>
+          <path d="M157 89Q194 47 196 70Q184 91 157 89Z"/>
+        </g>
+      </svg>
+
+      <div class="dialogue-content">
+        <div class="speaker" id="speaker"></div>
+        <p class="speech" id="speech" aria-live="polite"></p>
+        <div class="dialogue-bottom">
+          <div class="reading-info">
+            <span id="lineCount"></span><br>
+            <span id="readStatus" role="status"></span>
+          </div>
+          <div class="actions">
+            <button class="ink-btn" id="readButton" type="button">重听本句</button>
+            <button class="ink-btn" id="previous" type="button">上一句</button>
+            <button class="ink-btn next" id="next" type="button">继续 ▸</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer">虚构导览人物 · 创作叙事</div>
+  </section>
+
+  <section class="video-view" id="videoView" aria-label="景点视频" hidden>
+    <div class="video-head">
+      <h2 id="videoTitle">景点视频</h2>
+      <div class="tools">
+        <button class="btn" id="backToTalk" type="button">返回对话</button>
+        <button class="btn" id="closeVideo" type="button">返回地图</button>
+      </div>
+    </div>
+    <video id="player" controls playsinline preload="metadata" hidden></video>
+    <div class="video-empty" id="videoEmpty">
+      <h3 id="emptyTitle">请添加视频</h3>
+      <p id="emptyText"></p>
+    </div>
+    <p class="hint" id="videoStatus" role="status"></p>
+  </section>
+</dialog>
+
+<script src="./app.js" defer></script>
 </body>
 </html>

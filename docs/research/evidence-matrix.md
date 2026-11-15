@@ -33,6 +33,14 @@
 
 来源编号对应 [来源目录](source-catalogue.md) 与 [结构化登记](source-register.json)。使用四种证据口径：**文字事实**（来源明确说明）、**地图几何**（位置/轮廓/属性）、**照片观察**（可见形态）、**模型解释**（为导览补足或简化）。同一建筑可同时包含四种，不能因为某个高度有官方数字就把其全部细部称为实测。
 
+## 2026-11-15 · 南段独立叙事章节 `public/chapters/south/`
+
+- **接入与对应关系**：沿用稳定章节 ID `south` 和 `chapters/south/index.html` URL。页面设置六个叙事站点；天安门城楼与广场建筑群在一个站点合并讲述，主应用登记中的 `tiananmen` 与 `square` 保持为两个独立地标。其他站点对应正阳门、先农坛、天坛、南段道路遗存、永定门。
+- **文字事实**：历史文字沿用现有来源 ID，不新增来源或宣称本轮重查了网页。道路站点参考 `ROAD-PROTECTION`、`ROAD-CENTRE`、`ROAD-ARCHAEOLOGY`，将分散遗存、特定地点的叠压道路和珠市口以南排水遗存分开叙述；永定门现状复建信息对应 `YONG-DONGCHENG`、`YONG-REBUILD`。其余地标事实沿用各自既有矩阵条目。来源链接、原核验日期和限制见[来源目录](source-catalogue.md)。
+- **地图与影像**：背景地图是章节自身的导览插画，热点坐标用于页面点选，不是GIS定位、考古坐标或建筑测绘。人物图、配乐、配音和视频来自用户提供的 Windows 桌面 `masterpiece` 文件夹；作者、原始出处和再分发许可未随目录提供，均待补，当前不得视为已完成授权核验。
+- **创作边界**：六位讲述者及其对白是现代创作角色，不是历史人物证言、档案原文或独立史料。整理时收窄了道路叠压范围、车辙对应车种和中轴线位置不变等无充分支持的表述；个别详细年代、尺寸与仪式细节仍需逐句回对相应来源，不能仅凭页面叙述引用。
+- **实现位置**：[章节页面](../../public/chapters/south/index.html)、[数据与交互](../../public/chapters/south/app.js)、[样式](../../public/chapters/south/styles.css)；来源及素材说明见章节[README](../../public/chapters/south/README.md)、[来源说明](../../public/chapters/south/docs/sources.md)和[交付记录](../../public/chapters/south/docs/handoff.md)。
+
 ## 01 · 钟鼓楼 `bell-drum`
 
 - **文化依据**：`GEN-AXIS`、`GEN-BEIJING`支持两楼作为一项要素、城市报时功能及中轴北端关系。
