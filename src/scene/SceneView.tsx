@@ -218,6 +218,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     for (const el of sorted) {
       const id = el.dataset.site!;
       const anchor = city.anchors.get(id)!.clone();
+      if (id === 'tiananmen' || id === 'duanmen') anchor.y = 4;
       if (id === 'square') { anchor.x -= 18; anchor.z -= 10; }
       if (id === 'forbidden-city') { anchor.x += 18; anchor.z += 10; }
       normal.copy(anchor).project(camera);

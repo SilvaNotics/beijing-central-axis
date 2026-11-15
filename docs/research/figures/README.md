@@ -726,3 +726,7 @@ Chromium/SwiftShader，1300×1500，项目实际createLandmark/createMaterials/b
 [故宫聚焦画面](2026-11-16-palace-labels/focused-palace.png)：本项目模型，1000×760本地Chromium。观察到太和门、太和殿、保和殿、乾清宫、坤宁宫、午门等标签可见；中和殿、交泰殿等因名称碰撞在此范围隐藏。截图为聚焦检查，不是实景照片、完整游览验收或所有标记同时可见的证明。详见[本轮记录](../axis-tour-2026-11-15.md#2026-11-16--故宫内部建筑名称标记)。
 
 同轮[手机紧凑游览面板](2026-11-16-palace-labels/compact-mobile.png)：390×844本地模型截图，移除自动地点长介绍后面板高度约99.4px，保留名称、站次与进度。320px视口复查同样无横向溢出、无pageerror；不作为全程游览验收。
+
+## 2026-11-16 · 天安门、端门标签下移
+
+项目模型聚焦截图：[天安门](2026-11-16-gate-labels/tiananmen.png)、[端门](2026-11-16-gate-labels/duanmen.png)。900×700本地Chromium、减少动态效果；两处标签靠近城楼且opacity为1，无pageerror。仅校核两个聚焦画面，不是现实照片或完整游览验收。
