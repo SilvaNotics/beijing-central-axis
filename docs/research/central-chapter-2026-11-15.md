@@ -2,7 +2,7 @@
 
 ## 接入与对应关系
 
-2026-11-15 将用户提供的 Windows 桌面 `www` 静态页面整理为正式中段章节，沿用稳定章节 ID `central` 和入口 URL `chapters/central/index.html`。页面以五幅人物热点对应五项中段遗产：故宫 `forbidden-city`、社稷坛 `shejitan`、太庙 `taimiao`、端门 `duanmen`、外金水桥 `jinshui`；未修改主应用地标 ID、分区归属或 iframe 契约。
+2026-11-15 将用户提供的 Windows 桌面 `www` 静态页面整理为正式中段章节，实现提交为 `30c353a725490268f8814feea554778d2b2cee38`。沿用稳定章节 ID `central` 和入口 URL `chapters/central/index.html`。页面以五幅人物热点对应五项中段遗产：故宫 `forbidden-city`、社稷坛 `shejitan`、太庙 `taimiao`、端门 `duanmen`、外金水桥 `jinshui`；未修改主应用地标 ID、分区归属或 iframe 契约。
 
 ## 证据口径
 

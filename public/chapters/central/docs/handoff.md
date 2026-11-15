@@ -2,6 +2,7 @@
 
 ## 2026-11-15 · 接入整理
 
+- 实现提交：`30c353a725490268f8814feea554778d2b2cee38`。
 - 入口保持 `public/chapters/central/index.html`，主应用 `central` ID 和 URL 契约不变。
 - 桌面源目录 `www` 中的运行页面与全部必要素材已整理到 `public/chapters/central/`；桌面原件未修改。
 - 五个互动热点对应稳定地标 ID：故宫 `forbidden-city`、社稷坛 `shejitan`、太庙 `taimiao`、端门 `duanmen`、外金水桥 `jinshui`。
