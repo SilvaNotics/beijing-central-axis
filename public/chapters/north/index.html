@@ -62,7 +62,7 @@
   .place{position:absolute;transform:translate(-50%,-50%) rotate(var(--r,-1.2deg));pointer-events:none;z-index:4;
     display:flex;align-items:center;justify-content:center;
     padding:.45cqh .78cqw .5cqh;white-space:nowrap;
-    font-family:var(--ming);font-size:1.70cqh;letter-spacing:.16em;color:#3B2D1B;
+    font-family:var(--ming);font-size:max(16px,1.70cqh);line-height:1.3;letter-spacing:.16em;color:#3B2D1B;
     background:url("assets/p_tag2.webp") 100% 100%/100% 100% no-repeat;
     filter:drop-shadow(.16cqw .46cqh .34cqh rgba(26,17,8,.45));}
   .place{cursor:pointer;pointer-events:auto;
@@ -286,7 +286,12 @@
     #book{width:100%;height:max(100svh,calc(56.25vw + 440px));aspect-ratio:auto;box-shadow:none;perspective:none;}
     #stage{inset:76px 0 auto;height:56.25vw;}
     #map{height:100%;}
-    #stage>.place{display:none;}
+    #stage>.place{display:flex;min-width:44px;min-height:44px;padding:0;background:none;
+      font-size:14px;letter-spacing:.06em;touch-action:manipulation;filter:none;}
+    #stage>.place>span{padding:4px 6px;background:var(--paper) url("assets/p_tag2.webp") center/100% 100% no-repeat;
+      box-shadow:0 2px 4px #1a110840;}
+    #stage>.place[aria-label^="景山公园"]{transform:translate(-100%,-50%) rotate(var(--r));}
+    #stage>.place::after{display:none;}
     #stage>.marker{transform:translate(-50%,-50%);min-width:44px;min-height:44px;touch-action:manipulation;}
     .marker .card{width:clamp(44px,8vw,64px);aspect-ratio:1;}
     .marker .card>img:not(.ok){width:100%;height:100%;object-fit:contain;}
@@ -677,7 +682,8 @@ document.getElementById('soundToggle').addEventListener('click',()=>{
 const closeCard=()=>{ if(openCard){ openCard.classList.remove('on'); openCard.inert=true; openEl&&openEl.classList.remove('open'); openEl&&openEl.setAttribute('aria-expanded','false'); openCard=null; openEl=null; } };
 PLACES.forEach(o=>{
   const d=document.createElement('div');
-  d.className='place'; d.textContent=o.t;
+  d.className='place';
+  const placeText=document.createElement('span');placeText.textContent=o.t;d.appendChild(placeText);
   d.style.left=o.x; d.style.top=o.y; d.style.setProperty('--r',o.r);
 
   const card=document.createElement('div');
@@ -693,7 +699,8 @@ PLACES.forEach(o=>{
   d.setAttribute('role','button'); d.tabIndex=0; d.setAttribute('aria-expanded','false'); d.setAttribute('aria-label',`${o.t}，点开介绍`);
   const toggleCard=()=>{ sfx('paper');cardTrigger=document.activeElement;
     if(openCard===card){ closeCard(); return; }
-    closeCard(); card.inert=false; card.classList.add('on'); d.classList.add('open'); d.setAttribute('aria-expanded','true'); openCard=card; openEl=d; };
+    closeCard(); card.inert=false; card.classList.add('on'); d.classList.add('open'); d.setAttribute('aria-expanded','true'); openCard=card; openEl=d;
+    if(matchMedia('(max-width:900px)').matches)card.focus(); };
   d.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleCard(); } });
   d.addEventListener('click',e=>{e.stopPropagation();toggleCard();});
   card.addEventListener('click',e=>e.stopPropagation());

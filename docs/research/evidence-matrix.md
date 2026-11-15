@@ -442,3 +442,7 @@
 本条补齐第04项此前缺失的稳定引用入口。`PAL-WUYING`、`PAL-WENHUA` 及本地 OSM 数据支持前后殿、穿廊和地图轮廓的分部表达；不提供逐点测绘。实现见 [palaceSideHalls.ts](../../src/scene/palaceSideHalls.ts)，资料与模型参数见 [内部专题](palace-interior-review-2026-11-14.md)。
 
 近邻自动补墙为历史试作，现已被 [排布纠错](palace-wall-layout-review-2026-11-14.md) 取代。此次仅补齐文档链，不重新认定史实、升级图片核验状态或声称测试通过。
+
+## 2026-11-15 · 南段人物配音恢复
+
+按用户要求，app.js 恢复原交付的 12 句对白，撤销 revisedLines 对系统语音的逐句强制切换，默认 60 句均使用原有角色录音。研究纠正继续有效：ROAD-PROTECTION、ROAD-CENTRE、ROAD-ARCHAEOLOGY 不支持把特定发掘点的七层叠压推及整段道路；恢复对白也不能证明车辙车种、词源或轴线位置从未变化。此项属于原作品与录音一致的呈现决定，非新增事实、地图几何或史实核验。详见[南段章节记录](south-chapter-2026-11-15.md#同日--按用户要求恢复配音与原对白)与[交付记录](../../public/chapters/south/docs/handoff.md)。

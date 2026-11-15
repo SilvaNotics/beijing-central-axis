@@ -1,5 +1,14 @@
 # 交付记录 · 北段（north）
 
+## 2026-11-15 · 地名字牌可见性修复
+
+- 窄屏旧规则 `#stage>.place{display:none}` 隐藏了四张地图纸签；恢复钟楼、鼓楼、万宁桥、景山公园字牌。地图与历史文字未改。
+- 手机文字至少 14px、触控区域至少 44px；桌面至少 16px，避免随画布高度缩到过小。本轮 Chromium 桌面未复现文字完全空白，不能据此确认其他设备均无字体问题。
+- 手机景山纸签向左错开，防止 320px 视口下点击区域挡住万宁桥；地点卡打开后获得焦点，Escape 关闭并恢复入口焦点。此偏移仅为导航排版，不代表地理位置修订。
+- `NODE_OPTIONS=--max-old-space-size=1024 npm run build`：通过，1648 模块，Vite 32.84 秒；既有大分块提示保留。
+- `npx playwright test e2e/north-labels.spec.ts e2e/mobile.spec.ts --grep "north" --workers=1 --reporter=line`：4 项通过，18.0 秒。覆盖独立页面与 iframe 的四张字牌、全部三个人物；字牌检查宽度 320/390/768/1024/1440px，含点击、Enter、Escape、焦点恢复和无页面横向溢出；无页面 JavaScript 异常。未验证真实手机或其他浏览器，本轮未运行完整单元测试及全部 E2E。
+- 软件界面截图：[手机字牌](../../../../docs/qa/north-labels-2026-11-15/north-labels-390.png)、[桌面字牌](../../../../docs/qa/north-labels-2026-11-15/north-labels-1440.png)、[手机 iframe](../../../../docs/qa/north-labels-2026-11-15/north-labels-iframe-390.png)。这些截图不作为史实或测绘证据。实现版本可通过 `git log -- e2e/north-labels.spec.ts` 定位。
+
 ## 基本信息
 
 | 项 | 内容 |
