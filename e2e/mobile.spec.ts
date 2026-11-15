@@ -1,9 +1,20 @@
-import { expect, test, type CDPSession } from '@playwright/test';
+import { expect, test, type CDPSession, type Locator } from '@playwright/test';
 
 test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
 
 const touch = (session: CDPSession, type: 'touchStart' | 'touchMove' | 'touchEnd' | 'touchCancel', points: { id: number; x: number; y: number }[]) =>
   session.send('Input.dispatchTouchEvent', { type, touchPoints: points });
+
+async function expectNoticeAbovePortrait(dialog: Locator) {
+  const caption = dialog.locator('.dialogue-caption');
+  const portrait = dialog.locator('#fig img');
+  await expect(caption).toBeVisible();
+  await expect.poll(() => portrait.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+  const noticeBox = (await caption.boundingBox())!;
+  const portraitBox = (await portrait.boundingBox())!;
+  expect(noticeBox.y + noticeBox.height + 8).toBeLessThanOrEqual(portraitBox.y);
+  expect(portraitBox.height).toBeGreaterThan(100);
+}
 
 test('touch rotation can be toggled without Shift and reset to panning', async ({ page, context }, testInfo) => {
   test.setTimeout(180_000);
@@ -119,6 +130,7 @@ test('north map portraits stay visible and open dialogues on narrow screens', as
       expect(box.height).toBeGreaterThanOrEqual(44);
       await marker.tap();
       await expect(page.locator('#dlg')).toBeVisible();
+      await expectNoticeAbovePortrait(page.locator('#dlg'));
       await page.locator('#back').tap();
       await expect(marker).toBeFocused();
     }
@@ -130,5 +142,34 @@ test('north map portraits stay visible and open dialogues on narrow screens', as
   await expect(page.locator('#dlg')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.locator('#stage > .marker').first()).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test('embedded north dialogue keeps the creation notice above every portrait', async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/#/chapter/north');
+  const frame = page.frameLocator('iframe');
+  await expect(frame.locator('#stage > .marker')).toHaveCount(3);
+  for (const viewport of [
+    { width: 320, height: 844 },
+    { width: 390, height: 844 },
+    { width: 390, height: 667 },
+    { width: 768, height: 1024 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const marker of await frame.locator('#stage > .marker').all()) {
+      await marker.tap();
+      await expect(frame.locator('#dlg')).toBeVisible();
+      await expectNoticeAbovePortrait(frame.locator('#dlg'));
+      await expect(frame.locator('#dlgText')).not.toBeEmpty();
+      if (await marker.getAttribute('data-npc') === 'porter') {
+        await page.screenshot({ path: testInfo.outputPath(`north-dialogue-${viewport.width}x${viewport.height}.png`) });
+      }
+      await frame.locator('#back').tap();
+      await expect(marker).toBeFocused();
+    }
+    expect(await frame.locator('html').evaluate(el => el.scrollWidth > innerWidth)).toBe(false);
+  }
   expect(errors).toEqual([]);
 });
