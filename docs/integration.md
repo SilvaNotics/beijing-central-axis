@@ -18,7 +18,7 @@
 | 中段 | `forbidden-city`、`shejitan`、`taimiao`、`duanmen`、`jinshui` |
 | 南段 | `tiananmen`、`square`、`zhengyang`、`tiantan`、`xiannongtan`、`southern-road`、`yongdingmen` |
 
-`public/chapters/north/` 已接入正式「纸雕立体书地图」章节；`public/chapters/south/` 已接入正式独立互动章节「京华入墨 · 中轴拾光」；`central/` 仍为**分区接入示例**。南段章节以六个叙事站点覆盖七个稳定地标：天安门城楼与广场建筑群合并讲述，但主应用中的 `tiananmen`、`square` ID 保持独立。章节说明见[南段 README](../public/chapters/south/README.md)、[素材与事实边界](../public/chapters/south/docs/sources.md)和[交付记录](../public/chapters/south/docs/handoff.md)；北段交付说明见[章节 README](../public/chapters/north/README.md)和[交付记录](../public/chapters/north/docs/handoff.md)。
+`public/chapters/north/` 已接入正式「纸雕立体书地图」章节；`public/chapters/central/` 已接入互动画卷「京华入画」，以五个人物热点覆盖中段五项遗产；`public/chapters/south/` 已接入正式独立互动章节「京华入墨 · 中轴拾光」。南段章节以六个叙事站点覆盖七个稳定地标：天安门城楼与广场建筑群合并讲述，但主应用中的 `tiananmen`、`square` ID 保持独立。章节说明见[北段 README](../public/chapters/north/README.md)、[中段 README](../public/chapters/central/README.md)、[南段 README](../public/chapters/south/README.md)，以及各自的来源与交付记录。
 
 ## 入口登记
 

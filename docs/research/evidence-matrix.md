@@ -41,6 +41,14 @@
 - **创作边界**：六位讲述者及其对白是现代创作角色，不是历史人物证言、档案原文或独立史料。整理时收窄了道路叠压范围、车辙对应车种和中轴线位置不变等无充分支持的表述；个别详细年代、尺寸与仪式细节仍需逐句回对相应来源，不能仅凭页面叙述引用。
 - **实现位置**：[章节页面](../../public/chapters/south/index.html)、[数据与交互](../../public/chapters/south/app.js)、[样式](../../public/chapters/south/styles.css)；来源及素材说明见章节[README](../../public/chapters/south/README.md)、[来源说明](../../public/chapters/south/docs/sources.md)和[交付记录](../../public/chapters/south/docs/handoff.md)。
 
+## 2026-11-15 · 中段互动画卷章节 `public/chapters/central/`
+
+- **接入与对应关系**：沿用稳定章节 ID `central` 和入口 URL；页面五个人物热点依次对应 `forbidden-city`、`shejitan`、`taimiao`、`duanmen`、`jinshui`，不改主应用地标 ID 及 iframe 契约。
+- **文字事实**：本轮没有新增历史来源或重新在线核验既有页面。中轴宫城与坛庙关系沿用 `GEN-AXIS`、`GEN-BEIJING`、`GEN-PLAN`；故宫沿用 `GEN-PALACE`；端门沿用 `DUAN-DPM`；外金水桥沿用 `JINSHUI-SWJ`、`JINSHUI-2019`。来源原核验日期、页码与限制以[来源目录](source-catalogue.md)为准。
+- **待复核内容**：端门建置年代、明清仪仗用途与“端礼门”称谓，以及外金水桥重建年代和逐级通行细节，尚未逐句映射到现有来源结论；整合不等于完成新一轮史料核验。`JINSHUI-SWJ` 与 `JINSHUI-2019` 的逐桥孔数冲突继续保留，页面不补造孔数。
+- **地图与影像**：背景图是画卷式导览插画；五个人物位置是视觉热点，不是坐标、建筑轮廓或遗产边界。建筑画卷、人物图与视频来自用户提供的桌面 `www` 目录，作者、来源和许可待补。介绍者为现代创作角色，不作为历史人物证言。
+- **实现与验证**：[章节页面](../../public/chapters/central/index.html)、[来源说明](../../public/chapters/central/docs/sources.md)、[交付记录](../../public/chapters/central/docs/handoff.md)。页面保留画卷开合、影像/文字讲述和位置微调，并补入标题层级、动态状态、地图替代文本、按钮状态及精确同源 `axis:return` 返回协议。详细验证见[研究记录](central-chapter-2026-11-15.md)和[进度记录](../progress.md)。
+
 ## 01 · 钟鼓楼 `bell-drum`
 
 - **文化依据**：`GEN-AXIS`、`GEN-BEIJING`支持两楼作为一项要素、城市报时功能及中轴北端关系。

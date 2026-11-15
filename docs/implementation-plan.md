@@ -19,7 +19,7 @@
 | `src/scene/SceneView.tsx` | Three.js 生命周期、相机、交互、画质与资源释放 |
 | `src/scene/` 其他模块 | 地理变换、布局、建筑、水系、树木、材料与合批 |
 | `public/data/`、`src/data/palace-walls.json` | 浏览器可用的本地地理数据和围墙数据 |
-| `public/chapters/` | 北段纸雕章节、南段水墨叙事章节；中段为独立可替换的分区接入示例 |
+| `public/chapters/` | 北段纸雕章节、中段互动画卷与南段水墨叙事章节；各自通过固定 URL 独立接入 |
 | `docs/research/` | 来源、模型取舍、快照、专题与校核图 |
 
 ## 路由与交互

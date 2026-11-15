@@ -72,7 +72,7 @@ NODE_OPTIONS=--max-old-space-size=1024 npm run build
 - 主应用保留 `base: './'` 和 hash 路由；章节目录和素材随构建一起发布。可直接访问 `#/sample`、`#/chapter/north`、`#/chapter/central`、`#/chapter/south`，独立章节仍位于 `chapters/{regionId}/index.html`。
 - Action 版本固定到提交 SHA；工作流只授予读取源码的权限，发布 job 单独取得 `pages: write` 和 `id-token: write`。
 
-验证时检查实际站点下的首页、字体与地理数据、三个章节 iframe、独立打开和返回链接；GitHub Actions 成功只证明上传与发布完成。中段仍为接入示例；北段与南段的实际交付和验证范围见[进度记录](progress.md)。
+验证时检查实际站点下的首页、字体与地理数据、三个章节 iframe、独立打开和返回链接；GitHub Actions 成功只证明上传与发布完成。北段、中段与南段的实际交付和验证范围见[进度记录](progress.md)。
 
 ## 验证与交付
 

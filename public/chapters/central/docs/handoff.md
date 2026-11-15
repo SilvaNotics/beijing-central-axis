@@ -1,0 +1,26 @@
+# 中段章节交付记录
+
+## 2026-11-15 · 接入整理
+
+- 入口保持 `public/chapters/central/index.html`，主应用 `central` ID 和 URL 契约不变。
+- 桌面源目录 `www` 中的运行页面与全部必要素材已整理到 `public/chapters/central/`；桌面原件未修改。
+- 五个互动热点对应稳定地标 ID：故宫 `forbidden-city`、社稷坛 `shejitan`、太庙 `taimiao`、端门 `duanmen`、外金水桥 `jinshui`。
+- 保留作者的画卷开合、影像/文字切换、探访进度和人物位置微调；补充页面标题层级、动态进度播报、地图替代文本、按钮状态以及精确同源 `axis:return` 返回协议。
+- 章节内返回链接在 iframe 中隐藏，独立打开时显示；父应用继续提供章节返回、重新载入和独立打开。
+- 历史内容沿用已有来源 ID，未新增或重新在线核验来源。部分详细年代、仪式描述和尺寸换算仍需逐句复核，见[来源与素材说明](sources.md)。
+- 素材作者、原始出处和再分发授权未随源目录提供，状态为待补；本记录不构成授权确认。
+
+## 验证
+
+2026-11-15 实际执行结果：
+
+- `NODE_OPTIONS=--max-old-space-size=1024 npm run build`：退出码 0；TypeScript 与 Vite 通过，1648 个模块，Vite 阶段 31.04 秒。CSS 47.05 kB、应用 JavaScript 528.72 kB、Three.js 分块 541.12 kB；两个既有大分块提示保留。
+- `NODE_OPTIONS=--max-old-space-size=1024 npm test`：退出码 0；44 个测试文件、200 项全部通过，147.93 秒。
+- `NODE_OPTIONS=--max-old-space-size=1024 npm run test:e2e -- --workers=1 --reporter=line`：退出码 0；生产构建加 9 项 Playwright 全部通过，浏览器阶段 6.5 分钟。
+- `python3 scripts/verify-docs.py`：通过；38 份文档、890 个本地链接、92 条来源记录与 13 份快照文件校验一致。测试运行器未在本检查中启动。
+- 生产预览 1440×950 与 320/390×844：无横向溢出；五个人物按钮在窄屏均保持至少 44px 触控区域；画卷弹层完整落在视口内。五张建筑画卷和五张人物图均解码成功。
+- 故宫、社稷坛、太庙三段视频均读取 1920×1080 H.264/AAC 元数据；端门、外金水桥文字画卷均可打开并返回，进度更新为“已探访 2 / 5”，关闭后焦点回到入口。五个热点均有可读的辅助技术名称。
+- iframe 嵌入时章节自身返回链接隐藏；父应用“返回中轴总览”回到 `#/` 并把焦点交给品牌入口。独立打开时返回链接可正常回到应用根路由。页面错误、HTTP 失败和远端资源请求均为 0。
+- 截图：[桌面地图](../../../../docs/qa/central-2026-11-15/central-desktop.png)、[320px 地图](../../../../docs/qa/central-2026-11-15/central-320.png)、[320px 画卷](../../../../docs/qa/central-2026-11-15/central-320-dialog.png)、[390px 地图](../../../../docs/qa/central-2026-11-15/central-390.png)、[390px 画卷](../../../../docs/qa/central-2026-11-15/central-390-dialog.png)、[父应用嵌入](../../../../docs/qa/central-2026-11-15/central-iframe-390.png)；逐项结果见[浏览器检查记录](../../../../docs/qa/central-2026-11-15/browser-check.json)。这些是本轮软件界面截图，不是历史证据或建筑测绘。
+
+未完成真实 iOS/Android 设备、读屏软件、全部视频完整播放和真实触屏手势验收；本地媒体元数据可读不等于所有设备的音视频播放体验均已验证。

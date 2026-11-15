@@ -1,0 +1,103 @@
+{
+  "recordedOn": "2026-11-15",
+  "environment": {
+    "host": "WSL2",
+    "node": "24.20.0",
+    "runner": "Playwright Chromium headless",
+    "preview": "http://127.0.0.1:4173"
+  },
+  "viewportChecks": [
+    {
+      "viewport": "1440x950",
+      "horizontalOverflow": 0,
+      "pins": 5,
+      "returnLinkVisibleStandalone": true,
+      "mapLoaded": true,
+      "portraitsLoaded": 5
+    },
+    {
+      "viewport": "320x844",
+      "horizontalOverflow": 0,
+      "pinsVisibleWithinMap": 5,
+      "minimumMeasuredPinWidth": 44,
+      "dialogInsideViewport": true
+    },
+    {
+      "viewport": "390x844",
+      "horizontalOverflow": 0,
+      "pinsVisibleWithinMap": 5,
+      "minimumMeasuredPinWidth": 44,
+      "dialogInsideViewport": true
+    }
+  ],
+  "sites": [
+    {
+      "id": "forbidden-city",
+      "title": "故宫",
+      "mode": "video",
+      "durationSeconds": 14.651791,
+      "videoDimensions": "1920x1080",
+      "videoCodec": "H.264/AAC"
+    },
+    {
+      "id": "shejitan",
+      "title": "社稷坛",
+      "mode": "video",
+      "durationSeconds": 14.666667,
+      "videoDimensions": "1920x1080",
+      "videoCodec": "H.264/AAC"
+    },
+    {
+      "id": "taimiao",
+      "title": "太庙",
+      "mode": "video",
+      "durationSeconds": 14.836984,
+      "videoDimensions": "1920x1080",
+      "videoCodec": "H.264/AAC"
+    },
+    {
+      "id": "duanmen",
+      "title": "端门",
+      "mode": "text",
+      "textLength": 182
+    },
+    {
+      "id": "jinshui",
+      "title": "外金水桥",
+      "mode": "text",
+      "textLength": 182
+    }
+  ],
+  "interactionChecks": {
+    "paintingImagesDecoded": 5,
+    "progressAfterTwoVisits": "已探访 2 / 5",
+    "focusReturnsToOpener": true,
+    "keyboardEscapeClosesDialog": true,
+    "chapterReturnHiddenInIframe": true,
+    "parentReturnNavigatesHome": true,
+    "parentBrandFocusedAfterReturn": true,
+    "standaloneReturnNavigatesHome": true
+  },
+  "networkChecks": {
+    "pageErrors": 0,
+    "consoleErrorsOrWarnings": 0,
+    "failedRequests": 0,
+    "httpStatusFailures": 0,
+    "remoteRequests": 0,
+    "expectedMediaAborts": "Closing a video early aborts its in-progress media request; this was observed and was not counted as a page failure."
+  },
+  "screenshots": [
+    "central-desktop.png",
+    "central-320.png",
+    "central-320-dialog.png",
+    "central-390.png",
+    "central-390-dialog.png",
+    "central-iframe-390.png"
+  ],
+  "notVerified": [
+    "Real iOS or Android device playback",
+    "Screen-reader walkthrough",
+    "Full playback of every video",
+    "Real touch-device gestures"
+  ]
+}

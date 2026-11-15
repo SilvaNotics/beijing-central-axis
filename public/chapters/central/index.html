@@ -1,23 +1,160 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="color-scheme" content="light" />
-<meta name="description" content="北京中轴线中段 · 故宫 / 社稷坛 / 太庙 / 端门 / 外金水桥分区接入示例。独立页面，用于替换接入与导航演示。" />
-<title>中段 · 分区接入示例</title>
-<style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Microsoft YaHei","PingFang SC",sans-serif;line-height:1.75}a{color:inherit;text-underline-offset:.25em}button,a{-webkit-tap-highlight-color:transparent}a:focus-visible{outline:3px solid currentColor;outline-offset:6px}p{margin:0 0 1.25rem}h1,h2{font-weight:500;line-height:1.25}h1{margin:.75rem 0 1.5rem;font-family:"Songti SC","Noto Serif CJK SC",SimSun,serif;font-size:clamp(2.75rem,7vw,5.5rem);letter-spacing:.08em}h2{font-size:1.25rem;margin:0 0 .75rem}.skip{position:absolute;left:1rem;top:-5rem;z-index:5;padding:.5rem 1rem;background:var(--paper);color:var(--ink)}.skip:focus{top:1rem}.frame{max-width:1280px;margin:0 auto;padding:2rem clamp(1.25rem,5vw,5rem) 3rem}.topline{display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.75rem;letter-spacing:.12em}.tag{border:1px solid currentColor;padding:.25rem .65rem;display:inline-block}.back{text-decoration:none;display:inline-block;padding:.5rem 0;white-space:nowrap}.hero{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,6vw,6rem);align-items:center;margin:4rem 0}.eyebrow{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase}.intro{max-width:29rem;font-size:.95rem}.intro-note{font-size:.75rem;opacity:.72;max-width:30rem}.map{margin:0;position:relative}.map svg{display:block;width:100%;height:auto}.map figcaption{font-size:.7rem;letter-spacing:.08em;margin-top:.75rem;text-align:right}.map text{font-family:"Microsoft YaHei","PingFang SC",sans-serif}.sequence{display:flex;gap:1rem;flex-wrap:wrap;margin:1.75rem 0 0;padding:0;list-style:none;font-size:.8rem}.sequence a{text-decoration:none;display:inline-block;border-bottom:1px solid;padding:.5rem .1rem}.sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;padding-top:2rem}.section{scroll-margin-top:2rem}.number{font-size:.7rem;letter-spacing:.15em;display:block;margin-bottom:1rem}.section p{font-size:.85rem;opacity:.78;margin:0}.foot{display:flex;justify-content:space-between;gap:1.5rem;margin-top:3rem;padding-top:1.5rem;font-size:.7rem;border-top:1px solid var(--line)}@media(max-width:720px){.frame{padding-top:1rem}.topline{font-size:.65rem;letter-spacing:.04em}.hero{grid-template-columns:1fr;margin:2.5rem 0;gap:2rem}h1{font-size:clamp(2.6rem,11vw,4rem)}.map{max-width:32rem;width:100%;margin:auto}.sections{grid-template-columns:1fr;gap:1.75rem}.section{padding-bottom:1.5rem;border-bottom:1px solid var(--line)}.foot{flex-direction:column;gap:.5rem}.sequence{gap:.75rem}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}body{--paper:#f0e8da;--ink:#552b25;--line:#bfa693;background:var(--paper);color:var(--ink)}.frame{border-top:8px solid #8b3028}.tag{background:#8b3028;color:#fff3dc;border-color:#8b3028}.hero{grid-template-columns:1.05fr .95fr}.map{padding:1.25rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.eyebrow,.number{color:#98442c}.sections{gap:0;border:1px solid var(--line)}.section{padding:1.5rem}.section+.section{border-left:1px solid var(--line)}.intro-note{max-width:29rem}.sequence a:hover{color:#a34529}@media(max-width:720px){.hero{grid-template-columns:1fr}.section+.section{border-left:none;border-top:1px solid var(--line)}.section{padding:1.25rem}}</style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="北京中轴线中段互动画卷：点击故宫、社稷坛、太庙、端门与外金水桥人物，展开建筑画卷、影像与文字讲述。">
+<title>京华入画 · 北京中轴线中段</title>
+<style>
+:root{--paper:#f5efdf;--ink:#352d25;--red:#923d31;--gold:#ad8950;--line:#d6c6a5;--map-stretch:1.70;--colophon-w:clamp(190px,20vw,270px)}
+/* ↑ --map-stretch 为画面横向拉长倍率：调大 → 画更宽、左侧留白更小；调回 1 → 恢复原比例 */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;height:100dvh;overflow:hidden;display:flex;flex-direction:column;color:var(--ink);background:var(--paper);font-family:"Microsoft YaHei",sans-serif;background-image:radial-gradient(#ab8d5510 1px,transparent 1px);background-size:6px 6px}
+button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #a85238;outline-offset:4px}
+
+/* 极简顶栏：只保留品牌、进度与微调控件，把全部高度让给画面 */
+.topbar{flex:0 0 auto;height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 22px;border-bottom:1px solid var(--line);background:#f7f0e0cc}
+.brand{display:flex;gap:11px;align-items:center;flex-shrink:0}
+.seal{background:var(--red);color:#fff3dc;font-family:serif;padding:6px 8px;font-size:17px;writing-mode:vertical-rl;border:3px double #f6e5c2;outline:1px solid var(--red)}
+.brand strong{font:21px "STSong","SimSun",serif;letter-spacing:4px}
+.hint{font-size:11px;letter-spacing:2px;color:#9a886d;white-space:nowrap}
+.tools{display:flex;align-items:center;gap:16px;flex-shrink:0}
+#progress{font-size:11px;letter-spacing:1px;color:#86745b;white-space:nowrap}
+.linkbtn{border:0;border-bottom:1px solid #b69a72;color:#856b49;background:none;padding:0 0 3px;font-size:11px;white-space:nowrap}
+.linkbtn:hover{color:var(--red);border-color:var(--red)}
+
+/* 主舞台：左侧卷首题跋 + 右侧画卷。画卷温和横向拉长并靠右，左侧留白收窄 */
+.stage{flex:1 1 auto;min-height:0;position:relative;display:flex;align-items:stretch;gap:14px;padding:10px;container-type:size}
+
+/* 卷首题跋：纯装饰文字，非触发点 */
+.colophon{flex:1 1 auto;min-width:var(--colophon-w);position:relative;overflow:hidden;border-right:1px solid var(--line);background:linear-gradient(90deg,#f5efdf00,#f7f0e080)}
+.colophon:before{content:"";position:absolute;width:min(72%,270px);aspect-ratio:1;border:1px solid #c9b18a66;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
+.colophon:after{content:"";position:absolute;inset:14px 10px 14px 18px;border:1px solid #d8c8a877;pointer-events:none}
+.poem-title,.poem-body,.poem-sign{writing-mode:vertical-rl;position:absolute;white-space:nowrap;z-index:1}
+.poem-title{right:20px;top:26px;margin:0;font:clamp(21px,4.5cqh,30px)/1.2 "STSong","SimSun",serif;letter-spacing:8px;color:#7d3328}
+.poem-body{right:66px;top:28px;max-height:calc(100% - 56px);font:clamp(12px,2.7cqh,15px)/1.85 "STSong","SimSun",serif;letter-spacing:3px;color:#5f5040}
+.poem-sign{left:24px;top:26px;font-size:11px;letter-spacing:4px;color:#a08d70}
+.poem-seal{position:absolute;left:20px;bottom:26px;width:40px;height:40px;display:grid;place-items:center;writing-mode:vertical-rl;background:var(--red);color:#fff0d8;border:2px double #f4e0bb;outline:1px solid var(--red);font:14px/1.1 "SimSun",serif;letter-spacing:2px;z-index:1}
+
+.canvas{flex:0 1 auto;min-width:0;display:flex;justify-content:flex-end}
+.map-wrap{position:relative;flex:0 0 auto;height:100%;width:min(calc(92vw - 200px),calc(80dvh * var(--map-stretch)));border:1px solid #b59b73;box-shadow:0 15px 45px #70502a18;background:#dcc5a2;isolation:isolate}
+@supports (width:1cqw){.map-wrap{width:min(calc(100cqw - 200px),calc(100cqh * var(--map-stretch)))}}
+.map-wrap:after{content:"";position:absolute;inset:8px;border:1px solid #fff3d853;pointer-events:none;z-index:3}
+.map-img{display:block;width:100%;height:100%;object-fit:fill}
+
+/* 人物随地图等比缩放；点击热区严格等于圆形头像本身（标签不参与命中） */
+.pin{position:absolute;left:var(--x);top:var(--y);display:block;width:clamp(48px,8vw,96px);aspect-ratio:1;border-radius:50%;padding:0;border:0;background:transparent;transform:translate(-50%,-65%);z-index:4;touch-action:manipulation;filter:drop-shadow(0 4px 3px #49311550);transition:filter .2s}
+@supports (width:1cqw){.pin{width:clamp(44px,8.2cqmin,88px)}}
+.pin:hover{filter:drop-shadow(0 4px 8px #923d31aa);z-index:5}
+.portrait{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:50%;border:2px solid #fff0c7;background:#fff8ea;box-shadow:0 0 0 2px #a87e40}
+.pin-label{display:block;white-space:nowrap;position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);width:max-content;padding:3px 9px;background:#8c3b2f;color:#fff2dc;border:1px solid #e3c78e;font-size:clamp(10px,1.8cqmin,14px);font-family:"SimSun",serif;letter-spacing:1px;pointer-events:none}
+.pin:before{content:"";position:absolute;inset:-8px;border:1px solid #fff1c6;border-radius:50%;animation:pulse 3s infinite;pointer-events:none}
+@keyframes pulse{0%,100%{transform:scale(.96);opacity:.15}50%{transform:scale(1.09);opacity:.8}}
+.editing .pin{touch-action:none;cursor:move}
+.edit-note{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:8;max-width:min(92%,540px);padding:8px 14px;background:#fff8e7;border:1px dashed #ae8a4f;font-size:12px;line-height:1.6;text-align:center;box-shadow:0 4px 14px #0002}
+
+/* 画卷 / 视频 / 书卷弹层 */
+.modal[hidden],[hidden]{display:none!important}
+.modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:25px;background:#211a13c9;backdrop-filter:blur(8px)}
+.dialog{position:relative;width:min(1060px,96vw);max-height:94dvh;overflow:auto;background:#f4ecd9;padding:22px 34px 25px;border:1px solid #c7a56d;box-shadow:0 25px 90px #0006}
+.dialog:before{content:"";position:absolute;inset:7px;border:1px solid #c5ad82;pointer-events:none}
+.close{position:absolute;right:15px;top:12px;background:#f7efdf;border:1px solid #cbb28b;color:#755f42;width:33px;height:33px;font-size:23px;z-index:5}
+.dialog-head{text-align:center;margin-bottom:14px}
+.dialog-head small{color:var(--red);font-size:10px;letter-spacing:4px}
+.dialog-head h2{font:30px "SimSun",serif;letter-spacing:6px;margin:9px 0}
+.artstage{position:relative;margin:auto;max-width:900px;min-height:180px}
+.painting{position:relative;background:#e2ceaa;padding:10px 16px;border-block:2px solid #a07a46;box-shadow:0 7px 20px #543a2126;transform:translateZ(0)}
+.painting img{display:block;width:100%;max-height:58dvh;object-fit:contain;background:#e5d8bc}
+.painting:before,.painting:after{content:"";position:absolute;top:-9px;bottom:-9px;width:15px;border-radius:5px;background:linear-gradient(90deg,#69472e,#d3ac6c 45%,#95683d 80%,#63422b);box-shadow:2px 0 5px #0004;z-index:2}
+.painting:before{left:-3px}.painting:after{right:-3px}
+.reveal-center{animation:centerOpen 1.9s cubic-bezier(.25,.65,.25,1) both}
+.reveal-left{animation:leftOpen 2s cubic-bezier(.25,.65,.25,1) both}
+.reveal-right{animation:rightOpen 2s cubic-bezier(.25,.65,.25,1) both}
+@keyframes centerOpen{from{clip-path:inset(-15px 49.5% -15px 49.5%)}to{clip-path:inset(-15px -15px -15px -15px)}}
+@keyframes leftOpen{from{clip-path:inset(-15px 99% -15px -15px)}to{clip-path:inset(-15px -15px -15px -15px)}}
+@keyframes rightOpen{from{clip-path:inset(-15px -15px -15px 99%)}to{clip-path:inset(-15px -15px -15px -15px)}}
+.guide-row{display:flex;align-items:center;justify-content:center;gap:17px;margin:17px auto 0;min-height:80px;transition:opacity .4s,transform .4s}
+.guide-row.wait{opacity:0;transform:translateY(15px);pointer-events:none}
+.guide-button{padding:0;border:0;background:transparent;width:70px;flex-shrink:0;position:relative}
+.guide-button:after{content:"▶";position:absolute;right:-3px;bottom:0;border-radius:50%;background:var(--red);color:#fff3df;font-size:10px;padding:7px}
+.guide-copy strong{display:block;font:17px "SimSun",serif;letter-spacing:2px;margin-bottom:7px}
+.guide-copy p{font-size:12px;color:#8c7657;margin:0}
+.media{width:100%;display:block;max-height:65dvh;background:#17130f}
+.back{display:block;margin:17px auto 0;padding:8px 20px;border:1px solid #bea37a;background:transparent;color:#7d603d;font-size:12px}
+.book{position:relative;margin:12px auto 5px;max-width:810px;padding:35px 48px;background:repeating-linear-gradient(0deg,transparent,transparent 37px,#b79c6520 38px),radial-gradient(ellipse at center,#fff7df,#e5ce9d);border-block:8px solid #a77b41;box-shadow:inset 0 0 35px #9b672b30,0 7px 25px #5a3d2225;animation:leftOpen 1.3s ease both}
+.book:before,.book:after{content:"";position:absolute;top:-17px;bottom:-17px;width:20px;background:linear-gradient(90deg,#735031,#d4b47f,#805835);border-radius:5px}
+.book:before{left:-8px}.book:after{right:-8px}
+.book h3{font:25px "SimSun",serif;letter-spacing:5px;text-align:center;color:#823d2e;margin:0 0 20px}
+.book p{font:18px/2.1 "STSong","SimSun",serif;text-indent:2em;letter-spacing:1px;margin:0}
+.book .book-end{text-align:center;text-indent:0;margin-top:20px;font-size:12px;color:#92754b;letter-spacing:5px}
+.video-error{padding:12px;font-size:13px;line-height:1.8;background:#fff4da}
+.video-error a{color:var(--red)}
+
+@media(max-width:820px){
+  .topbar{height:46px;padding:0 12px;gap:8px}
+  .seal{padding:5px 6px;font-size:15px}
+  .brand strong{font-size:17px;letter-spacing:2px}
+  .hint{display:none}
+  .tools{gap:7px}
+  #progress,.linkbtn{font-size:10px}
+  .stage{--colophon-w:108px;gap:8px;padding:8px}
+  .colophon{min-width:0}
+  .colophon:before{display:none}
+  .colophon:after{inset:8px 5px 8px 8px}
+  .poem-title{right:8px;top:14px;font-size:18px;letter-spacing:5px}
+  .poem-body{right:36px;top:16px;font-size:10px;line-height:1.6;letter-spacing:1px;max-height:calc(100% - 30px)}
+  .poem-sign,.poem-seal{display:none}
+  .map-wrap{width:min(calc(100cqw - 116px),100cqh);height:auto;aspect-ratio:1;align-self:center}
+  .modal{padding:12px}
+  .dialog{width:100%;max-height:calc(100dvh - 24px);padding:22px 20px}
+  .book{padding:24px}.book p{font-size:16px;line-height:1.9}
+  .guide-copy p{font-size:11px}
+  .edit-note{font-size:11px;top:6px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before{animation-duration:.01ms!important;transition:none!important}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
 </head>
 <body>
-<a class="skip" href="#content">跳至正文</a>
-<div class="frame">
-<header class="topline"><span class="tag">分区接入示例</span><a class="back" data-return href="../../#/">← 返回中轴总览</a></header>
-<main id="content">
-<div class="hero"><div><div class="eyebrow">02 / CENTRAL PALACE</div><h1>循礼序，<br>入宫城</h1><p class="intro">以故宫为中段的主要识别点，将社稷坛、太庙、端门和外金水桥串入一张轴向导览。两侧节点与中央序列在同一页中展开，详细内容留待分区作者完成。</p><p class="intro-note">中段 · 故宫 / 社稷坛 / 太庙 / 端门 / 外金水桥<br>此页用于演示独立章节接入。正式图文与交互由分区作者替换。</p><nav aria-label="本页节点"><ul class="sequence"><li><a href="#palace">故宫</a></li><li><a href="#ritual">社稷坛 · 太庙</a></li><li><a href="#gates">端门 · 外金水桥</a></li></ul></nav></div><figure class="map"><svg viewBox="0 0 460 430" role="img" aria-labelledby="map-title map-desc"><title id="map-title">中段宫城序列示意</title><desc id="map-desc">故宫、端门与外金水桥沿中央排列；社稷坛在左侧，太庙在右侧。仅表示导览关系。</desc><path d="M230 30V395" fill="none" stroke="#b39775" stroke-dasharray="3 6"/><rect x="160" y="58" width="140" height="179" fill="#dfcbb1" stroke="#9e7361"/><path d="M175 80h110v42H175zM175 140h110v25H175zM175 183h110v35H175z" fill="#a84431"/><path d="M170 79l60-22 60 22M170 140l60-19 60 19M170 183l60-19 60 19" fill="#6f3428"/><a href="#palace" aria-label="查看故宫接入位置"><text x="230" y="111" fill="#fff3dc" text-anchor="middle" font-size="17">故宫</text></a><a href="#ritual" aria-label="查看社稷坛和太庙接入位置"><rect x="42" y="265" width="97" height="57" fill="#d4bc9c" stroke="#9e7361"/><rect x="322" y="265" width="97" height="57" fill="#d4bc9c" stroke="#9e7361"/><text x="90" y="301" fill="#552b25" text-anchor="middle" font-size="14">社稷坛</text><text x="370" y="301" fill="#552b25" text-anchor="middle" font-size="14">太庙</text></a><a href="#gates" aria-label="查看端门和外金水桥接入位置"><path d="M196 275h68v27h-68z" fill="#a84431"/><path d="M189 275l41-18 41 18z" fill="#6f3428"/><text x="230" y="329" fill="#552b25" text-anchor="middle" font-size="14">端门</text><path d="M57 364Q145 341 230 364T403 364" fill="none" stroke="#7f9b99" stroke-width="12"/><path d="M202 364h56" stroke="#f0e8da" stroke-width="5"/><text x="230" y="401" fill="#552b25" text-anchor="middle" font-size="13">外金水桥</text></a><text x="20" y="32" fill="#6f3428" font-size="11">北 N ↑</text><text x="375" y="77" fill="#98442c" font-size="10" letter-spacing="2" writing-mode="tb">宫 · 城 · 礼 · 序</text></svg><figcaption>节点关系示意 · 非比例地图</figcaption></figure></div>
-<div class="sections"><section class="section" id="palace"><span class="number">01 / 中央序列</span><h2>故宫</h2><p>以独立页面接续故宫的详细内容。此处保留位置与风格边界，不预设作者的叙事形式。</p></section><section class="section" id="ritual"><span class="number">02 / 两侧展开</span><h2>社稷坛 · 太庙</h2><p>两处节点在示意图中分列轴线两侧。正式章节可分别设置阅读或交互入口。</p></section><section class="section" id="gates"><span class="number">03 / 门与桥</span><h2>端门 · 外金水桥</h2><p>这里演示从地图节点定位到页内内容。详细介绍、素材和交互由章节作者补充。</p></section></div>
+<header class="topbar">
+  <div class="brand"><span class="seal">京华</span><strong>京华入画</strong></div>
+  <div class="hint">点击人物 · 开启一段古都故事</div>
+  <div class="tools"><a class="linkbtn" data-return href="../../#/" aria-label="返回北京中轴总览">← 总览</a><span id="progress" role="status" aria-live="polite">已探访 0 / 5</span><button class="linkbtn" id="adjust" aria-pressed="false" aria-controls="map">微调人物位置</button><button class="linkbtn" id="reset" hidden>恢复默认</button></div>
+</header>
+<main class="stage" id="stage" aria-label="北京中轴线中段互动画卷">
+  <aside class="colophon" aria-label="卷首题跋">
+    <h1 class="poem-title">京华入画</h1>
+    <div class="poem-body">一条中轴，半部城史。<br>自永定门北望，重檐次第，<br>坛庙分列，桥水相映；<br>六百年风雨，尽入一卷丹青。</div>
+    <div class="poem-sign">古都寻迹 · 卷首</div>
+    <div class="poem-seal">中轴</div>
+  </aside>
+  <div class="canvas"><div class="map-wrap" id="map" role="group" aria-label="中段建筑导览图"><img src="assets/map.jpg" class="map-img" alt="从永定门方向北望北京中轴线的画卷式导览图，故宫、社稷坛、太庙、端门和外金水桥沿轴线及两侧展开" draggable="false"></div></div>
+  <div class="edit-note" id="editnote" role="status" hidden>位置微调中：拖动五位人物至对应建筑；位置将保存在当前浏览器。完成后点击“完成微调”。</div>
 </main>
-<footer class="foot"><span>北京中轴 · 独立章节示例 / CENTRAL</span><span>本地资源 · 自包含页面 · 可整体替换</span></footer>
-</div>
-<script>document.querySelector('[data-return]').addEventListener('click',function(event){if(window.parent!==window){event.preventDefault();window.parent.postMessage({type:'axis:return'},window.location.origin);}});</script>
+<div class="modal" id="modal" hidden><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><button class="close" id="close" aria-label="关闭画卷">×</button><div class="dialog-head"><small id="dialog-kicker">古都拾景</small><h2 id="dialog-title"></h2></div><div id="content"></div></section></div>
+<script>
+'use strict';
+// 五处位置为已保存的正式版本（含介绍者2、4 的微调结果）；后续微调另存 v2 键，旧缓存不再覆盖
+if(window.parent!==window)document.querySelector('[data-return]').hidden=true;
+document.querySelector('[data-return]').addEventListener('click',event=>{if(window.parent===window)return;event.preventDefault();window.parent.postMessage({type:'axis:return'},window.location.origin)});
+const sites=[
+{id:1,name:'故宫',guide:1,x:50.6,y:19.4,reveal:'center',video:true,tag:'宫阙深处 · 影像讲述'},
+{id:2,name:'社稷坛',guide:2,x:21.132,y:37.065,reveal:'center',video:true,tag:'坛宇之间 · 影像讲述'},
+{id:3,name:'太庙',guide:3,x:72.8,y:37.1,reveal:'center',video:true,tag:'礼制之美 · 影像讲述'},
+{id:4,name:'端门',guide:4,x:51.608,y:46.036,reveal:'left',tag:'重门序礼 · 书卷阅读',text:'端门位于天安门与午门之间，始建于明永乐十八年（1420年），面阔九间、进深五间，重檐歇山顶、覆黄琉璃瓦，形制与天安门基本相同，台下五座券门的中门正压中轴线。明清两代，城楼用于存放并整肃皇帝卤簿仪仗，出巡大典自此启驾，端门鸣钟、午门擂鼓；两侧朝房供百官候朝整冠，故又称"端礼门"。它与天安门、午门共同构成进入宫城的前导礼仪序列，是"北京中轴线"世界遗产构成要素之一。'},
+{id:5,name:'外金水桥',guide:5,x:50.9,y:85.6,reveal:'right',tag:'白石流光 · 书卷阅读',text:'外金水桥横跨天安门前外金水河，七座汉白玉拱桥始建于明永乐年间、清康熙二十九年重建，按御路桥、王公桥、品级桥、公生桥分等通行，是皇权等级秩序最直观的物质呈现。其北的端门建于明永乐十八年（1420年），面阔九间、重檐歇山顶，形制与天安门相仿，明清两代为存放卤簿仪仗、整队启驾之所，与天安门、午门共同构成进入宫城的前导礼仪序列。二者皆为"北京中轴线"世界遗产的构成要素。'}
+];
+const $=s=>document.querySelector(s),map=$('#map'),modal=$('#modal'),content=$('#content');
+const asset=n=>'assets/'+encodeURIComponent(n.endsWith('.png')?n.slice(0,-4)+'.webp':n);let editing=false,current=null,previousFocus=null,revealTimer=null,session=0;const visited=new Set();let saved={};try{saved=JSON.parse(localStorage.getItem('jinghua-positions-v2')||'{}')}catch(e){}
+function savePositions(){try{localStorage.setItem('jinghua-positions-v2',JSON.stringify(saved))}catch(e){$('#editnote').textContent='当前浏览器无法保存位置，微调仅在本次打开期间生效。'}}
+sites.forEach(s=>{const p=saved[s.id];if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){s.x=p.x;s.y=p.y}const pin=document.createElement('button');pin.className='pin';pin.dataset.id=s.id;pin.style.setProperty('--x',s.x+'%');pin.style.setProperty('--y',s.y+'%');pin.setAttribute('aria-label',s.name+'，介绍者'+s.guide+'，点击展开建筑图片');pin.innerHTML=`<img class="portrait" src="${asset('介绍者'+s.guide+'.png')}" alt="介绍者${s.guide}" draggable="false"><span class="pin-label">${s.name}</span>`;pin.addEventListener('click',()=>{if(!editing)openSite(s)});let dragging=false;pin.addEventListener('pointerdown',e=>{if(!editing)return;dragging=true;pin.setPointerCapture(e.pointerId);e.preventDefault()});pin.addEventListener('pointermove',e=>{if(!dragging)return;const r=map.getBoundingClientRect();s.x=Math.max(5,Math.min(95,(e.clientX-r.left)/r.width*100));s.y=Math.max(8,Math.min(96,(e.clientY-r.top)/r.height*100));pin.style.setProperty('--x',s.x+'%');pin.style.setProperty('--y',s.y+'%')});function endDrag(){if(!dragging)return;dragging=false;saved[s.id]={x:s.x,y:s.y};savePositions()}pin.addEventListener('pointerup',endDrag);pin.addEventListener('pointercancel',endDrag);map.append(pin)});
+function openSite(s){clearTimeout(revealTimer);session++;current=s;previousFocus=document.activeElement;visited.add(s.id);$('#progress').textContent=`已探访 ${visited.size} / 5`;$('#dialog-title').textContent=s.name;$('#dialog-kicker').textContent='第'+['一','二','三','四','五'][s.id-1]+'景 · 画卷徐开';modal.hidden=false;showPainting();$('#close').focus()}
+function showPainting(){clearTimeout(revealTimer);session++;const s=current;$('#dialog-kicker').textContent='古都拾景 · 画卷徐开';content.innerHTML=`<div class="artstage"><div class="painting reveal-${s.reveal}"><img src="${asset(s.name+'.png')}" alt="${s.name}建筑画卷"></div></div><div class="guide-row wait"><button class="guide-button" disabled aria-label="点击介绍者${s.guide}${s.video?'播放'+s.name+'视频':'阅读'+s.name+'介绍'}"><img class="portrait" src="${asset('介绍者'+s.guide+'.png')}" alt="介绍者${s.guide}"></button><div class="guide-copy"><strong>让介绍者为你讲述${s.name}</strong><p>再次点击左侧人物，${s.video?'播放建筑介绍视频':'展开古风文字书卷'}</p></div></div>`;const token=session;const reveal=()=>{if(token!==session||modal.hidden)return;$('.guide-row').classList.remove('wait');$('.guide-button').disabled=false};$('.painting').addEventListener('animationend',reveal,{once:true});revealTimer=setTimeout(reveal,2200);$('.guide-button').onclick=showStory}
+function showStory(){clearTimeout(revealTimer);session++;const s=current;$('#dialog-kicker').textContent=s.video?'古都有声 · 影像讲述':'古都有文 · 书卷留香';if(s.video){content.innerHTML=`<video class="media" controls playsinline preload="metadata" poster="${asset(s.name+'.png')}"><source src="${asset(s.name+'.mp4')}" type="video/mp4">浏览器不支持视频播放。</video><div class="video-error" hidden>浏览器未能解码该视频。可<a href="${asset(s.name+'.mp4')}" target="_blank" rel="noopener">单独打开原视频</a>，或使用支持其编码的播放器。</div><button class="back">返回建筑画卷</button>`;const v=$('video');v.addEventListener('error',()=>$('.video-error').hidden=false);$('source').addEventListener('error',()=>$('.video-error').hidden=false);v.play().catch(()=>{});v.focus()}else{content.innerHTML='<article class="book"><h3></h3><p class="story-text"></p><p class="book-end">京华旧事 · 读城知礼</p></article><button class="back">返回建筑画卷</button>';$('.book h3').textContent=s.name;$('.story-text').textContent=s.text;$('.back').focus()}$('.back').onclick=()=>{const v=$('video');if(v)v.pause();showPainting();$('#close').focus()}}
+function closeModal(){clearTimeout(revealTimer);session++;const v=$('video');if(v){v.pause();v.removeAttribute('src');v.querySelectorAll('source').forEach(n=>n.remove());v.load()}modal.hidden=true;content.innerHTML='';previousFocus?.focus()}
+$('#close').onclick=closeModal;modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});document.addEventListener('keydown',e=>{if(modal.hidden)return;if(e.key==='Escape')closeModal();if(e.key==='Tab'){const focusable=[...modal.querySelectorAll('button:not([disabled]),video[controls],a[href]')].filter(n=>n.offsetParent!==null);const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
+$('#adjust').onclick=()=>{editing=!editing;map.classList.toggle('editing',editing);$('#adjust').textContent=editing?'完成微调':'微调人物位置';$('#adjust').setAttribute('aria-pressed',String(editing));$('#editnote').hidden=!editing;$('#reset').hidden=!editing};$('#reset').onclick=()=>{saved={};savePositions();location.reload()};
+</script>
 </body>
 </html>
