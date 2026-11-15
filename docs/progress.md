@@ -119,3 +119,5 @@
 - 截图与限制见[模型图册](research/figures/README.md#2026-11-15--南至北三维游览)，路线解释见[研究记录](research/axis-tour-2026-11-15.md)。浏览器没有实时播完整个路线，整体单调北移和终点由单元采样测试覆盖。
 
 - 最终精简后的游览Playwright回归：`npx playwright test --config /tmp/axis-tour-qa/playwright.config.mjs`，1项通过（2.3分钟）。使用本地Vite 4176端口，保留移动/暂停/继续/滚轮接管/Esc/二维切换检查；多视口检查由前述独立脚本完成。
+
+- 实现与模型截图对应提交：`1a5c116`（`feat: add fixed-angle south-to-north model tour`）；上述构建、202项单元和游览浏览器检查针对该实现内容，后续提交仅补记此版本号。
