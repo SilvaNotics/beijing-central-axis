@@ -19,6 +19,7 @@ button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #a8523
 .seal{background:var(--red);color:#fff3dc;font-family:serif;padding:6px 8px;font-size:17px;writing-mode:vertical-rl;border:3px double #f6e5c2;outline:1px solid var(--red)}
 .brand strong{font:21px "STSong","SimSun",serif;letter-spacing:4px}
 .hint{font-size:11px;letter-spacing:2px;color:#9a886d;white-space:nowrap}
+.music-credit{margin:0;padding:0 10px 5px;font-size:10px;color:#86745b;text-align:center}.music-credit a{color:inherit}
 .tools{display:flex;align-items:center;gap:16px;flex-shrink:0}
 #progress{font-size:11px;letter-spacing:1px;color:#86745b;white-space:nowrap}
 .linkbtn{border:0;border-bottom:1px solid #b69a72;color:#856b49;background:none;padding:0 0 3px;font-size:11px;white-space:nowrap}
@@ -120,7 +121,7 @@ button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #a8523
 <header class="topbar">
   <div class="brand"><span class="seal">京华</span><strong>京华入画</strong></div>
   <div class="hint">点击人物 · 开启一段古都故事</div>
-  <div class="tools"><a class="linkbtn" data-return href="../../#/" aria-label="返回北京中轴总览">← 总览</a><span id="progress" role="status" aria-live="polite">已探访 0 / 5</span><button class="linkbtn" id="adjust" aria-pressed="false" aria-controls="map">微调人物位置</button><button class="linkbtn" id="reset" hidden>恢复默认</button></div>
+  <div class="tools"><a class="linkbtn" data-return href="../../#/" aria-label="返回北京中轴总览">← 总览</a><span id="progress" role="status" aria-live="polite">已探访 0 / 5</span><button class="linkbtn" id="musicToggle" type="button" aria-pressed="true">音乐：开</button><button class="linkbtn" id="adjust" aria-pressed="false" aria-controls="map">微调人物位置</button><button class="linkbtn" id="reset" hidden>恢复默认</button></div>
 </header>
 <main class="stage" id="stage" aria-label="北京中轴线中段互动画卷">
   <aside class="colophon" aria-label="卷首题跋">
@@ -132,6 +133,7 @@ button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #a8523
   <div class="canvas"><div class="map-wrap" id="map" role="group" aria-label="中段建筑导览图"><img src="assets/map.jpg" class="map-img" alt="从永定门方向北望北京中轴线的画卷式导览图，故宫、社稷坛、太庙、端门和外金水桥沿轴线及两侧展开" draggable="false"></div></div>
   <div class="edit-note" id="editnote" role="status" hidden>位置微调中：拖动五位人物至对应建筑；位置将保存在当前浏览器。完成后点击“完成微调”。</div>
 </main>
+<p class="music-credit">音乐《Ripples》· <a href="https://incompetech.com/" target="_blank" rel="noopener">Kevin MacLeod</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> · 沿用北段剪辑</p>
 <div class="modal" id="modal" hidden><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><button class="close" id="close" aria-label="关闭画卷">×</button><div class="dialog-head"><small id="dialog-kicker">古都拾景</small><h2 id="dialog-title"></h2></div><div id="content"></div></section></div>
 <script>
 'use strict';
@@ -147,12 +149,33 @@ const sites=[
 ];
 const $=s=>document.querySelector(s),map=$('#map'),modal=$('#modal'),content=$('#content');
 const asset=n=>'assets/'+encodeURIComponent(n.endsWith('.png')?n.slice(0,-4)+'.webp':n);let editing=false,current=null,previousFocus=null,revealTimer=null,session=0;const visited=new Set();let saved={};try{saved=JSON.parse(localStorage.getItem('jinghua-positions-v2')||'{}')}catch(e){}
+// 地图配乐只在用户交互后播放；整个讲解弹层保持安静。
+const mapMusic=new Audio('assets/bgm_map.mp3');
+mapMusic.loop=true;mapMusic.preload='metadata';mapMusic.volume=.3;
+let musicOn=true,musicUnlocked=false,musicPageActive=true;
+function syncMapMusic(){
+  if(musicOn&&musicUnlocked&&musicPageActive&&modal.hidden&&!document.hidden){
+    if(mapMusic.paused)mapMusic.play().catch(()=>{});
+  }else mapMusic.pause();
+}
+$('#musicToggle').onclick=()=>{
+  musicOn=!musicOn;
+  $('#musicToggle').textContent='音乐：'+(musicOn?'开':'关');
+  $('#musicToggle').setAttribute('aria-pressed',String(musicOn));
+  syncMapMusic();
+};
+for(const type of ['pointerdown','keydown'])document.addEventListener(type,()=>{
+  musicUnlocked=true;syncMapMusic();
+},{passive:true});
+document.addEventListener('visibilitychange',syncMapMusic);
+window.addEventListener('pagehide',()=>{musicPageActive=false;syncMapMusic()});
+window.addEventListener('pageshow',()=>{musicPageActive=true;syncMapMusic()});
 function savePositions(){try{localStorage.setItem('jinghua-positions-v2',JSON.stringify(saved))}catch(e){$('#editnote').textContent='当前浏览器无法保存位置，微调仅在本次打开期间生效。'}}
 sites.forEach(s=>{const p=saved[s.id];if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){s.x=p.x;s.y=p.y}const pin=document.createElement('button');pin.className='pin';pin.dataset.id=s.id;pin.style.setProperty('--x',s.x+'%');pin.style.setProperty('--y',s.y+'%');pin.setAttribute('aria-label',s.name+'，介绍者'+s.guide+'，点击展开建筑图片');pin.innerHTML=`<img class="portrait" src="${asset('介绍者'+s.guide+'.png')}" alt="介绍者${s.guide}" draggable="false"><span class="pin-label">${s.name}</span>`;pin.addEventListener('click',()=>{if(!editing)openSite(s)});let dragging=false;pin.addEventListener('pointerdown',e=>{if(!editing)return;dragging=true;pin.setPointerCapture(e.pointerId);e.preventDefault()});pin.addEventListener('pointermove',e=>{if(!dragging)return;const r=map.getBoundingClientRect();s.x=Math.max(5,Math.min(95,(e.clientX-r.left)/r.width*100));s.y=Math.max(8,Math.min(96,(e.clientY-r.top)/r.height*100));pin.style.setProperty('--x',s.x+'%');pin.style.setProperty('--y',s.y+'%')});function endDrag(){if(!dragging)return;dragging=false;saved[s.id]={x:s.x,y:s.y};savePositions()}pin.addEventListener('pointerup',endDrag);pin.addEventListener('pointercancel',endDrag);map.append(pin)});
-function openSite(s){clearTimeout(revealTimer);session++;current=s;previousFocus=document.activeElement;visited.add(s.id);$('#progress').textContent=`已探访 ${visited.size} / 5`;$('#dialog-title').textContent=s.name;$('#dialog-kicker').textContent='第'+['一','二','三','四','五'][s.id-1]+'景 · 画卷徐开';modal.hidden=false;showPainting();$('#close').focus()}
+function openSite(s){clearTimeout(revealTimer);session++;current=s;previousFocus=document.activeElement;visited.add(s.id);$('#progress').textContent=`已探访 ${visited.size} / 5`;$('#dialog-title').textContent=s.name;$('#dialog-kicker').textContent='第'+['一','二','三','四','五'][s.id-1]+'景 · 画卷徐开';modal.hidden=false;syncMapMusic();showPainting();$('#close').focus()}
 function showPainting(){clearTimeout(revealTimer);session++;const s=current;$('#dialog-kicker').textContent='古都拾景 · 画卷徐开';content.innerHTML=`<div class="artstage"><div class="painting reveal-${s.reveal}"><img src="${asset(s.name+'.png')}" alt="${s.name}建筑画卷"></div></div><div class="guide-row wait"><button class="guide-button" disabled aria-label="点击介绍者${s.guide}${s.video?'播放'+s.name+'视频':'阅读'+s.name+'介绍'}"><img class="portrait" src="${asset('介绍者'+s.guide+'.png')}" alt="介绍者${s.guide}"></button><div class="guide-copy"><strong>让介绍者为你讲述${s.name}</strong><p>再次点击左侧人物，${s.video?'播放建筑介绍视频':'展开古风文字书卷'}</p></div></div>`;const token=session;const reveal=()=>{if(token!==session||modal.hidden)return;$('.guide-row').classList.remove('wait');$('.guide-button').disabled=false};$('.painting').addEventListener('animationend',reveal,{once:true});revealTimer=setTimeout(reveal,2200);$('.guide-button').onclick=showStory}
 function showStory(){clearTimeout(revealTimer);session++;const s=current;$('#dialog-kicker').textContent=s.video?'古都有声 · 影像讲述':'古都有文 · 书卷留香';if(s.video){content.innerHTML=`<video class="media" controls playsinline preload="metadata" poster="${asset(s.name+'.png')}"><source src="${asset(s.name+'.mp4')}" type="video/mp4">浏览器不支持视频播放。</video><div class="video-error" hidden>浏览器未能解码该视频。可<a href="${asset(s.name+'.mp4')}" target="_blank" rel="noopener">单独打开原视频</a>，或使用支持其编码的播放器。</div><button class="back">返回建筑画卷</button>`;const v=$('video');v.addEventListener('error',()=>$('.video-error').hidden=false);$('source').addEventListener('error',()=>$('.video-error').hidden=false);v.play().catch(()=>{});v.focus()}else{content.innerHTML='<article class="book"><h3></h3><p class="story-text"></p><p class="book-end">京华旧事 · 读城知礼</p></article><button class="back">返回建筑画卷</button>';$('.book h3').textContent=s.name;$('.story-text').textContent=s.text;$('.back').focus()}$('.back').onclick=()=>{const v=$('video');if(v)v.pause();showPainting();$('#close').focus()}}
-function closeModal(){clearTimeout(revealTimer);session++;const v=$('video');if(v){v.pause();v.removeAttribute('src');v.querySelectorAll('source').forEach(n=>n.remove());v.load()}modal.hidden=true;content.innerHTML='';previousFocus?.focus()}
+function closeModal(){clearTimeout(revealTimer);session++;const v=$('video');if(v){v.pause();v.removeAttribute('src');v.querySelectorAll('source').forEach(n=>n.remove());v.load()}modal.hidden=true;content.innerHTML='';syncMapMusic();previousFocus?.focus()}
 $('#close').onclick=closeModal;modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});document.addEventListener('keydown',e=>{if(modal.hidden)return;if(e.key==='Escape')closeModal();if(e.key==='Tab'){const focusable=[...modal.querySelectorAll('button:not([disabled]),video[controls],a[href]')].filter(n=>n.offsetParent!==null);const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
 $('#adjust').onclick=()=>{editing=!editing;map.classList.toggle('editing',editing);$('#adjust').textContent=editing?'完成微调':'微调人物位置';$('#adjust').setAttribute('aria-pressed',String(editing));$('#editnote').hidden=!editing;$('#reset').hidden=!editing};$('#reset').onclick=()=>{saved={};savePositions();location.reload()};
 </script>
