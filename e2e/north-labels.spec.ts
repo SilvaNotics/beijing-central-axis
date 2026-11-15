@@ -2,6 +2,45 @@ import { expect, test } from '@playwright/test';
 
 test.use({ reducedMotion: 'reduce' });
 
+for (const width of [390, 1440]) {
+  test(`north label pixels survive late webfont loading at ${width}px`, async ({ page }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.setViewportSize({ width, height: 950 });
+    let releaseFonts!: () => void;
+    const fontGate = new Promise<void>(resolve => { releaseFonts = resolve; });
+    await page.route('**/*.woff2', async route => { await fontGate; await route.continue(); });
+    try {
+      await page.goto('/chapters/north/index.html', { waitUntil: 'domcontentloaded' });
+      await page.locator('#introSkip').click();
+      await expect(page.locator('#intro')).toHaveCount(0);
+      const labels = page.locator('#stage > .place');
+      for (const label of await labels.all()) await expect(label).toHaveCSS('opacity', '1');
+      const cdp = await page.context().newCDPSession(page);
+      const captureLabels = async () => {
+        const images: string[] = [];
+        for (const label of await labels.all()) {
+          const box = (await label.locator('span').boundingBox())!;
+          const inset = width <= 900 ? 4 : 0;
+          images.push((await cdp.send('Page.captureScreenshot', { format: 'png', clip: { x:box.x+inset,y:box.y+inset,width:box.width-inset*2,height:box.height-inset*2,scale:1 } })).data);
+        }
+        return images;
+      };
+      // Playwright element screenshots wait for fonts.ready; CDP captures the actual pre-swap pixels.
+      const before = await captureLabels();
+      releaseFonts();
+      await page.evaluate(() => document.fonts.ready);
+      // Include the original eight-second opening fallback and the repaint after font swap.
+      await page.waitForTimeout(8500);
+      const after = await captureLabels();
+      for (const [i, pixels] of after.entries()) expect(pixels === before[i], `label ${i} pixels stay unchanged`).toBe(true);
+      for (const label of await labels.all()) {
+        expect(await label.evaluate(el => getComputedStyle(el).fontFamily)).not.toMatch(/AxisMing|AxisKai/);
+      }
+      await page.screenshot({ path: testInfo.outputPath(`north-late-font-${width}.png`) });
+    } finally { releaseFonts(); }
+  });
+}
+
 for (const embedded of [false, true]) {
   test(`north map place labels remain readable and open cards ${embedded ? 'embedded' : 'standalone'}`, async ({ page }, testInfo) => {
     const errors: string[] = [];
