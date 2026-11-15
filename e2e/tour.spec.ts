@@ -1,5 +1,16 @@
 import { expect, test } from '@playwright/test';
 
+test('identifies the palace halls when focusing the Forbidden City', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#/site/forbidden-city');
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 90_000 });
+  for (const id of ['638449347', '638473398', '638981317']) {
+    await expect(page.locator(`[data-annotation=palace-${id}]`)).toHaveCSS('opacity', '1');
+  }
+  await expect(page.locator('[data-annotation=palace-zhonghe]')).toHaveText('中和殿');
+});
+
 test('tours northward at a fixed angle, pauses, resumes and yields to manual navigation', async ({ page }, testInfo) => {
   test.setTimeout(240_000);
   const errors: string[] = [];
@@ -11,8 +22,7 @@ test('tours northward at a fixed angle, pauses, resumes and yields to manual nav
   await page.getByRole('button', { name: '由南至北游览' }).click();
   const progress = page.getByRole('complementary', { name: '由南至北游览进度' });
   await expect(progress.getByRole('status')).toContainText('永定门');
-  await expect(progress.locator('.tour-location-eyebrow')).toHaveText(/.+/);
-  await expect(progress.locator('.tour-location-card')).toContainText(/.+/);
+  await expect(progress.locator('.tour-location-card')).toHaveCount(0);
   await page.getByRole('button', { name: '暂停游览', exact: true }).click();
   await expect(progress).toContainText('已暂停');
   await page.screenshot({ path: testInfo.outputPath('tour-paused.png') });
