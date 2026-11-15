@@ -5,14 +5,11 @@ test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true
 const touch = (session: CDPSession, type: 'touchStart' | 'touchMove' | 'touchEnd' | 'touchCancel', points: { id: number; x: number; y: number }[]) =>
   session.send('Input.dispatchTouchEvent', { type, touchPoints: points });
 
-async function expectNoticeAbovePortrait(dialog: Locator) {
-  const caption = dialog.locator('.dialogue-caption');
+async function expectPortraitVisible(dialog: Locator) {
   const portrait = dialog.locator('#fig img');
-  await expect(caption).toBeVisible();
+  await expect(dialog.locator('.dialogue-caption')).toHaveCount(0);
   await expect.poll(() => portrait.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
-  const noticeBox = (await caption.boundingBox())!;
   const portraitBox = (await portrait.boundingBox())!;
-  expect(noticeBox.y + noticeBox.height + 8).toBeLessThanOrEqual(portraitBox.y);
   expect(portraitBox.height).toBeGreaterThan(100);
 }
 
@@ -120,6 +117,20 @@ test('north map portraits stay visible and open dialogues on narrow screens', as
   await page.goto('/chapters/north/index.html');
   for (const width of [320, 390, 768]) {
     await page.setViewportSize({ width, height: 844 });
+    await expect(page.locator('.pcard button')).toHaveCount(0);
+    const places = page.locator('.mobile-nav .places button');
+    await expect(places).toHaveCount(4);
+    for (const place of await places.all()) {
+      await place.tap();
+      await expect(page.locator('.pcard.on')).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(page.locator('.pcard.on')).toHaveCount(0);
+      await expect(place).toBeFocused();
+      await place.tap();
+      await expect(page.locator('.pcard.on')).toBeVisible();
+      await page.touchscreen.tap(2, 70);
+      await expect(page.locator('.pcard.on')).toHaveCount(0);
+    }
     const markers = page.locator('#stage > .marker');
     await expect(markers).toHaveCount(3);
     for (const marker of await markers.all()) {
@@ -130,7 +141,7 @@ test('north map portraits stay visible and open dialogues on narrow screens', as
       expect(box.height).toBeGreaterThanOrEqual(44);
       await marker.tap();
       await expect(page.locator('#dlg')).toBeVisible();
-      await expectNoticeAbovePortrait(page.locator('#dlg'));
+      await expectPortraitVisible(page.locator('#dlg'));
       await page.locator('#back').tap();
       await expect(marker).toBeFocused();
     }
@@ -145,7 +156,7 @@ test('north map portraits stay visible and open dialogues on narrow screens', as
   expect(errors).toEqual([]);
 });
 
-test('embedded north dialogue keeps the creation notice above every portrait', async ({ page }, testInfo) => {
+test('embedded north dialogue shows portraits without the creation notice', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/#/chapter/north');
@@ -161,7 +172,7 @@ test('embedded north dialogue keeps the creation notice above every portrait', a
     for (const marker of await frame.locator('#stage > .marker').all()) {
       await marker.tap();
       await expect(frame.locator('#dlg')).toBeVisible();
-      await expectNoticeAbovePortrait(frame.locator('#dlg'));
+      await expectPortraitVisible(frame.locator('#dlg'));
       await expect(frame.locator('#dlgText')).not.toBeEmpty();
       if (await marker.getAttribute('data-npc') === 'porter') {
         await page.screenshot({ path: testInfo.outputPath(`north-dialogue-${viewport.width}x${viewport.height}.png`) });
