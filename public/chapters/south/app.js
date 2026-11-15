@@ -228,7 +228,7 @@ function updateBackground(){
 }
 
 /* 声音状态 */
-let bgm=null,bgmTarget=0,musicOn=true;
+let bgm=null,bgmTarget=0,musicOn=true,musicUnlocked=false,musicPageActive=true;
 let voices=[],utterance=null,readToken=0,readState="idle";
 const synth=("speechSynthesis" in window)?window.speechSynthesis:null;
 
@@ -243,11 +243,10 @@ function ensureAudio(){
 function musicTarget(){
  if(!bgm)return;
  const onMap=!$("story").open;
- const active=musicOn&&mode!=="video"&&!document.hidden;
- const duck=(readState==="speaking"||readState==="pending")?.4:1;
- /* 地图页只作背景，压到六成；进站后恢复 */
- const scene=onMap?.6:1;
- bgmTarget=active?Number($("musicVolume").value)*duck*scene:0;
+ // 讲解期间保持静音，包括暂停朗读、关闭自动朗读和视频返回对话。
+ const active=musicOn&&musicUnlocked&&musicPageActive&&onMap&&mode!=="video"&&!document.hidden;
+ bgmTarget=active?Number($("musicVolume").value)*.6:0;
+ if(bgmTarget===0){stopMusicLoop();return}
  if(bgmTarget>0&&bgm.paused){
   const started=bgm.play();
   if(started&&started.catch)started.catch(()=>{});
@@ -259,6 +258,7 @@ function startMusic(){
 }
 function stopMusicLoop(){
  bgmTarget=0;
+ if(bgm){bgm.pause();bgm.volume=0}
 }
 /* 音量做几十毫秒的渐变，避免开关时爆音 */
 setInterval(()=>{
@@ -290,6 +290,7 @@ $("musicVolume").addEventListener("input",musicTarget);
 
 /* 浏览器不允许无交互自动出声：第一次点击/按键后再起乐 */
 function unlockMusic(){
+ musicUnlocked=true;
  for(const type of ["pointerdown","keydown","touchstart"])
   document.removeEventListener(type,unlockMusic);
  ensureAudio();
@@ -317,7 +318,7 @@ function playCast(token){
  readState="pending";readUI("正在准备朗读……");
  const started_=()=>{
   if(token!==readToken)return;
-  readState="speaking";readUI("正在朗读 · 音乐已降低");
+  readState="speaking";readUI("正在朗读 · 地图音乐已暂停");
  };
  castAudio.onplaying=started_;
  castAudio.onplay=started_;
@@ -391,7 +392,7 @@ function speakLine(){
  readState="pending";readUI("正在准备朗读……");
  u.onstart=()=>{
   if(token!==readToken)return;
-  readState="speaking";readUI("正在朗读 · 音乐已降低");
+  readState="speaking";readUI("正在朗读 · 地图音乐已暂停");
  };
  u.onend=()=>{
   if(token!==readToken)return;
@@ -563,11 +564,13 @@ document.addEventListener("visibilitychange",()=>{
  }else musicTarget();
 });
 window.addEventListener("pagehide",()=>{
+ musicPageActive=false;
  cancelRead();stopMusicLoop();
  if(bgm&&!bgm.paused)bgm.pause();
 });
 window.addEventListener("pageshow",()=>{
- if($("story").open&&mode==="talk")startMusic();
+ musicPageActive=true;
+ musicTarget();
 });
 
 progress();
