@@ -14,8 +14,8 @@ describe('south to north detail tour', () => {
     expect(stops.filter(p => p.siteId === 'tiantan').map(p => p.name)).toEqual(['圜丘坛', '皇穹宇', '祈年殿']);
   });
   it('holds details, interpolates without overshooting and finishes at the north end', () => {
-    expect(sampleTour(stops, 4000)).toMatchObject({ x: stops[0].x, z: stops[0].z, done: false });
-    const middle = sampleTour(stops, 4200 + tourTravelMs(stops[0], stops[1]) / 2);
+    expect(sampleTour(stops, 3000)).toMatchObject({ x: stops[0].x, z: stops[0].z, done: false });
+    const middle = sampleTour(stops, 3200 + tourTravelMs(stops[0], stops[1]) / 2);
     expect(middle.x).toBeCloseTo((stops[0].x + stops[1].x) / 2);
     expect(middle.z).toBeCloseTo((stops[0].z + stops[1].z) / 2);
     let previousZ = Infinity;

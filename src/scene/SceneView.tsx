@@ -153,13 +153,12 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   const pointers = new Set<number>();
   let tap: { id: number; x: number; y: number } | null = null;
 
-  const fit = (center: THREE.Vector3, extent: number, animated = true) => {
+  const fit = (center: THREE.Vector3, extent: number, animated = true, angle = .9) => {
     const distance = 1600, zoom = 1000 / extent;
     const shadowExtent = Math.min(600, extent * .8);
     Object.assign(sun.shadow.camera, { left: -shadowExtent, right: shadowExtent, top: shadowExtent, bottom: -shadowExtent });
     sun.shadow.camera.updateProjectionMatrix(); sun.target.position.copy(center);
     sun.position.copy(center).add(new THREE.Vector3(-180, 320, 120));
-    const angle = TOUR_ANGLE;
     const to = center.clone().add(new THREE.Vector3(0, Math.sin(angle) * distance, Math.cos(angle) * distance));
     if (animated && !reducedMotion) animation = { from: camera.position.clone(), to, fromTarget: controls.target.clone(), target: center.clone(), fromZoom: camera.zoom, zoom, start: performance.now() };
     else { animation = null; camera.position.copy(to); camera.zoom = zoom; camera.updateProjectionMatrix(); controls.target.copy(center); controls.update(); }
@@ -368,7 +367,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
         tourElapsed = 0; tourStatusKey = ''; city.halo.visible = false;
         const first = tourStops[0];
         activeFocus = first.siteId;
-        fit(new THREE.Vector3(first.x, first.y, first.z), Math.max(26, 22 / aspect), false);
+        fit(new THREE.Vector3(first.x, first.y, first.z), Math.max(26, 22 / aspect), false, TOUR_ANGLE);
       }
       tourMode = mode; tourLastFrame = null;
       invalidate();
