@@ -3,15 +3,21 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { landmarks } from '../data/heritage';
 import { createCity, bounds } from './city';
-import { mappedLayout } from './layouts';
+import { mappedLayout, palaceAxis } from './layouts';
 import { AXIS_ROTATION } from './geo';
 import { moundCenter } from './templeLayout';
 import { roadStation } from './southernRoad';
+import { zhongheLayout } from './palaceArchitecture';
+import { palaceGateLayout } from './palaceGates';
 import { createMaterials, disposeMaterials } from './materials';
 import { loadCityData, type CityData } from './geodata';
 import type { SceneViewProps } from './types';
 import { createTourStops, sampleTour, tourDuration, TOUR_ANGLE, type TourMode } from './axisTour';
 import './scene.css';
+
+const palaceSite = landmarks.find(site => site.id === 'forbidden-city')!;
+const palaceLabels = [...palaceAxis, 43512262, 43519304, 40592355, 40592356, 40593735, 40606461]
+  .map(id => mappedLayout(id, palaceSite));
 
 interface SceneController {
   focus: (id: string) => void;
@@ -69,6 +75,9 @@ export default function SceneView(props: SceneViewProps) {
         <span data-annotation="danbi-bridge">丹陛桥</span>
         <span data-annotation="road-slabs">石板道路</span>
         <span data-annotation="road-foundation">道路叠压遗存</span>
+        {palaceLabels.map(building => <span key={building.osmId} data-annotation={`palace-${building.osmId}`}>{building.name}</span>)}
+        <span data-annotation="palace-zhonghe">中和殿</span>
+        <span data-annotation="palace-638156366">午门</span>
       </div>
     </div>
     <div className="scene-vignette" aria-hidden="true" />
@@ -144,11 +153,17 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   let width = 1, height = 1, frame = 0, disposed = false, rendering = false, needsFrames = 5;
   let activeFocus = 'all';
   const tourStops = createTourStops(), totalTourMs = tourDuration(tourStops);
+  let currentTourName = '';
   let tourMode: TourMode = 'off', tourElapsed = 0, tourLastFrame: number | null = null, tourStatusKey = '';
   const tourOffset = new THREE.Vector3(0, Math.sin(TOUR_ANGLE) * 1600, Math.cos(TOUR_ANGLE) * 1600);
   let animation: { from: THREE.Vector3; to: THREE.Vector3; fromTarget: THREE.Vector3; target: THREE.Vector3; fromZoom: number; zoom: number; start: number } | null = null;
   const labelElements = [...labelLayer.querySelectorAll<HTMLButtonElement>('[data-site]')];
   const annotationElements = [...labelLayer.querySelectorAll<HTMLElement>('[data-annotation]')];
+  const palaceAnnotationPositions = new Map(palaceLabels.map(building => [`palace-${building.osmId}`, new THREE.Vector3(building.x, 4, building.z)]));
+  const zhonghe = zhongheLayout(palaceSite, data);
+  palaceAnnotationPositions.set('palace-zhonghe', new THREE.Vector3(zhonghe.x, 3.1, zhonghe.z));
+  const wumen = palaceGateLayout(palaceSite, data, 638156366);
+  if (wumen) palaceAnnotationPositions.set('palace-638156366', new THREE.Vector3(wumen.x, 4, wumen.z));
   const mouse = new THREE.Vector2(), raycaster = new THREE.Raycaster();
   const pointers = new Set<number>();
   let tap: { id: number; x: number; y: number } | null = null;
@@ -216,6 +231,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
       if (visible) occupied.push({ x, y, w });
     }
     const squareAnchor = city.anchors.get('square');
+    const palaceAnchor = city.anchors.get('forbidden-city');
     const annotations: Record<string, THREE.Vector3> = {
       heroes: new THREE.Vector3(-.8, 4.2, -15.8),
       memorial: new THREE.Vector3(.3, 3.4, 7.4),
@@ -241,16 +257,27 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
       annotations['road-foundation'] = new THREE.Vector3(foundation.x-roadAnchor.x,.5,foundation.z-roadAnchor.z);
     }
     const roadVisible = Boolean(roadAnchor) && (activeFocus === 'southern-road' || ref.current.selection === 'southern-road');
-    for (const el of annotationElements) {
+    const palaceVisible = Boolean(palaceAnchor) && (activeFocus === 'forbidden-city' || ref.current.selection === 'forbidden-city');
+    for (const [id, position] of palaceAnnotationPositions) annotations[id] = position;
+    const palaceOccupied: { x: number; y: number; w: number }[] = [];
+    // Reserve room for the current palace stop before placing nearby names.
+    const currentName = tourMode !== 'off' ? currentTourName : '';
+    const orderedAnnotations = [...annotationElements].sort((a, b) => Number(b.textContent === currentName) - Number(a.textContent === currentName));
+    for (const el of orderedAnnotations) {
       const offset = annotations[el.dataset.annotation!];
+      const palace = el.dataset.annotation!.startsWith('palace-');
+      el.classList.toggle('is-current-stop', palace && el.textContent === currentName);
       const tiantan = ['prayer-hall','imperial-vault','circular-altar','danbi-bridge'].includes(el.dataset.annotation!);
       const road = ['road-slabs','road-foundation'].includes(el.dataset.annotation!);
-      const origin = tiantan ? tiantanAnchor : road ? roadAnchor : squareAnchor;
-      const activeGroup = tiantan ? tiantanVisible : road ? roadVisible : squareVisible;
+      const origin = palace ? palaceAnchor : tiantan ? tiantanAnchor : road ? roadAnchor : squareAnchor;
+      const activeGroup = palace ? palaceVisible : tiantan ? tiantanVisible : road ? roadVisible : squareVisible;
       if (!activeGroup || !origin || !offset) { el.style.opacity = '0'; continue; }
       normal.set(origin.x + offset.x, offset.y, origin.z + offset.z).project(camera);
       const x = (normal.x + 1) * width / 2, y = (1 - normal.y) * height / 2;
-      const visible = normal.z < 1 && normal.z > -1 && x > 45 && x < width - 70 && y > 45 && y < height - 60;
+      const w = el.offsetWidth;
+      const visible = normal.z < 1 && normal.z > -1 && x > 45 && x < width - Math.max(70, w) && y > 45 && y < height - 60
+        && (!palace || !palaceOccupied.some(p => x < p.x + p.w + 6 && x + w + 6 > p.x && Math.abs(y - p.y) < 20));
+      if (visible && palace) palaceOccupied.push({ x, y, w });
       el.style.opacity = visible ? '1' : '0';
       el.style.transform = `translate3d(${x}px,${y}px,0)`;
     }
@@ -263,6 +290,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
       if (tourLastFrame !== null) tourElapsed += Math.min(1000, Math.max(0, time - tourLastFrame));
       tourLastFrame = time;
       const point = sampleTour(tourStops, tourElapsed);
+      currentTourName = point.name;
       controls.target.set(point.x, point.y, point.z);
       camera.position.copy(controls.target).add(tourOffset);
       sun.target.position.copy(controls.target);
