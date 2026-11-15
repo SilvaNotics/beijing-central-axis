@@ -30,22 +30,22 @@ npm run dev
 | `npm run build` | 先执行 TypeScript 项目检查，再生成 `dist/` |
 | `npm run preview` | 通过本地 HTTP 服务预览 `dist/` |
 | `python3 scripts/verify-docs.py` | 只核对本地文档、来源登记与数据快照，不启动测试 runner |
-| `npm test` | Vitest 单元测试入口；当前会话按用户要求不执行 |
-| `npm run test:e2e` | 构建后执行 Playwright；本轮不执行 |
+| `npm test` | Vitest 单元测试入口；保留下述 WSL 串行和堆限制 |
+| `npm run test:e2e` | 构建后执行 Playwright；软件 WebGL 环境建议使用 `-- --workers=1` |
 
 包中没有单独的 lint 脚本，不要将编译检查写成 ESLint 检查。单元测试与浏览器检查必须有实际输出才能标记通过。
 
 主应用构建未包含 Playwright 配置与浏览器检查文件。可以单独检查这些文件的类型，命令不会运行浏览器或测试用例；`@types/node` 已作为开发依赖登记：
 
 ```bash
-node --max-old-space-size=512 ./node_modules/typescript/bin/tsc --noEmit --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node playwright.config.ts e2e/atlas.spec.ts
+node --max-old-space-size=512 ./node_modules/typescript/bin/tsc --noEmit --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --types node playwright.config.ts e2e/atlas.spec.ts e2e/mobile.spec.ts
 ```
 
 ## WSL 资源约束
 
 2026-11-14 的内核日志记录了 Vitest 并发造成的全局 OOM。当前测试配置采用单 worker、文件串行、用例最大并发数 1 和独立 forks 隔离；主进程与 worker 的 V8 老生代堆分别限制为 1024 MiB。
 
-不要通过 CLI、`VITEST_MAX_WORKERS` 或关闭隔离覆盖这些设置。1024 MiB 不是整个进程 RSS 上限，Three.js 原生几何缓冲区另占内存。历史证据和未验证边界见 [测试资源排错](testing-resources.md)。当前用户要求不运行测试，构建和静态检查不代表测试套件通过。
+不要通过 CLI、`VITEST_MAX_WORKERS` 或关闭隔离覆盖这些设置。1024 MiB 不是整个进程 RSS 上限，Three.js 原生几何缓冲区另占内存。历史证据和未验证边界见 [测试资源排错](testing-resources.md)。2026-11-14 轮次按用户当时要求未执行测试；后续实际执行结果按日期追加到 [进度记录](progress.md)，构建和静态检查不能替代测试结果。
 
 资源紧张时可限制构建的 Node 堆：
 
