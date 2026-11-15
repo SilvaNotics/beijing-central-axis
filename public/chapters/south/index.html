@@ -6,108 +6,10 @@
 <meta name="description" content="北京中轴线南段互动地图，包含天安门、正阳门、天坛、先农坛、道路遗存与永定门的故事、配音和影像。">
 <title>京华入墨 · 中轴拾光</title>
 <link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./roaming.css">
+<link rel="stylesheet" href="./opening.css">
 </head>
 <body>
-<div id="axis-ink-opening" aria-hidden="true">
-  <svg xmlns="http://www.w3.org/2000/svg"
-       viewBox="0 0 1000 1000"
-       preserveAspectRatio="none">
-    <defs>
-      <filter id="axisIntroSpread"
-              x="-45%" y="-45%" width="190%" height="190%"
-              color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise"
-                      baseFrequency=".009 .013"
-                      numOctaves="3"
-                      seed="19"
-                      result="inkNoise"/>
-        <feDisplacementMap in="SourceGraphic"
-                           in2="inkNoise"
-                           scale="63"
-                           xChannelSelector="R"
-                           yChannelSelector="G"/>
-        <feGaussianBlur stdDeviation="7"/>
-      </filter>
-
-      <filter id="axisIntroBloom"
-              x="-50%" y="-50%" width="200%" height="200%">
-        <feTurbulence type="fractalNoise"
-                      baseFrequency=".012 .018"
-                      numOctaves="3"
-                      seed="19"
-                      result="bloomNoise"/>
-        <feDisplacementMap in="SourceGraphic"
-                           in2="bloomNoise"
-                           scale="83"/>
-        <feGaussianBlur stdDeviation="15"/>
-      </filter>
-
-      <filter id="axisIntroPaper"
-              x="0" y="0" width="100%" height="100%">
-        <feTurbulence type="fractalNoise"
-                      baseFrequency=".6"
-                      numOctaves="3"
-                      stitchTiles="stitch"/>
-        <feColorMatrix type="saturate" values="0"/>
-      </filter>
-
-      <radialGradient id="axisIntroPaperColor">
-        <stop offset="0" stop-color="#fbf5e5"/>
-        <stop offset=".65" stop-color="#f3ecda"/>
-        <stop offset="1" stop-color="#e8dec6"/>
-      </radialGradient>
-
-      <mask id="axisIntroReveal"
-            maskUnits="userSpaceOnUse"
-            x="0" y="0" width="1000" height="1000"
-            style="mask-type:luminance">
-        <rect width="1000" height="1000" fill="white"/>
-        <circle data-ink-hole
-                cx="500" cy="560" r="0"
-                fill="black"
-                filter="url(#axisIntroSpread)"/>
-      </mask>
-    </defs>
-
-    <!-- 宣纸层随水墨扩散而被揭开 -->
-    <g mask="url(#axisIntroReveal)">
-      <rect width="1000" height="1000"
-            fill="url(#axisIntroPaperColor)"/>
-      <rect width="1000" height="1000"
-            fill="#9b9279" opacity=".065"
-            filter="url(#axisIntroPaper)"/>
-
-      <!-- 低对比远山淡墨 -->
-      <path d="M0 730 110 590 170 660 260 450
-               365 640 430 580 545 750
-               670 630 790 700 900 490 1000 650
-               V1000H0Z"
-            fill="#7d8a72" opacity=".055"/>
-    </g>
-
-    <!-- 晕染前缘，不使用规则描边 -->
-    <circle data-ink-halo
-            cx="500" cy="560" r="0"
-            fill="none"
-            stroke="#61725a"
-            stroke-width="72"
-            opacity="0"
-            filter="url(#axisIntroBloom)"/>
-
-    <circle data-ink-edge
-            cx="500" cy="560" r="0"
-            fill="none"
-            stroke="#46523f"
-            stroke-width="22"
-            opacity="0"
-            filter="url(#axisIntroSpread)"/>
-  </svg>
-
-  <div data-ink-title>
-    京华入墨
-    <small>一卷京华 · 入画相逢</small>
-  </div>
-</div>
 <main class="page">
   <header>
     <div>
@@ -326,5 +228,7 @@
 </dialog>
 
 <script src="./app.js" defer></script>
+<script src="./roaming.js" defer></script>
+<script src="./opening.js" defer></script>
 </body>
 </html>
