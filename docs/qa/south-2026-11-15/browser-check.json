@@ -1,0 +1,103 @@
+{
+  "checkedOn": "2026-11-15",
+  "mode": "One Chromium instance, direct browser-library inspection; no npm test runner",
+  "stations": [
+    {
+      "title": "天安门广场及建筑群",
+      "dialogueLines": 10,
+      "portrait": true,
+      "focusRestored": true
+    },
+    {
+      "title": "正阳门",
+      "dialogueLines": 10,
+      "portrait": true,
+      "focusRestored": true
+    },
+    {
+      "title": "先农坛",
+      "dialogueLines": 10,
+      "portrait": true,
+      "focusRestored": true
+    },
+    {
+      "title": "天坛",
+      "dialogueLines": 10,
+      "portrait": true,
+      "focusRestored": true
+    },
+    {
+      "title": "中轴线南段道路遗存",
+      "dialogueLines": 10,
+      "portrait": true,
+      "focusRestored": true
+    },
+    {
+      "title": "永定门",
+      "dialogueLines": 10,
+      "portrait": true,
+      "focusRestored": true
+    }
+  ],
+  "videoMetadata": [
+    {
+      "title": "天安门广场及建筑群",
+      "duration": 96.979813,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "title": "正阳门",
+      "duration": 27.979002,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "title": "先农坛",
+      "duration": 30.417007,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "title": "天坛",
+      "duration": 15.041678,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "title": "永定门",
+      "duration": 15.041678,
+      "width": 1280,
+      "height": 720
+    }
+  ],
+  "layouts": [
+    {
+      "width": 320,
+      "mapOverflow": false,
+      "dialogFits": true
+    },
+    {
+      "width": 390,
+      "mapOverflow": false,
+      "dialogFits": true
+    },
+    {
+      "width": 768,
+      "mapOverflow": false,
+      "dialogFits": true
+    }
+  ],
+  "returnLinkHidden": true,
+  "parentReturn": true,
+  "errors": [],
+  "failures": [],
+  "remote": [],
+  "finalBuildSeconds": 34.26,
+  "finalScreenshots": "390x844 and 1440x950",
+  "revisedAudio": {
+    "oldRecordingDisabled": true,
+    "text": "南段道路遗存不是一整段露天古路，而是分布在不同地点的考古发现。"
+  },
+  "finalCheckErrors": []
+}

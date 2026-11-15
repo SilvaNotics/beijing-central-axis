@@ -18,7 +18,7 @@
 | 中段 | `forbidden-city`、`shejitan`、`taimiao`、`duanmen`、`jinshui` |
 | 南段 | `tiananmen`、`square`、`zhengyang`、`tiantan`、`xiannongtan`、`southern-road`、`yongdingmen` |
 
-`public/chapters/north/` 已于 2026-11-14 接入正式「纸雕立体书地图」章节。`central/` 与 `south/` 仍为**分区接入示例**。交付这些分区的正式章节时替换对应目录，不要把示例文案、示意小地图或工程骨架标记为最终作品。北段交付说明见 [章节 README](../public/chapters/north/README.md) 和 [交付记录](../public/chapters/north/docs/handoff.md)。
+`public/chapters/north/` 已接入正式「纸雕立体书地图」章节；`public/chapters/south/` 已接入正式独立互动章节「京华入墨 · 中轴拾光」；`central/` 仍为**分区接入示例**。南段章节以六个叙事站点覆盖七个稳定地标：天安门城楼与广场建筑群合并讲述，但主应用中的 `tiananmen`、`square` ID 保持独立。章节说明见[南段 README](../public/chapters/south/README.md)、[素材与事实边界](../public/chapters/south/docs/sources.md)和[交付记录](../public/chapters/south/docs/handoff.md)；北段交付说明见[章节 README](../public/chapters/north/README.md)和[交付记录](../public/chapters/north/docs/handoff.md)。
 
 ## 入口登记
 
