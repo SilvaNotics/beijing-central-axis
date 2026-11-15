@@ -61,11 +61,9 @@
   /* 地名纸签：钉在纸雕地图上的位置牌 */
   .place{position:absolute;transform:translate(-50%,-50%) rotate(var(--r,-1.2deg));pointer-events:none;z-index:4;
     display:flex;align-items:center;justify-content:center;
-    padding:.45cqh .78cqw .5cqh;white-space:nowrap;
-    font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;font-weight:400;
-    font-size:max(16px,1.70cqh);line-height:1.3;letter-spacing:.16em;color:#3B2D1B;
-    background:url("assets/p_tag2.webp") 100% 100%/100% 100% no-repeat;
+    padding:0;white-space:nowrap;
     filter:drop-shadow(.16cqw .46cqh .34cqh rgba(26,17,8,.45));}
+  .place>img{display:block;height:max(30px,3.6cqh);width:auto;pointer-events:none;}
   .place{cursor:pointer;pointer-events:auto;
     transition:transform .16s ease, filter .16s ease;}
   .place:hover{transform:translate(-50%,-50%) rotate(var(--r,-1.2deg)) translateY(-.55cqh) scale(1.05);
@@ -289,8 +287,7 @@
     #map{height:100%;}
     #stage>.place{display:flex;min-width:44px;min-height:44px;padding:0;background:none;
       font-size:14px;letter-spacing:.06em;touch-action:manipulation;filter:none;}
-    #stage>.place>span{padding:4px 6px;background:var(--paper) url("assets/p_tag2.webp") center/100% 100% no-repeat;
-      box-shadow:0 2px 4px #1a110840;}
+    #stage>.place>img{height:28px;box-shadow:0 2px 4px #1a110840;}
     #stage>.place[aria-label^="景山公园"]{transform:translate(-100%,-50%) rotate(var(--r));}
     #stage>.place::after{display:none;}
     #stage>.marker{transform:translate(-50%,-50%);min-width:44px;min-height:44px;touch-action:manipulation;}
@@ -681,10 +678,15 @@ document.getElementById('soundToggle').addEventListener('click',()=>{
   button.setAttribute('aria-pressed',String(soundMuted));button.textContent=soundMuted?'声音：关':'声音：开';
 });
 const closeCard=()=>{ if(openCard){ openCard.classList.remove('on'); openCard.inert=true; openEl&&openEl.classList.remove('open'); openEl&&openEl.setAttribute('aria-expanded','false'); openCard=null; openEl=null; } };
-PLACES.forEach(o=>{
+PLACES.forEach((o,index)=>{
   const d=document.createElement('div');
   d.className='place';
-  const placeText=document.createElement('span');placeText.textContent=o.t;d.appendChild(placeText);
+  // Paper and lettering share the same decoded pixels: the label has no live glyph layer.
+  const placeImage=document.createElement('img');
+  placeImage.src='assets/place-'+['bell','drum','bridge','jingshan'][index]+'.png';
+  placeImage.alt='';placeImage.draggable=false;
+  const placeText=document.createElement('span');placeText.className='sr';placeText.textContent=o.t;
+  d.append(placeImage,placeText);
   d.style.left=o.x; d.style.top=o.y; d.style.setProperty('--r',o.r);
 
   const card=document.createElement('div');
