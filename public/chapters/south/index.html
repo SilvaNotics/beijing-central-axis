@@ -28,6 +28,8 @@
     <button class="btn" id="reset" type="button">重置进度</button>
   </div>
 
+  <div class="map-view-tools"><p class="map-pan-hint" id="mapPanHint">完整画卷 · 点击景点开始漫游</p><button class="btn" id="mapZoom" type="button" aria-pressed="false" aria-controls="mapViewport">放大查看</button></div>
+  <div class="map-viewport" id="mapViewport" role="region" aria-label="南段画卷浏览区域" aria-describedby="mapPanHint" tabindex="0">
   <section class="map" aria-label="北京中轴线互动地图">
     <img id="mapImage" alt="北京中轴线水墨地图" hidden>
     <div class="empty-map" id="mapEmpty">
@@ -36,6 +38,7 @@
     </div>
     <div class="hotspots" id="hotspots" hidden></div>
   </section>
+  </div>
 
   <nav class="destinations" id="destinations" aria-label="景点入口"></nav>
   <p class="status" id="pageStatus" role="status"></p>

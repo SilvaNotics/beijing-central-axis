@@ -3,6 +3,7 @@
  "use strict";
 
  const map=document.querySelector(".map");
+ const viewport=map?.closest(".map-viewport");
  const image=document.getElementById("mapImage");
  if(!map||!image)return;
 
@@ -49,7 +50,14 @@
   cover.remove();
   map.classList.remove("scroll-mist-running");
   document.removeEventListener("keydown",key);
+  viewport?.removeEventListener("scroll",positionSkip);
+  window.removeEventListener("resize",positionSkip);
  }
+ function positionSkip(){
+  if(viewport)skip.style.right=Math.max(14,map.clientWidth-viewport.scrollLeft-viewport.clientWidth+14)+"px";
+ }
+ viewport?.addEventListener("scroll",positionSkip,{passive:true});
+ window.addEventListener("resize",positionSkip);
  function key(e){if(e.key==="Escape")finish()}
  skip.addEventListener("click",finish);
  document.addEventListener("keydown",key);
@@ -83,6 +91,7 @@
  }
 
  function resize(){
+  positionSkip();
   const r=map.getBoundingClientRect();
   W=Math.max(1,r.width);
   H=Math.max(1,r.height);

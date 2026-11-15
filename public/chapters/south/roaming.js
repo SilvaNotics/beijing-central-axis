@@ -68,7 +68,7 @@
   reset.textContent="回到地图起点";
 
   bar.append(status,reset);
-  map.insertAdjacentElement("afterend",bar);
+  map.closest(".map-viewport").insertAdjacentElement("afterend",bar);
 
   // 景点前方的道路停靠点，避免人物站在屋顶上。
   const stops={

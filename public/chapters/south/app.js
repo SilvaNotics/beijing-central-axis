@@ -146,6 +146,26 @@ function updatePortrait(){
 }
 
 /* 地图与景点入口 */
+// 窄屏保留画卷的可读尺寸；只在容器尺寸变化时重新居中，用户可自由横向浏览。
+const mapViewport=document.querySelector(".map-viewport");
+document.querySelector("#mapZoom")?.addEventListener("click",event=>{
+ const zoomed=mapViewport.classList.toggle("is-zoomed");
+ event.currentTarget.setAttribute("aria-pressed",String(zoomed));
+ event.currentTarget.textContent=zoomed?"查看全图":"放大查看";
+ document.querySelector("#mapPanHint").textContent=zoomed?"左右滑动画卷查看细节":"完整画卷 · 点击景点开始漫游";
+ centerMap();
+});
+const centerMap=()=>{
+ if(mapViewport)mapViewport.scrollLeft=Math.max(0,(mapViewport.scrollWidth-mapViewport.clientWidth)/2);
+};
+if(mapViewport){
+ const mapElement=mapViewport.querySelector(".map");
+ new ResizeObserver(centerMap).observe(mapViewport);
+ if(mapElement)new ResizeObserver(centerMap).observe(mapElement);
+ document.querySelector("#mapImage")?.addEventListener("load",centerMap,{once:true});
+ queueMicrotask(centerMap);
+}
+
 for(const place of DATA){
  const spot=document.createElement("button");
  spot.className="spot";spot.type="button";
