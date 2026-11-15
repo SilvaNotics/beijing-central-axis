@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { landmarks } from '../data/heritage';
 import type { RegionId } from '../data/types';
 import { createCityPlan } from '../scene/cityPlan';
@@ -217,20 +217,27 @@ function loadPlan() {
 }
 
 export default function FlatMap({ selection, focus, onSelect, viewRevision }: Props) {
-  const host=useRef<HTMLDivElement>(null), drag=useRef<{id:number;x:number;y:number;panX:number;panY:number;moved:boolean}|null>(null);
+  const host=useRef<HTMLDivElement>(null);
+  const pointers=useRef(new Map<number,{x:number;y:number;startX:number;startY:number}>());
+  const suppressClick=useRef(false);
   const [plan,setPlan]=useState<Plan>(),[error,setError]=useState(false);
   const [view,setView]=useState({x:0,y:0,scale:1});
+  const mapPosition=(x:number,y:number)=>{
+    const matrix=host.current?.querySelector('svg')?.getScreenCTM();
+    return matrix ? new DOMPoint(x,y).matrixTransform(matrix.inverse()) : null;
+  };
+  const releasePointer=(event:ReactPointerEvent<HTMLDivElement>)=>{
+    pointers.current.delete(event.pointerId);
+    if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
+  };
   useEffect(()=>{let alive=true;loadPlan().then(value=>{if(alive)setPlan(value);}).catch(()=>{if(alive)setError(true);});return()=>{alive=false;};},[]);
   useEffect(()=>setView({x:0,y:0,scale:1}),[focus,viewRevision]);
   useEffect(()=>{
     const el=host.current;if(!el)return;
     const wheel=(event:WheelEvent)=>{
       event.preventDefault();
-      const rect=el.querySelector('svg')!.getBoundingClientRect();
-      // SVG uses meet, so account for letterboxing in both directions.
-      const ratio=Math.min(rect.width/WIDTH,rect.height/HEIGHT);
-      const x=(event.clientX-rect.left-(rect.width-WIDTH*ratio)/2)/ratio;
-      const y=(event.clientY-rect.top-(rect.height-HEIGHT*ratio)/2)/ratio;
+      const point=mapPosition(event.clientX,event.clientY);if(!point)return;
+      const {x,y}=point;
       setView(old=>{const scale=Math.max(.85,Math.min(12,old.scale*Math.exp(-event.deltaY*.0015)));const factor=scale/old.scale;return{x:x-(x-old.x)*factor,y:y-(y-old.y)*factor,scale};});
     };
     el.addEventListener('wheel',wheel,{passive:false});return()=>el.removeEventListener('wheel',wheel);
@@ -247,18 +254,44 @@ export default function FlatMap({ selection, focus, onSelect, viewRevision }: Pr
   const axisPath=axis.length ? `M${axis.map(p=>p.join(',')).join('L')}` : '';
   return <div ref={host} className="flat-map" aria-label="北京中轴线二维地图" onPointerDown={event=>{
     if(event.button!==0&&event.button!==1)return;
-    if(event.button===0&&(event.target as Element).closest('.flat-site'))return;
-    event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current={id:event.pointerId,x:event.clientX,y:event.clientY,panX:view.x,panY:view.y,moved:false};
+    if(!pointers.current.size)suppressClick.current=false;
+    const site=(event.target as Element).closest('.flat-site');
+    if(event.pointerType!=='touch'&&event.button===0&&site)return;
+    pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY});
+    // Preserve a label tap's original target; capture it once it becomes a gesture.
+    if(!site||event.button===1){event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);}
+    if(pointers.current.size>1){
+      suppressClick.current=true;
+      for(const id of pointers.current.keys())event.currentTarget.setPointerCapture(id);
+    }
   }} onPointerMove={event=>{
-    const current=drag.current;if(!current||event.pointerId!==current.id)return;
-    const rect=event.currentTarget.getBoundingClientRect(),ratio=Math.min(rect.width/WIDTH,rect.height/HEIGHT);
-    const dx=(event.clientX-current.x)/ratio,dy=(event.clientY-current.y)/ratio;
-    if(Math.hypot(dx,dy)>3)current.moved=true;
-    setView(old=>({...old,x:current.panX+dx,y:current.panY+dy}));
-  }} onPointerUp={event=>{if(drag.current?.id===event.pointerId){event.currentTarget.releasePointerCapture(event.pointerId);drag.current=null;}}} onPointerCancel={()=>{drag.current=null;}}>
+    const current=pointers.current.get(event.pointerId);if(!current)return;
+    const before=[...pointers.current.values()].map(p=>mapPosition(p.x,p.y));
+    current.x=event.clientX;current.y=event.clientY;
+    const after=[...pointers.current.values()].map(p=>mapPosition(p.x,p.y));
+    if(Math.hypot(current.x-current.startX,current.y-current.startY)>5){
+      suppressClick.current=true;event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    if(!before[0]||!after[0])return;
+    if(before.length===1){
+      const dx=after[0].x-before[0].x,dy=after[0].y-before[0].y;
+      setView(old=>({...old,x:old.x+dx,y:old.y+dy}));
+    }else if(before.length===2&&before[1]&&after[1]){
+      const from={x:(before[0].x+before[1].x)/2,y:(before[0].y+before[1].y)/2};
+      const to={x:(after[0].x+after[1].x)/2,y:(after[0].y+after[1].y)/2};
+      const distance=Math.hypot(before[1].x-before[0].x,before[1].y-before[0].y);
+      const nextDistance=Math.hypot(after[1].x-after[0].x,after[1].y-after[0].y);
+      if(distance<1||nextDistance<1)return;
+      setView(old=>{
+        const scale=Math.max(.85,Math.min(12,old.scale*nextDistance/distance)),factor=scale/old.scale;
+        return{x:to.x-(from.x-old.x)*factor,y:to.y-(from.y-old.y)*factor,scale};
+      });
+    }
+  }} onPointerUp={releasePointer} onPointerCancel={event=>{suppressClick.current=true;releasePointer(event);}}
+    onLostPointerCapture={event=>{if(event.target===event.currentTarget)pointers.current.delete(event.pointerId);}}
+    onClickCapture={event=>{if(suppressClick.current&&event.detail!==0){event.preventDefault();event.stopPropagation();}}}>
     <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} aria-labelledby="flat-map-title">
-      <title id="flat-map-title">北京中轴线地理导览：本地道路、水系与建筑轮廓；中键拖动、滚轮缩放，Tab 可选择遗产点</title>
+      <title id="flat-map-title">北京中轴线地理导览：本地道路、水系与建筑轮廓；单指平移、双指缩放，或中键拖动、滚轮缩放，Tab 可选择遗产点</title>
       <defs><pattern id="plan-grid" width="73" height="73" patternUnits="userSpaceOnUse"><path d="M73 0H0V73" fill="none" stroke="currentColor" strokeOpacity=".1" strokeWidth=".5" /></pattern></defs>
       <g className="flat-map-content" transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
         {plan&&<image href={plan.image} x={440-640*SCALE/2} y={520-1090*SCALE/2} width={640*SCALE} height={1090*SCALE} />}

@@ -97,8 +97,9 @@ test('Shift drag rotates the scene and compass; Ctrl and ordinary drag pan', asy
 test('keeps each chapter independently reachable and returns focus to the atlas', async ({ page }) => {
   await page.goto('/#/chapter/north');
   const frame = page.frameLocator('iframe');
-  await expect(frame.locator('[data-return]')).toBeVisible();
-  await frame.locator('[data-return]').click();
+  await expect(frame.locator('[data-return]')).toBeHidden();
+  await expect(frame.locator('#map')).toBeVisible();
+  await page.getByRole('button', { name: '返回中轴总览', exact: true }).click();
   await expect(page).toHaveURL(/#\/$/);
   await expect(page.locator('.brand')).toBeFocused();
 });

@@ -89,7 +89,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   renderer.shadowMap.enabled = ref.current.quality === 'cinematic' && !mobile && !software;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.domElement.className = 'atlas-canvas';
-  renderer.domElement.setAttribute('aria-label', '北京中轴线三维沙盘，拖动平移，Shift 加拖动旋转视角，滚轮缩放；遗产名录提供键盘入口');
+  renderer.domElement.setAttribute('aria-label', '北京中轴线三维沙盘，拖动平移，Shift 加拖动或点击旋转按钮后拖动旋转视角，滚轮或双指缩放；遗产名录提供键盘入口');
   renderer.domElement.setAttribute('role', 'img');
   container.prepend(renderer.domElement);
   const scene = new THREE.Scene();
@@ -143,7 +143,8 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   const labelElements = [...labelLayer.querySelectorAll<HTMLButtonElement>('[data-site]')];
   const annotationElements = [...labelLayer.querySelectorAll<HTMLElement>('[data-annotation]')];
   const mouse = new THREE.Vector2(), raycaster = new THREE.Raycaster();
-  let down = { x: 0, y: 0 };
+  const pointers = new Set<number>();
+  let tap: { id: number; x: number; y: number } | null = null;
 
   const fit = (center: THREE.Vector3, extent: number, animated = true) => {
     const distance = 1600, zoom = 1000 / extent;
@@ -287,14 +288,27 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     if (activeFocus === 'all') overview(false); else invalidate();
   };
   const onPointerDown = (e: PointerEvent) => {
-    // OrbitControls swaps ROTATE back to PAN when Ctrl is held; Shift still rotates.
-    const action = e.ctrlKey && !e.shiftKey ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
+    controls.touches.ONE = ref.current.rotateMode ? THREE.TOUCH.ROTATE : THREE.TOUCH.PAN;
+    // Compensate for OrbitControls' modifier swap while retaining Shift rotation.
+    const rotate = Boolean(ref.current.rotateMode || e.shiftKey);
+    const modifier = e.ctrlKey || e.metaKey || e.shiftKey;
+    const action = rotate !== modifier ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
     controls.mouseButtons.LEFT = controls.mouseButtons.MIDDLE = controls.mouseButtons.RIGHT = action;
     if (e.button === 1) e.preventDefault();
-    down = { x: e.clientX, y: e.clientY }; animation = null;
+    pointers.add(e.pointerId);
+    tap = pointers.size === 1 && e.button === 0 ? { id: e.pointerId, x: e.clientX, y: e.clientY } : null;
+    animation = null;
+  };
+  const onPointerMove = (e: PointerEvent) => {
+    if (tap?.id === e.pointerId && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) > 5) tap = null;
+  };
+  const onPointerCancel = (e: PointerEvent) => {
+    pointers.delete(e.pointerId); tap = null;
   };
   const onPointerUp = (e: PointerEvent) => {
-    if (e.shiftKey || e.button !== 0 || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) return;
+    const candidate = tap;
+    pointers.delete(e.pointerId); tap = null;
+    if (!candidate || candidate.id !== e.pointerId || e.shiftKey || Math.hypot(e.clientX - candidate.x, e.clientY - candidate.y) > 5) return;
     const rect = renderer.domElement.getBoundingClientRect();
     mouse.set((e.clientX - rect.left) / rect.width * 2 - 1, -(e.clientY - rect.top) / rect.height * 2 + 1);
     raycaster.setFromCamera(mouse, camera);
@@ -306,6 +320,8 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   document.addEventListener('visibilitychange', onVisibility);
   controls.addEventListener('change', invalidate);
   renderer.domElement.addEventListener('pointerdown', onPointerDown, true);
+  renderer.domElement.addEventListener('pointermove', onPointerMove);
+  renderer.domElement.addEventListener('pointercancel', onPointerCancel);
   renderer.domElement.addEventListener('pointerup', onPointerUp);
   renderer.domElement.addEventListener('webglcontextlost', onContextLost);
   const observer = new ResizeObserver(resize); observer.observe(container); resize();
@@ -323,6 +339,8 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     dispose: () => {
       disposed = true; cancelAnimationFrame(frame); observer.disconnect(); controls.dispose();
       renderer.domElement.removeEventListener('pointerdown', onPointerDown, true);
+      renderer.domElement.removeEventListener('pointermove', onPointerMove);
+      renderer.domElement.removeEventListener('pointercancel', onPointerCancel);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       sun.dispose(); document.removeEventListener('visibilitychange', onVisibility);

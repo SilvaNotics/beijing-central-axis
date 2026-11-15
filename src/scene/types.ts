@@ -6,6 +6,7 @@ export interface SceneViewProps {
   focus: RegionId | 'all';
   sample?: boolean;
   quality: 'cinematic' | 'balanced';
+  rotateMode?: boolean;
   onSelect: (id: string) => void;
   onReady?: (state: 'ready' | 'fallback') => void;
   onBearingChange?: (degrees: number) => void;

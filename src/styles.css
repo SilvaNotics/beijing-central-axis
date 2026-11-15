@@ -66,3 +66,18 @@ button:hover,a:hover{color:#ffe0a1}button:focus-visible,a:focus-visible,[tabinde
 .civic-plan .civic-rail{fill:#d0c19f;stroke:none}
 
 .mapped-plan[data-plan-site="yongdingmen"] .plan-roofs{fill:#71766d;stroke:#82a58a}
+
+.rotation-control{display:flex;align-items:center;gap:5px;color:#e6d1aa;font-size:10px;white-space:nowrap}
+.rotation-control[aria-pressed=true]{color:#ffe0a1;background:#6d5033;outline:1px solid #c5a36c;outline-offset:3px}
+.rotation-control:disabled{opacity:.5}
+.touch-instruction{display:none}
+@media(pointer:coarse){.mouse-instruction{display:none}.touch-instruction{display:inline}.map-controls{height:auto;min-height:52px;padding:4px 8px}.map-controls button{min-width:44px;min-height:44px;justify-content:center}}
+@media(max-width:600px){
+  .map-controls{left:18px;right:18px;bottom:18px;height:auto;min-height:52px;padding:4px 8px;justify-content:space-between}
+  .map-controls button{min-width:44px;min-height:44px;justify-content:center}
+  .rotation-control{font-size:10px}
+  .map-bottom{bottom:116px}
+  .map-note{display:none}
+  .map-instruction{bottom:85px;right:18px;line-height:1.7}
+  .landmark-detail{bottom:84px}
+}
