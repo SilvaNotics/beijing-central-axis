@@ -10,6 +10,7 @@ import { roadStation } from './southernRoad';
 import { createMaterials, disposeMaterials } from './materials';
 import { loadCityData, type CityData } from './geodata';
 import type { SceneViewProps } from './types';
+import { createTourStops, sampleTour, tourDuration, TOUR_ANGLE, type TourMode } from './axisTour';
 import './scene.css';
 
 interface SceneController {
@@ -17,6 +18,7 @@ interface SceneController {
   quality: (value: SceneViewProps['quality']) => void;
   reset: () => void;
   active: (value: boolean) => void;
+  tour: (mode: TourMode) => void;
   dispose: () => void;
 }
 
@@ -44,6 +46,7 @@ export default function SceneView(props: SceneViewProps) {
   }, [shouldInitialize]);
   useEffect(() => {
     if (!ready) return;
+    if (props.tourMode && props.tourMode !== 'off') return;
     if (props.selection) controller.current?.focus(props.selection);
     else if (props.sample) controller.current?.focus('sample');
     else if (props.focus === 'all') controller.current?.reset();
@@ -51,6 +54,7 @@ export default function SceneView(props: SceneViewProps) {
   }, [props.selection, props.focus, props.sample, props.viewRevision, ready]);
   useEffect(() => { controller.current?.quality(props.quality); }, [props.quality, ready]);
   useEffect(() => { controller.current?.active(props.active !== false); }, [props.active, ready]);
+  useEffect(() => { controller.current?.tour(props.tourMode ?? 'off'); }, [props.tourMode, ready]);
   return <div className={`scene-world ${ready ? 'is-ready' : ''}`} ref={host}>
     <div ref={labels} className="scene-labels" aria-label="地图地标">
       {landmarks.map(site => <button key={site.id} className={`scene-label ${props.selection === site.id ? 'selected' : ''}`} data-site={site.id} onClick={() => props.onSelect(site.id)} tabIndex={-1} aria-label={`查看${site.name}`}><span className="label-point" /><span className="label-title">{site.name}</span></button>)}
@@ -139,6 +143,9 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   let active = ref.current.active !== false;
   let width = 1, height = 1, frame = 0, disposed = false, rendering = false, needsFrames = 5;
   let activeFocus = 'all';
+  const tourStops = createTourStops(), totalTourMs = tourDuration(tourStops);
+  let tourMode: TourMode = 'off', tourElapsed = 0, tourLastFrame: number | null = null, tourStatusKey = '';
+  const tourOffset = new THREE.Vector3(0, Math.sin(TOUR_ANGLE) * 1600, Math.cos(TOUR_ANGLE) * 1600);
   let animation: { from: THREE.Vector3; to: THREE.Vector3; fromTarget: THREE.Vector3; target: THREE.Vector3; fromZoom: number; zoom: number; start: number } | null = null;
   const labelElements = [...labelLayer.querySelectorAll<HTMLButtonElement>('[data-site]')];
   const annotationElements = [...labelLayer.querySelectorAll<HTMLElement>('[data-annotation]')];
@@ -152,7 +159,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     Object.assign(sun.shadow.camera, { left: -shadowExtent, right: shadowExtent, top: shadowExtent, bottom: -shadowExtent });
     sun.shadow.camera.updateProjectionMatrix(); sun.target.position.copy(center);
     sun.position.copy(center).add(new THREE.Vector3(-180, 320, 120));
-    const angle = .9;
+    const angle = TOUR_ANGLE;
     const to = center.clone().add(new THREE.Vector3(0, Math.sin(angle) * distance, Math.cos(angle) * distance));
     if (animated && !reducedMotion) animation = { from: camera.position.clone(), to, fromTarget: controls.target.clone(), target: center.clone(), fromZoom: camera.zoom, zoom, start: performance.now() };
     else { animation = null; camera.position.copy(to); camera.zoom = zoom; camera.updateProjectionMatrix(); controls.target.copy(center); controls.update(); }
@@ -252,6 +259,24 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   function invalidate() { if (disposed || !active || document.hidden) return; needsFrames = 2; if (!frame && !rendering) frame = requestAnimationFrame(render); }
   function render(time: number) {
     frame = 0; if (disposed || !active || document.hidden) return; rendering = true;
+    if (tourMode === 'playing') {
+      // Cap stalled frames so a slow device never skips a whole detail stop.
+      if (tourLastFrame !== null) tourElapsed += Math.min(1000, Math.max(0, time - tourLastFrame));
+      tourLastFrame = time;
+      const point = sampleTour(tourStops, tourElapsed);
+      controls.target.set(point.x, point.y, point.z);
+      camera.position.copy(controls.target).add(tourOffset);
+      sun.target.position.copy(controls.target);
+      sun.position.copy(controls.target).add(new THREE.Vector3(-180, 320, 120));
+      activeFocus = point.siteId;
+      const progress = Math.min(100, Math.floor(tourElapsed / totalTourMs * 100));
+      const key = `${point.index}:${progress}`;
+      if (key !== tourStatusKey) {
+        tourStatusKey = key;
+        ref.current.onTourStatus?.({ index: point.index + 1, total: tourStops.length, name: point.name, progress });
+      }
+      if (point.done) { tourMode = 'complete'; tourLastFrame = null; ref.current.onTourModeChange?.('complete'); }
+    }
     if (animation) {
       const t = Math.min(1, (time - animation.start) / 1150), eased = t * t * (3 - 2 * t);
       camera.position.lerpVectors(animation.from, animation.to, eased);
@@ -274,10 +299,11 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     if (import.meta.env.DEV) {
       container.dataset.triangles = String(renderer.info.render.triangles);
       container.dataset.drawCalls = String(renderer.info.render.calls);
+      container.dataset.camera = JSON.stringify({ position: camera.position.toArray(), target: controls.target.toArray(), zoom: camera.zoom });
     }
     updateLabels();
     rendering = false;
-    if ((animation || --needsFrames > 0) && !frame) frame = requestAnimationFrame(render);
+    if ((tourMode === 'playing' || animation || --needsFrames > 0) && !frame) frame = requestAnimationFrame(render);
   }
   const resize = () => {
     const rect = container.getBoundingClientRect();
@@ -285,9 +311,15 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     width = rect.width; height = rect.height;
     aspect = width / height; camera.left = -500 * aspect; camera.right = 500 * aspect; camera.updateProjectionMatrix();
     renderer.setSize(width, height);
-    if (activeFocus === 'all') overview(false); else invalidate();
+    if (tourMode !== 'off') { camera.zoom = 1000 / Math.max(26, 22 / aspect); camera.updateProjectionMatrix(); invalidate(); }
+    else if (activeFocus === 'all') overview(false); else invalidate();
+  };
+  const stopForInteraction = () => {
+    if (tourMode !== 'off') { tourMode = 'off'; tourLastFrame = null; ref.current.onTourModeChange?.('off'); }
+    animation = null;
   };
   const onPointerDown = (e: PointerEvent) => {
+    stopForInteraction();
     controls.touches.ONE = ref.current.rotateMode ? THREE.TOUCH.ROTATE : THREE.TOUCH.PAN;
     // Compensate for OrbitControls' modifier swap while retaining Shift rotation.
     const rotate = Boolean(ref.current.rotateMode || e.shiftKey);
@@ -315,8 +347,8 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     const hit = raycaster.intersectObjects(city.pickers)[0];
     if (hit) ref.current.onSelect(hit.object.userData.id as string);
   };
-  const onContextLost = (event: Event) => { event.preventDefault(); ref.current.onReady?.('fallback'); };
-  const onVisibility = () => { if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else invalidate(); };
+  const onContextLost = (event: Event) => { event.preventDefault(); stopForInteraction(); ref.current.onReady?.('fallback'); };
+  const onVisibility = () => { tourLastFrame = null; if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else invalidate(); };
   document.addEventListener('visibilitychange', onVisibility);
   controls.addEventListener('change', invalidate);
   renderer.domElement.addEventListener('pointerdown', onPointerDown, true);
@@ -324,18 +356,30 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   renderer.domElement.addEventListener('pointercancel', onPointerCancel);
   renderer.domElement.addEventListener('pointerup', onPointerUp);
   renderer.domElement.addEventListener('webglcontextlost', onContextLost);
+  renderer.domElement.addEventListener('wheel', stopForInteraction, { passive: true, capture: true });
   const observer = new ResizeObserver(resize); observer.observe(container); resize();
   failedInitCleanup.push(() => { cancelAnimationFrame(frame); observer.disconnect(); });
   if (ref.current.selection) focus(ref.current.selection); else if (ref.current.sample) focus('sample'); else if (ref.current.focus !== 'all') focus(ref.current.focus);
   return {
     focus,
+    tour: mode => {
+      if (mode === tourMode) return;
+      if (mode === 'playing' && tourMode !== 'paused') {
+        tourElapsed = 0; tourStatusKey = ''; city.halo.visible = false;
+        const first = tourStops[0];
+        activeFocus = first.siteId;
+        fit(new THREE.Vector3(first.x, first.y, first.z), Math.max(26, 22 / aspect), false);
+      }
+      tourMode = mode; tourLastFrame = null;
+      invalidate();
+    },
     reset: () => { city.halo.visible = false; overview(); },
     quality: value => {
       renderer.shadowMap.enabled = value === 'cinematic' && !mobile && !software;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, value === 'cinematic' && !software ? 1.75 : 1.15));
       renderer.setSize(width, height); invalidate();
     },
-    active: value => { if(active===value)return; active = value; if (value) { animation = null; invalidate(); } else { cancelAnimationFrame(frame); frame = 0; } },
+    active: value => { if(active===value)return; active = value; tourLastFrame = null; if (value) { animation = null; invalidate(); } else { cancelAnimationFrame(frame); frame = 0; } },
     dispose: () => {
       disposed = true; cancelAnimationFrame(frame); observer.disconnect(); controls.dispose();
       renderer.domElement.removeEventListener('pointerdown', onPointerDown, true);
@@ -343,6 +387,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
       renderer.domElement.removeEventListener('pointercancel', onPointerCancel);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
+      renderer.domElement.removeEventListener('wheel', stopForInteraction, true);
       sun.dispose(); document.removeEventListener('visibilitychange', onVisibility);
       scene.traverse(object => { if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) { object.geometry.dispose(); if (object instanceof THREE.LineSegments || city.pickers.includes(object as THREE.Mesh) || object === city.halo) (object.material as THREE.Material).dispose(); } });
       terrainCleanup(); skyTexture.dispose(); disposeMaterials(materials); renderer.dispose(); renderer.domElement.remove();

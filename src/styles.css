@@ -70,6 +70,18 @@ button:hover,a:hover{color:#ffe0a1}button:focus-visible,a:focus-visible,[tabinde
 .rotation-control{display:flex;align-items:center;gap:5px;color:#e6d1aa;font-size:10px;white-space:nowrap}
 .rotation-control[aria-pressed=true]{color:#ffe0a1;background:#6d5033;outline:1px solid #c5a36c;outline-offset:3px}
 .rotation-control:disabled{opacity:.5}
+.tour-control{display:flex;align-items:center;gap:5px;color:#e6d1aa;font-size:10px;white-space:nowrap}
+.tour-control[aria-pressed=true]{color:#ffe0a1}
+.tour-control:disabled{opacity:.5}
+.tour-progress{position:absolute;z-index:4;top:90px;left:72px;width:min(250px,calc(100% - 110px));padding:12px 16px;background:#354643f2;border:1px solid #a99064;color:#e6d1aa}
+.tour-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;letter-spacing:1px}
+.tour-heading button{display:grid;place-items:center;min-width:32px;min-height:32px;color:inherit}
+.tour-progress p{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:4px 0 12px;font-family:var(--song);font-size:18px}
+.tour-progress small{font-size:10px;letter-spacing:0}
+.tour-progress progress{display:block;width:100%;height:3px;margin:0 0 10px;accent-color:#e0b667;border:0;background:#687268}
+.tour-progress progress::-webkit-progress-bar{background:#687268}
+.tour-progress progress::-webkit-progress-value{background:#e0b667}
+@media(max-width:600px){.tour-progress{top:84px;left:24px;padding:8px 12px;width:min(230px,calc(100% - 86px))}.tour-heading button{min-width:44px;min-height:44px}.tour-progress p{font-size:16px}.map-controls{flex-wrap:wrap;column-gap:4px;row-gap:0}.map-controls .control-divider{display:none}.overview-control span{font-size:9px}.tour-control{font-size:10px}.map-controls .quality-control{padding-left:4px}}
 .touch-instruction{display:none}
 @media(pointer:coarse){.mouse-instruction{display:none}.touch-instruction{display:inline}.map-controls{height:auto;min-height:52px;padding:4px 8px}.map-controls button{min-width:44px;min-height:44px;justify-content:center}}
 @media(max-width:600px){

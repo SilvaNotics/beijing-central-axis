@@ -712,3 +712,7 @@ Chromium/SwiftShader，1300×1500，项目实际createLandmark/createMaterials/b
 以下保留此前工作树的模型图：[整体俯视](palace-interior-top-after.png)、[二维地图](palace-interior-flat-after.png)、[武英殿](palace-interior-wuying-after.png)、[文华殿](palace-interior-wenhua-after.png)、[应用画面](palace-interior-app-after.png)。这些是项目模型而非现实参考照片；本轮未重新截图或验证相机参数。
 
 图中早期近邻自动补墙不能作为当前院墙排布结论，后续已有 [显式排布纠错](../palace-wall-layout-review-2026-11-14.md)。殿廊分部和资料边界见 [内部专题](../palace-interior-review-2026-11-14.md)。旧图保留研究过程，不标记为本次交付最终验收。
+
+## 2026-11-15 · 南至北三维游览
+
+项目模型检查图：[800px桌面暂停画面](2026-11-15-axis-tour/desktop.png)、[390px手机布局检查](2026-11-15-axis-tour/mobile-earlier-framing.png)。两图均为本项目软件WebGL截图，不是现实参考照片或用户验收。桌面图使用本轮最终近景范围；手机图来自稍早、较远的相机范围，仅用于确认控件、停留卡与页面布局。检查观察为按钮、站点及进度可见，手机没有横向溢出；没有据此声称完整路线每站遮挡均已验收。版本与实际命令见[进度记录](../../progress.md)本轮条目，路线和证据边界见[游览记录](../axis-tour-2026-11-15.md)。
