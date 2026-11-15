@@ -19,7 +19,7 @@ for (const width of [390, 1440]) {
       const captureLabels = async () => {
         const images: string[] = [];
         for (const label of await labels.all()) {
-          const box = (await label.locator('span').boundingBox())!;
+          const box = (await label.locator('img').boundingBox())!;
           const inset = width <= 900 ? 4 : 0;
           images.push((await cdp.send('Page.captureScreenshot', { format: 'png', clip: { x:box.x+inset,y:box.y+inset,width:box.width-inset*2,height:box.height-inset*2,scale:1 } })).data);
         }
@@ -33,9 +33,7 @@ for (const width of [390, 1440]) {
       await page.waitForTimeout(8500);
       const after = await captureLabels();
       for (const [i, pixels] of after.entries()) expect(pixels === before[i], `label ${i} pixels stay unchanged`).toBe(true);
-      for (const label of await labels.all()) {
-        expect(await label.evaluate(el => getComputedStyle(el).fontFamily)).not.toMatch(/AxisMing|AxisKai/);
-      }
+      for (const label of await labels.all()) expect(await label.locator('img').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`north-late-font-${width}.png`) });
     } finally { releaseFonts(); }
   });
@@ -53,7 +51,7 @@ for (const embedded of [false, true]) {
       await page.setViewportSize(viewport);
       for (const label of await labels.all()) {
         await expect(label).toBeVisible();
-        expect(await label.evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(viewport.width <= 900 ? 14 : 16);
+        expect(await label.locator('img').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
         await label.click();
         await expect(root.locator('.pcard.on')).toBeVisible();
         await expect(root.locator('.pcard.on h4')).toHaveText((await label.textContent())!);
