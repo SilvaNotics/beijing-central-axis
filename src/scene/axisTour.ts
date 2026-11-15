@@ -8,9 +8,9 @@ import { drumTowerDisplayOffset } from './bellDrumLayout';
 
 export type TourMode = 'off' | 'playing' | 'paused' | 'complete';
 export interface TourStop { siteId: string; name: string; x: number; y: number; z: number }
-export interface TourStatus { index: number; total: number; name: string; progress: number }
-export const TOUR_ANGLE = .9;
-const HOLD_MS = 4200;
+export interface TourStatus { siteId: string; index: number; total: number; name: string; progress: number }
+export const TOUR_ANGLE = 15 * Math.PI / 180;
+const HOLD_MS = 3200;
 
 /** Display itinerary from the existing model, not a walkable or historical route. */
 export function createTourStops(): TourStop[] {
@@ -63,7 +63,7 @@ export function createTourStops(): TourStop[] {
 }
 
 export function tourTravelMs(a: TourStop, b: TourStop) {
-  return Math.max(2600, Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z) / 22 * 1000);
+  return Math.max(2000, Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z) / 28 * 1000);
 }
 export function tourDuration(stops: TourStop[]) {
   return stops.reduce((total, stop, i) => total + HOLD_MS + (i ? tourTravelMs(stops[i - 1], stop) : 0), 0);
@@ -71,6 +71,9 @@ export function tourDuration(stops: TourStop[]) {
 
 /** Absolute elapsed-time sampling makes pauses and slow frames deterministic. */
 export function sampleTour(stops: TourStop[], elapsedMs: number) {
+  if (stops.length && elapsedMs >= tourDuration(stops)) {
+    return { ...stops[stops.length - 1], index: stops.length - 1, done: true };
+  }
   let remaining = Math.max(0, elapsedMs);
   for (let i = 0; i < stops.length; i++) {
     const a = stops[i];

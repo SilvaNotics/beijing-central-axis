@@ -11,6 +11,8 @@ test('tours northward at a fixed angle, pauses, resumes and yields to manual nav
   await page.getByRole('button', { name: '由南至北游览' }).click();
   const progress = page.getByRole('complementary', { name: '由南至北游览进度' });
   await expect(progress.getByRole('status')).toContainText('永定门');
+  await expect(progress.locator('.tour-location-eyebrow')).toHaveText(/.+/);
+  await expect(progress.locator('.tour-location-card')).toContainText(/.+/);
   await page.getByRole('button', { name: '暂停游览', exact: true }).click();
   await expect(progress).toContainText('已暂停');
   await page.screenshot({ path: testInfo.outputPath('tour-paused.png') });
