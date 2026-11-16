@@ -730,3 +730,7 @@ Chromium/SwiftShader，1300×1500，项目实际createLandmark/createMaterials/b
 ## 2026-11-16 · 天安门、端门标签下移
 
 项目模型聚焦截图：[天安门](2026-11-16-gate-labels/tiananmen.png)、[端门](2026-11-16-gate-labels/duanmen.png)。900×700本地Chromium、减少动态效果；两处标签靠近城楼且opacity为1，无pageerror。仅校核两个聚焦画面，不是现实照片或完整游览验收。
+
+## 2026-11-16 · 坛庙小标签与外金水桥
+
+项目模型截图：[社稷坛](2026-11-16-temple-labels/shejitan.png)、[太庙](2026-11-16-temple-labels/taimiao.png)、[先农坛](2026-11-16-temple-labels/xiannongtan.png)、[外金水桥](2026-11-16-temple-labels/jinshui.png)。900×700本地Chromium、减少动态效果；前三处建筑名称可见，外金水桥标签靠近桥身。图为本地软件检查，不是实景照片或完整游览验收；碰撞避让下未显示所有先农坛院落名称。手机名称显示实测另见[专题记录](../axis-tour-2026-11-15.md#2026-11-16--坛庙细部名称与外金水桥标签)。

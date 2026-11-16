@@ -49,3 +49,19 @@ test('tours northward at a fixed angle, pauses, resumes and yields to manual nav
   await expect(progress).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test('identifies the altar and temple buildings when focused', async ({ page }) => {
+  test.setTimeout(150_000);
+  await page.setViewportSize({ width: 900, height: 700 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#/site/shejitan');
+  await expect(page.locator('.scene-world')).toHaveClass(/is-ready/, { timeout: 90_000 });
+  for (const [site, ids] of [
+    ['shejitan', ['sheji-hall', 'sheji-altar']],
+    ['taimiao', ['taimiao-front', 'taimiao-middle', 'taimiao-rear']],
+    ['xiannongtan', ['agriculture-altar', 'agriculture-taisui', 'agriculture-compound-2']],
+  ] as const) {
+    await page.goto(`/#/site/${site}`);
+    for (const id of ids) await expect(page.locator(`[data-annotation=${id}]`)).toHaveCSS('opacity', '1');
+  }
+});

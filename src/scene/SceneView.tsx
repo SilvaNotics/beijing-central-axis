@@ -9,8 +9,9 @@ import { moundCenter } from './templeLayout';
 import { roadStation } from './southernRoad';
 import { zhongheLayout } from './palaceArchitecture';
 import { palaceGateLayout } from './palaceGates';
+import { agricultureCompounds } from './agricultureLayout';
 import { createMaterials, disposeMaterials } from './materials';
-import { loadCityData, type CityData } from './geodata';
+import { loadCityData, localFootprintLayout, type CityData } from './geodata';
 import type { SceneViewProps } from './types';
 import { createTourStops, sampleTour, tourDuration, TOUR_ANGLE, type TourMode } from './axisTour';
 import './scene.css';
@@ -18,6 +19,20 @@ import './scene.css';
 const palaceSite = landmarks.find(site => site.id === 'forbidden-city')!;
 const palaceLabels = [...palaceAxis, 43512262, 43519304, 40592355, 40592356, 40593735, 40606461]
   .map(id => mappedLayout(id, palaceSite));
+const detailLabels = [
+  { id: 'sheji-hall', site: 'shejitan', osmId: 60540199, name: '中山堂', height: 2 },
+  { id: 'sheji-altar', site: 'shejitan', osmId: 687599164, name: '社稷坛坛台', height: .8 },
+  { id: 'taimiao-front', site: 'taimiao', osmId: 684772333, name: '享殿', height: 3 },
+  { id: 'taimiao-middle', site: 'taimiao', osmId: 684772314, name: '寝殿', height: 2.2 },
+  { id: 'taimiao-rear', site: 'taimiao', osmId: 60540211, name: '祧庙', height: 2.2 },
+  { id: 'agriculture-altar', site: 'xiannongtan', osmId: 587608667, name: '先农坛坛台', height: .8 },
+  { id: 'agriculture-taisui', site: 'xiannongtan', osmId: 587608666, name: '太岁殿', height: 2.2 },
+];
+const agricultureSite = landmarks.find(site => site.id === 'xiannongtan')!;
+const compoundLabels = agricultureCompounds(agricultureSite).map((compound, index) => ({
+  id: `agriculture-compound-${index}`, name: compound.name,
+  x: compound.x, z: compound.z + compound.courtZ, height: 2.2,
+}));
 
 interface SceneController {
   focus: (id: string) => void;
@@ -78,6 +93,8 @@ export default function SceneView(props: SceneViewProps) {
         {palaceLabels.map(building => <span key={building.osmId} data-annotation={`palace-${building.osmId}`}>{building.name}</span>)}
         <span data-annotation="palace-zhonghe">中和殿</span>
         <span data-annotation="palace-638156366">午门</span>
+        {detailLabels.map(label => <span key={label.id} data-annotation={label.id}>{label.name}</span>)}
+        {compoundLabels.map(label => <span key={label.id} data-annotation={label.id}>{label.name}</span>)}
       </div>
     </div>
     <div className="scene-vignette" aria-hidden="true" />
@@ -164,6 +181,15 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
   palaceAnnotationPositions.set('palace-zhonghe', new THREE.Vector3(zhonghe.x, 3.1, zhonghe.z));
   const wumen = palaceGateLayout(palaceSite, data, 638156366);
   if (wumen) palaceAnnotationPositions.set('palace-638156366', new THREE.Vector3(wumen.x, 4, wumen.z));
+  const detailAnnotations = new Map<string, { site: string; position: THREE.Vector3 }>();
+  for (const label of detailLabels) {
+    const site = landmarks.find(s => s.id === label.site)!;
+    const building = data.buildings.find(b => b.id === label.osmId);
+    if (!building) continue;
+    const layout = localFootprintLayout(building, site);
+    detailAnnotations.set(label.id, { site: label.site, position: new THREE.Vector3(layout.x, label.height, layout.z) });
+  }
+  for (const label of compoundLabels) detailAnnotations.set(label.id, { site: 'xiannongtan', position: new THREE.Vector3(label.x, label.height, label.z) });
   const mouse = new THREE.Vector2(), raycaster = new THREE.Raycaster();
   const pointers = new Set<number>();
   let tap: { id: number; x: number; y: number } | null = null;
@@ -219,6 +245,7 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
       const id = el.dataset.site!;
       const anchor = city.anchors.get(id)!.clone();
       if (id === 'tiananmen' || id === 'duanmen') anchor.y = 4;
+      if (id === 'jinshui') anchor.y = 1.2;
       if (id === 'square') { anchor.x -= 18; anchor.z -= 10; }
       if (id === 'forbidden-city') { anchor.x += 18; anchor.z += 10; }
       normal.copy(anchor).project(camera);
@@ -265,20 +292,21 @@ function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement, ref: 
     const currentName = tourMode !== 'off' ? currentTourName : '';
     const orderedAnnotations = [...annotationElements].sort((a, b) => Number(b.textContent === currentName) - Number(a.textContent === currentName));
     for (const el of orderedAnnotations) {
-      const offset = annotations[el.dataset.annotation!];
+      const detail = detailAnnotations.get(el.dataset.annotation!);
+      const offset = detail?.position ?? annotations[el.dataset.annotation!];
       const palace = el.dataset.annotation!.startsWith('palace-');
-      el.classList.toggle('is-current-stop', palace && el.textContent === currentName);
+      el.classList.toggle('is-current-stop', el.textContent === currentName);
       const tiantan = ['prayer-hall','imperial-vault','circular-altar','danbi-bridge'].includes(el.dataset.annotation!);
       const road = ['road-slabs','road-foundation'].includes(el.dataset.annotation!);
-      const origin = palace ? palaceAnchor : tiantan ? tiantanAnchor : road ? roadAnchor : squareAnchor;
-      const activeGroup = palace ? palaceVisible : tiantan ? tiantanVisible : road ? roadVisible : squareVisible;
+      const origin = detail ? city.anchors.get(detail.site) : palace ? palaceAnchor : tiantan ? tiantanAnchor : road ? roadAnchor : squareAnchor;
+      const activeGroup = detail ? activeFocus === detail.site || ref.current.selection === detail.site : palace ? palaceVisible : tiantan ? tiantanVisible : road ? roadVisible : squareVisible;
       if (!activeGroup || !origin || !offset) { el.style.opacity = '0'; continue; }
       normal.set(origin.x + offset.x, offset.y, origin.z + offset.z).project(camera);
       const x = (normal.x + 1) * width / 2, y = (1 - normal.y) * height / 2;
       const w = el.offsetWidth;
       const visible = normal.z < 1 && normal.z > -1 && x > 45 && x < width - Math.max(70, w) && y > 45 && y < height - 60
-        && (!palace || !palaceOccupied.some(p => x < p.x + p.w + 6 && x + w + 6 > p.x && Math.abs(y - p.y) < 20));
-      if (visible && palace) palaceOccupied.push({ x, y, w });
+        && (!(palace || detail) || !palaceOccupied.some(p => x < p.x + p.w + 6 && x + w + 6 > p.x && Math.abs(y - p.y) < 20));
+      if (visible && (palace || detail)) palaceOccupied.push({ x, y, w });
       el.style.opacity = visible ? '1' : '0';
       el.style.transform = `translate3d(${x}px,${y}px,0)`;
     }
