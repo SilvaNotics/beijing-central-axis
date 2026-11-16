@@ -21,9 +21,27 @@ export default function ChapterView({ region, onBack }: { region: Region; onBack
   }, [src, onBack]);
   useEffect(() => {
     setStatus('loading');
+    // Media preloads can hold iframe.load indefinitely on mobile connections.
+    // Reveal same-origin documents once their DOM is usable, without waiting
+    // for background audio/video. Cross-origin entries still use onLoad.
+    const expected = src ? new URL(src, window.location.href) : null;
+    const checkDocument = () => {
+      try {
+        const doc = frameRef.current?.contentDocument;
+        if (!doc || !expected || doc.URL === 'about:blank') return;
+        const actual = new URL(doc.URL);
+        if (actual.origin === expected.origin && actual.pathname === expected.pathname
+          && doc.readyState !== 'loading' && doc.body) {
+          setStatus('displayed');
+          window.clearInterval(poll);
+        }
+      } catch { /* Cross-origin pages expose readiness through onLoad only. */ }
+    };
+    const poll = window.setInterval(checkDocument, 100);
+    checkDocument();
     const timeout = window.setTimeout(() => setStatus(previous => previous === 'loading' ? 'slow' : previous), 8000);
-    return () => window.clearTimeout(timeout);
-  }, [region.id, attempt]);
+    return () => { window.clearTimeout(timeout); window.clearInterval(poll); };
+  }, [region.id, attempt, src]);
   return <section className="chapter-view" aria-label={`${region.title}篇章`}>
     <header className="chapter-header">
       <button ref={backRef} className="text-button" onClick={onBack}><ArrowLeft size={17} /> 返回中轴总览</button>
