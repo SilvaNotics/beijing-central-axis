@@ -14,6 +14,7 @@ export const bounds = { width: 640, depth: 1090, centerX: 45, centerZ: 3 };
 export interface City {
   object: THREE.Group;
   anchors: Map<string, THREE.Vector3>;
+  labelOffsets: Map<string, { x: number; z: number }>;
   pickers: THREE.Mesh[];
   halo: THREE.Mesh;
 }
@@ -58,10 +59,34 @@ function waterSurface(data: CityData, material: THREE.Material) {
   return group;
 }
 
-export function createCity(m: Materials, data: CityData, sample = false): City {
+export const CITY_STAGES = [
+  { key: 'paper', label: '铺纸' },
+  { key: 'sites', label: '起屋' },
+  { key: 'palace', label: '立宫' },
+  { key: 'scape', label: '收卷' }
+] as const;
+export type CityStageKey = typeof CITY_STAGES[number]['key'];
+export interface CityLoadProgress { index: number; total: number; key: CityStageKey; label: string }
+export type CityStageListener = (progress: CityLoadProgress) => void;
+
+/** 让出主线程一帧，让加载层把上一步的文案和进度真正画出来。 */
+const yieldFrame = () => new Promise<void>(resolve => {
+  if (typeof requestAnimationFrame !== 'function') { setTimeout(resolve, 0); return; }
+  requestAnimationFrame(() => setTimeout(resolve, 0));
+});
+
+export async function createCity(m: Materials, data: CityData, sample = false, onStage?: CityStageListener): Promise<City> {
   const object = new THREE.Group(), authored = new THREE.Group();
   const anchors = new Map<string, THREE.Vector3>();
+  const labelOffsets = new Map<string, { x: number; z: number }>();
   const pickers: THREE.Mesh[] = [];
+  const stage = async (key: CityStageKey) => {
+    const index = CITY_STAGES.findIndex(item => item.key === key);
+    onStage?.({ index: index + 1, total: CITY_STAGES.length, key, label: CITY_STAGES[index].label });
+    if (import.meta.env.DEV) performance.mark(`city-stage-${key}`);
+    await yieldFrame();
+  };
+  await stage('paper');
   const ground = new THREE.Mesh(new THREE.BoxGeometry(bounds.width, 2.0, bounds.depth), m.earth);
   ground.position.set(bounds.centerX, -1.2, bounds.centerZ); ground.receiveShadow = true; object.add(ground);
   const base = new THREE.Mesh(new THREE.BoxGeometry(bounds.width + .8, 1, bounds.depth + .8), m.darkStone);
@@ -78,15 +103,30 @@ export function createCity(m: Materials, data: CityData, sample = false): City {
   terrain.name = 'city-plan'; object.add(terrain);
   object.add(waterSurface(data, m.water));
   const lateralSites = new Set(['shejitan', 'taimiao', 'tiantan', 'xiannongtan']);
-  for (const site of landmarks) {
+  const place = (site: typeof landmarks[number]) => {
     const [x, z] = project(site.coords);
     const group = createLandmark(site, m, data); group.position.set(x, .05, z);
     authored.add(group);
     const anchorY = site.kind === 'temple' ? 9 : site.kind === 'hill' ? 10 : site.kind === 'tower' ? 9 : site.kind === 'gate' ? 9 : 5;
+    // 名牌挂在实际画出来的那团建筑上，而不是数据里的坐标点：
+    // 坐标偶有偏差（太庙偏 120 m、天坛 180 m），名牌就会悬在空地上。
+    // 只挪名牌和点击框，anchor 本身不动——详情卡的标注是按 anchor 的相对坐标写的。
+    group.updateMatrixWorld(true);
+    const drawn = new THREE.Box3().setFromObject(group), center = drawn.getCenter(new THREE.Vector3());
+    let labelX = Number.isFinite(center.x) ? center.x : x, labelZ = Number.isFinite(center.z) ? center.z : z;
+    // 先农坛的院子从祭台一直拉到东边的神仓院，外接框中心被拉偏近 200 m，名牌会落在神仓院头上。
+    // 单独钉回太岁殿那一团（相对坐标点），导览镜头也对着这里。
+    if (site.id === 'xiannongtan') { labelX = x - 6.9; labelZ = z + 11.3; }
+    labelOffsets.set(site.id, { x: labelX - x, z: labelZ - z });
     anchors.set(site.id, new THREE.Vector3(x, anchorY, z));
     const pick = new THREE.Mesh(new THREE.BoxGeometry(Math.max(2.2, site.footprint[0] / 10), 6, Math.max(2.2, site.footprint[1] / 10)), new THREE.MeshBasicMaterial({ visible: false }));
-    pick.position.set(x, 3, z); pick.userData.id = site.id; pickers.push(pick); object.add(pick);
-  }
+    pick.position.set(labelX, 3, labelZ); pick.userData.id = site.id; pickers.push(pick); object.add(pick);
+  };
+  await stage('sites');
+  for (const site of landmarks) if (site.kind !== 'palace') place(site);
+  await stage('palace');
+  for (const site of landmarks) if (site.kind === 'palace') place(site);
+  await stage('scape');
   // The route and every physical layer use the same geographic projection.
   const centerline = [...landmarks.filter(site => !lateralSites.has(site.id) && !['square','southern-road','zhengyang'].includes(site.id)).map(site => project(site.coords)), ...Object.values(zhengyangLayout(landmarks.find(s=>s.id==='zhengyang')!,data)).map(p=>{const [x,z]=project(landmarks.find(s=>s.id==='zhengyang')!.coords);return [x+p.x,z+p.z] as [number,number];}), ...southernRoadPath()].sort((a, b) => a[1] - b[1]);
   authored.add(path(axisThroughShenwu(centerline,landmarks.find(s=>s.id==='forbidden-city')!,data), .38, m.brass, .01));
@@ -98,5 +138,5 @@ export function createCity(m: Materials, data: CityData, sample = false): City {
     // Same full-quality architecture as the main city, framed tightly for material inspection.
     object.name = 'courtyard-lighting-study';
   }
-  return { object, anchors, pickers, halo };
+  return { object, anchors, labelOffsets, pickers, halo };
 }

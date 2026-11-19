@@ -19,7 +19,7 @@ export default function AtlasDialog({ mode, onClose, onSelect }: Props) {
         <p>点击遗产地标，了解历史；选择北、中、南段，让视线沿轴移动；进入篇章，继续深入各段的独立体验。</p>
         <div className="about-stat"><span>7.8<small>公里 / 轴线长度</small></span><span>15<small>处 / 遗产构成要素</small></span><span>2024<small>年 / 列入世界遗产</small></span></div>
         <h3 className="source-title">资料与地理依据</h3><ul className="source-list">{sources.map(source => <li key={source.id}><a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<ArrowUpRight size={15} /></a><p>{source.note}</p></li>)}</ul>
-        <p className="small-note">信息供文化探索与学习参考，开放时间与参观安排请以各场馆官方公告为准。</p>
+        <p className="small-note">背景音乐《Ripples》由 Kevin MacLeod（incompetech.com）创作，依 CC BY 4.0 授权使用；界面音效取 CC0 / 公有领域素材；游览播报为本站自制的语音合成文件（Microsoft Edge TTS 神经网络语音），仅用于本课程的演示与学习，不作商业用途。信息供文化探索与学习参考，开放时间与参观安排请以各场馆官方公告为准。</p>
       </>}
     </div>
   </dialog>;
