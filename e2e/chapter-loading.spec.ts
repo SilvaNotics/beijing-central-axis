@@ -21,7 +21,9 @@ for (const region of ['north', 'central', 'south']) {
       await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
       await expect.poll(() => pendingMedia).toBeGreaterThan(0);
       await expect(page.locator('.chapter-loading')).toHaveCount(0);
-      expect(await root.locator('body').evaluate(() => document.readyState)).toBe('interactive');
+      // 媒体被 abort 之后解析本就收尾了（complete），这里只要求解析没卡在 loading：
+      // 「边下边可用」由上面的 pendingMedia > 0 与遮罩已撤来守。
+      expect(await root.locator('body').evaluate(() => document.readyState)).not.toBe('loading');
       const entry = root.locator(region === 'north' ? '.people button' : region === 'central' ? '.pin' : '.destination').first();
       await entry.click();
       await expect(root.locator(region === 'north' ? '#dlg' : region === 'central' ? '#modal' : '#story')).toBeVisible();

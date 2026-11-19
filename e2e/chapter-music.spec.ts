@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 
 test.use({ reducedMotion: 'reduce' });
 
-for (const embedded of [false, true]) {
+// 章节页单独打开时自己放曲；嵌进总览时改由父页面放（见文件末尾那条），这里只验单独打开。
+for (const embedded of [false]) {
   for (const region of ['central', 'south']) {
     test(region + ' music stops throughout stories ' + (embedded ? 'in iframe' : 'standalone'), async ({ page }, testInfo) => {
       const errors: string[] = [];
@@ -88,3 +89,30 @@ for (const embedded of [false, true]) {
     });
   }
 }
+
+// 嵌进总览时，章节不再自己建 <audio>：配乐由父页面统一放，章节只把音量意图（normal/duck/mute）报上去。
+for (const region of ['central', 'south']) {
+  test(region + ' music is handed to the atlas when embedded', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.addEventListener('message', (event: MessageEvent) => {
+        const data = event.data as { type?: string; state?: string } | null;
+        if (data?.type === 'axis:audio') {
+          const log = ((window as unknown as { __axisAudio?: string[] }).__axisAudio ??= []);
+          log.push(String(data.state));
+        }
+      });
+    });
+    await page.goto('/#/chapter/' + region);
+    const root = page.frameLocator('iframe');
+    const states = () => page.evaluate(() => ((window as unknown as { __axisAudio?: string[] }).__axisAudio ?? []) as string[]);
+    const last = async () => (await states()).at(-1);
+    await expect.poll(async () => (await states()).length, { timeout: 20_000 }).toBeGreaterThan(0);
+    await root.locator('h1').click();
+    await page.keyboard.press('Escape');
+    await expect.poll(last, { timeout: 20_000 }).toBe('normal');
+    await root.locator(region === 'central' ? '.pin' : '.destination').first().click();
+    await expect(root.locator(region === 'central' ? '#modal' : '#story')).toBeVisible();
+    await expect.poll(last, { timeout: 20_000 }).toBe('mute');
+  });
+}
+
