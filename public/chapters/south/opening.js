@@ -5,7 +5,7 @@
  const map=document.querySelector(".map");
  const viewport=map?.closest(".map-viewport");
  const image=document.getElementById("mapImage");
- if(!map||!image||window.parent!==window||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ if(!map||!image||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
 
  document.querySelectorAll(
   ".scroll-mist-cover,.rolling-scroll-cover"

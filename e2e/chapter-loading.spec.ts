@@ -38,29 +38,42 @@ for (const region of ['north', 'central', 'south']) {
   });
 }
 
-for (const region of ['north', 'south']) {
-  test(`${region} embedded map skips its blocking opening and defers story media`, async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    const eagerStoryRequests: string[] = [];
-    page.on('request', request => {
-      const path = new URL(request.url()).pathname;
-      if (/\/intro_book\.mp4$|\/assets\/portraits\//.test(path)) eagerStoryRequests.push(path);
-    });
-    await page.goto(`/#/chapter/${region}`, { waitUntil: 'domcontentloaded' });
-    const frame = page.frameLocator('iframe');
-    const image = frame.locator(region === 'north' ? '#map' : '#mapImage');
-    await image.evaluate((img: HTMLImageElement) => img.decode());
-    await expect(frame.locator('#intro, .axis-fixed-roll-cover')).toHaveCount(0);
-    const target = frame.locator(region === 'north' ? '.people button' : '.spot').last();
-    await target.click({ trial: true });
-    expect(eagerStoryRequests).toEqual([]);
-    if (region === 'south') {
-      // The closest destination demonstrates both walking and deferred portrait loading.
-      await target.click();
-      await expect(frame.locator('#story')).toBeVisible({ timeout: 15_000 });
-      await expect(frame.locator('#portrait')).toBeVisible();
-      await frame.locator('#portrait').evaluate((img: HTMLImageElement) => img.decode());
-      expect(eagerStoryRequests).toEqual([expect.stringContaining('/assets/portraits/yongdingmen.png')]);
-    }
+test('north plays the original opening video in the atlas and allows skipping', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const videoRequests: string[] = [];
+  page.on('request', request => {
+    if (request.url().endsWith('/intro_book.mp4')) videoRequests.push(request.url());
   });
-}
+  await page.goto('/#/chapter/north', { waitUntil: 'domcontentloaded' });
+  const frame = page.frameLocator('iframe');
+  const start = frame.getByRole('button', { name: '点一下，翻开' });
+  await expect(start).toBeVisible();
+  expect(videoRequests).toEqual([]);
+  await start.click();
+  await expect.poll(() => frame.locator('#introV').evaluate((video: HTMLVideoElement) => video.currentTime)).toBeGreaterThan(0);
+  await frame.getByRole('button', { name: '跳过开场' }).click();
+  await expect(frame.locator('#intro')).toHaveCount(0);
+  await frame.locator('.people button').last().click();
+  await expect(frame.locator('#dlg')).toBeVisible();
+});
+
+test('south keeps its scroll opening and defers portraits until entering a story', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const portraitRequests: string[] = [];
+  page.on('request', request => {
+    const path = new URL(request.url()).pathname;
+    if (path.includes('/assets/portraits/')) portraitRequests.push(path);
+  });
+  await page.goto('/#/chapter/south', { waitUntil: 'domcontentloaded' });
+  const frame = page.frameLocator('iframe');
+  await expect(frame.locator('.axis-fixed-roll-cover canvas')).toBeVisible();
+  await frame.getByRole('button', { name: '跳过开场 · Esc' }).click();
+  await expect(frame.locator('.axis-fixed-roll-cover')).toHaveCount(0);
+  await frame.locator('#mapImage').evaluate((img: HTMLImageElement) => img.decode());
+  expect(portraitRequests).toEqual([]);
+  await frame.locator('.spot').last().click();
+  await expect(frame.locator('#story')).toBeVisible({ timeout: 15_000 });
+  await expect(frame.locator('#portrait')).toBeVisible();
+  await frame.locator('#portrait').evaluate((img: HTMLImageElement) => img.decode());
+  expect(portraitRequests).toEqual([expect.stringContaining('/assets/portraits/yongdingmen.png')]);
+});

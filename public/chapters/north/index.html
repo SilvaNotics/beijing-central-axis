@@ -342,7 +342,7 @@
 </nav>
 <h1 class="sr">中轴线北段 · 纸雕立体书地图</h1>
 <div id="book">
-  <template id="introTemplate"><div id="intro"><video id="introV" src="assets/intro_book.mp4" poster="assets/intro_poster.jpg" playsinline muted preload="auto"></video><button id="introTap" type="button">点一下，翻开</button></div></template>
+  <template id="introTemplate"><div id="intro"><video id="introV" data-src="assets/intro_book.mp4" poster="assets/intro_poster.jpg" playsinline muted preload="none"></video><button id="introTap" type="button">点一下，翻开</button></div></template>
   <div id="stage">
     <img id="map" src="map.webp" alt="" fetchpriority="high">
   </div>
@@ -920,8 +920,6 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
 
 /* 开场：书本展开。第一次点击带声音从头播，播完把画面交还小地图，UI 错峰浮现 */
 (()=>{
-  // 嵌入总览时地图直接可用。模板中的视频和海报只在独立开场时加载。
-  if(EMBEDDED) return;
   if(location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches){
     for(const type of ['pointerdown','keydown']) addEventListener(type,()=>BGM.set(0.50),{once:true});
     return;
@@ -934,6 +932,7 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
   const tap=document.getElementById('introTap');
   const skip=document.getElementById('introSkip');
   skip.hidden=false;
+  BGM.set(0);
   book.classList.add('intro');stage.inert=true;mobileNav.inert=true;
   document.querySelectorAll('.place').forEach((el,i)=>el.style.transitionDelay=(0.04*i)+'s');
   document.querySelectorAll('.marker').forEach((el,i)=>el.style.transitionDelay=(0.10+0.07*i)+'s');
@@ -941,6 +940,7 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
   function finish(){
     if(done) return; done=true;
     intro.classList.add('off');v.pause();skip.hidden=true;stage.inert=false;mobileNav.inert=false;
+    if(v.hasAttribute('src')){v.removeAttribute('src');v.load();}
     book.classList.remove('intro');
     BGM.set(0.50);
     if(intro.contains(document.activeElement)||document.activeElement===skip){
@@ -952,8 +952,13 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
     if(done||started) return; started=true;
     tap&&tap.classList.add('off');
     v.muted=!sound||soundMuted; v.volume=0.9;
-    v.currentTime=0;
-    const p=v.play(); if(p&&p.catch) p.catch(()=>{ v.muted=true; v.play().catch(()=>{}); });
+    // 播放时再请求视频，跳过开场时可直接进入地图。
+    v.src=v.dataset.src;
+    v.play().catch(()=>{
+      if(done) return;
+      v.muted=true;
+      v.play().catch(finish);
+    });
   }
   v.addEventListener('ended', finish);
   v.addEventListener('error', finish);
