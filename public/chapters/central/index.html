@@ -130,7 +130,7 @@ button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #a8523
     <div class="poem-sign">古都寻迹 · 卷首</div>
     <div class="poem-seal">中轴</div>
   </aside>
-  <div class="canvas"><div class="map-wrap" id="map" role="group" aria-label="中段建筑导览图"><img src="assets/map.jpg" class="map-img" alt="从永定门方向北望北京中轴线的画卷式导览图，故宫、社稷坛、太庙、端门和外金水桥沿轴线及两侧展开" draggable="false"></div></div>
+  <div class="canvas"><div class="map-wrap" id="map" role="group" aria-label="中段建筑导览图"><img src="assets/map.jpg" class="map-img" fetchpriority="high" alt="从永定门方向北望北京中轴线的画卷式导览图，故宫、社稷坛、太庙、端门和外金水桥沿轴线及两侧展开" draggable="false"></div></div>
   <div class="edit-note" id="editnote" role="status" hidden>位置微调中：拖动五位人物至对应建筑；位置将保存在当前浏览器。完成后点击“完成微调”。</div>
 </main>
 <p class="music-credit">音乐《Ripples》· <a href="https://incompetech.com/" target="_blank" rel="noopener">Kevin MacLeod</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> · 沿用北段剪辑</p>
@@ -153,8 +153,13 @@ const asset=n=>'assets/'+encodeURIComponent(n.endsWith('.png')?n.slice(0,-4)+'.w
 // 作为总览的章节打开时，改由父页面统一放这一首，这里只发音量意图。
 const EMBEDDED=window.parent!==window;
 const sayAudio=state=>{ if(EMBEDDED) window.parent.postMessage({type:'axis:audio',state},window.location.origin); };
-const mapMusic=new Audio('assets/bgm_map.mp3');
-mapMusic.loop=true;mapMusic.preload='metadata';mapMusic.volume=.3;
+const mapMusic=EMBEDDED?null:new Audio();
+if(mapMusic){
+  mapMusic.loop=true;
+  mapMusic.preload='none';
+  mapMusic.volume=.3;
+  mapMusic.src='assets/bgm_map.mp3';
+}
 let musicOn=true,musicUnlocked=EMBEDDED,musicPageActive=true;
 function syncMapMusic(){
   if(EMBEDDED){

@@ -338,13 +338,13 @@
 <nav class="chapter-tools" aria-label="章节工具">
   <a href="../../#/" data-return>返回中轴总览</a>
   <div><button id="soundToggle" type="button" aria-pressed="false">声音：开</button>
-  <button id="introSkip" type="button">跳过开场</button></div>
+  <button id="introSkip" type="button" hidden>跳过开场</button></div>
 </nav>
 <h1 class="sr">中轴线北段 · 纸雕立体书地图</h1>
 <div id="book">
-  <div id="intro"><video id="introV" src="assets/intro_book.mp4" poster="assets/intro_poster.jpg" playsinline muted preload="auto"></video><button id="introTap" type="button">点一下，翻开</button></div>
+  <template id="introTemplate"><div id="intro"><video id="introV" src="assets/intro_book.mp4" poster="assets/intro_poster.jpg" playsinline muted preload="auto"></video><button id="introTap" type="button">点一下，翻开</button></div></template>
   <div id="stage">
-    <img id="map" src="map.webp" alt="">
+    <img id="map" src="map.webp" alt="" fetchpriority="high">
   </div>
 
   <div id="leaf"></div>
@@ -775,7 +775,7 @@ const EMBEDDED=window.parent!==window;
 const sayAudio=state=>{ if(EMBEDDED) window.parent.postMessage({type:'axis:audio',state},window.location.origin); };
 const BGM=(()=>{
   if(EMBEDDED){
-    sayAudio('mute');                                  // 开场动画自带音轨，先让父层安静
+    sayAudio('normal');
     return {play:()=>sayAudio('normal'),
             set:v=>sayAudio(v>=0.45?'normal':v>0?'duck':'mute'),
             mute:flag=>sayAudio(flag?'mute':'normal'),
@@ -920,14 +920,20 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
 
 /* 开场：书本展开。第一次点击带声音从头播，播完把画面交还小地图，UI 错峰浮现 */
 (()=>{
-  const book=document.getElementById('book'), intro=document.getElementById('intro'), v=document.getElementById('introV');
+  // 嵌入总览时地图直接可用。模板中的视频和海报只在独立开场时加载。
+  if(EMBEDDED) return;
+  if(location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches){
+    for(const type of ['pointerdown','keydown']) addEventListener(type,()=>BGM.set(0.50),{once:true});
+    return;
+  }
+  const book=document.getElementById('book');
+  const template=document.getElementById('introTemplate');
+  template.replaceWith(template.content.cloneNode(true));
+  const intro=document.getElementById('intro');
+  const v=document.getElementById('introV');
   const tap=document.getElementById('introTap');
-  if(!intro||!v) return;
   const skip=document.getElementById('introSkip');
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ intro.remove(); skip.hidden=true;book.classList.remove('intro'); return; }
-  if(location.hash) { intro.remove();skip.hidden=true;
-    addEventListener('pointerdown', ()=>BGM.set(0.50), {once:true});   // 深链进地图：首次点击起乐
-    return; }                                          // 自检与深链直接进地图
+  skip.hidden=false;
   book.classList.add('intro');stage.inert=true;mobileNav.inert=true;
   document.querySelectorAll('.place').forEach((el,i)=>el.style.transitionDelay=(0.04*i)+'s');
   document.querySelectorAll('.marker').forEach((el,i)=>el.style.transitionDelay=(0.10+0.07*i)+'s');

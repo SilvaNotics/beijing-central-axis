@@ -37,3 +37,30 @@ for (const region of ['north', 'central', 'south']) {
     } finally { release(); }
   });
 }
+
+for (const region of ['north', 'south']) {
+  test(`${region} embedded map skips its blocking opening and defers story media`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    const eagerStoryRequests: string[] = [];
+    page.on('request', request => {
+      const path = new URL(request.url()).pathname;
+      if (/\/intro_book\.mp4$|\/assets\/portraits\//.test(path)) eagerStoryRequests.push(path);
+    });
+    await page.goto(`/#/chapter/${region}`, { waitUntil: 'domcontentloaded' });
+    const frame = page.frameLocator('iframe');
+    const image = frame.locator(region === 'north' ? '#map' : '#mapImage');
+    await image.evaluate((img: HTMLImageElement) => img.decode());
+    await expect(frame.locator('#intro, .axis-fixed-roll-cover')).toHaveCount(0);
+    const target = frame.locator(region === 'north' ? '.people button' : '.spot').last();
+    await target.click({ trial: true });
+    expect(eagerStoryRequests).toEqual([]);
+    if (region === 'south') {
+      // The closest destination demonstrates both walking and deferred portrait loading.
+      await target.click();
+      await expect(frame.locator('#story')).toBeVisible({ timeout: 15_000 });
+      await expect(frame.locator('#portrait')).toBeVisible();
+      await frame.locator('#portrait').evaluate((img: HTMLImageElement) => img.decode());
+      expect(eagerStoryRequests).toEqual([expect.stringContaining('/assets/portraits/yongdingmen.png')]);
+    }
+  });
+}

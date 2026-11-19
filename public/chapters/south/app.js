@@ -106,9 +106,9 @@ const $=id=>{
  return element;
 };
 let current=null,line=0,mode="talk";
-let mapVersion=0,videoVersion=0;
+let videoVersion=0;
 let visited=new Set();
-const refs=new Map(),portraits=new Map();
+const refs=new Map();
 const KEY="axis-ink-complete-v3";
 const returnLink=document.querySelector("[data-return]");
 if(window.parent!==window)returnLink.hidden=true;
@@ -124,25 +124,12 @@ try{
  if(Array.isArray(saved))visited=new Set(saved.filter(id=>valid.has(id)));
 }catch(_){}
 
-function loadPortraitFiles(){
- for(const place of DATA){
-  const portrait=new Image();
-  portrait.onload=()=>{
-   portraits.set(place.id,portrait.src);
-   if(current?.id===place.id)updatePortrait();
-  };
-  portrait.src="./assets/portraits/"+place.id+".png";
- }
-}
-
 function updatePortrait(){
- if(!current)return;
- const src=portraits.get(current.id);
- $("portrait").hidden=!src;
- if(src){
-  $("portrait").src=src;
-  $("portrait").alt=current.person+"的人物立绘";
- }else $("portrait").removeAttribute("src");
+ const portrait=$("portrait");
+ portrait.alt=current.person+"的人物立绘";
+ portrait.hidden=false;
+ portrait.onerror=()=>{portrait.hidden=true};
+ portrait.src="./assets/portraits/"+current.id+".png";
 }
 
 /* 地图与景点入口 */
@@ -200,21 +187,19 @@ function progress(){
  try{localStorage.setItem(KEY,JSON.stringify([...visited]))}catch(_){}
 }
 
-function loadMap(src){
- const version=++mapVersion,image=new Image();
- image.onload=()=>{
-  if(version!==mapVersion)return;
-  $("mapImage").src=src;
-  $("mapImage").hidden=false;
+function loadMap(){
+ const image=$("mapImage");
+ const ready=()=>{
+  image.hidden=false;
   $("mapEmpty").hidden=true;
   $("hotspots").hidden=false;
   $("pageStatus").textContent="地图已加载，点击景点开始探索。";
-  updateBackground();
  };
- image.onerror=()=>{
-  if(version===mapVersion)$("pageStatus").textContent="地图未能载入，可直接点击下方景点。";
- };
- image.src=src;
+ if(image.complete&&image.naturalWidth){ready();return;}
+ image.addEventListener("load",ready,{once:true});
+ image.addEventListener("error",()=>{
+  $("pageStatus").textContent="地图未能载入，可直接点击下方景点。";
+ },{once:true});
 }
 $("reset").addEventListener("click",()=>{
  if(confirm("确定清空游览记录吗？")){
@@ -585,5 +570,4 @@ window.addEventListener("pageshow",()=>{
 });
 
 progress();
-loadMap("./assets/map.jpg");
-loadPortraitFiles();
+loadMap();

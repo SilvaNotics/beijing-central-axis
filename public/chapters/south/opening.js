@@ -1,11 +1,11 @@
 // Restored from the supplied 京华入墨 · 中轴拾光.html.
-(function installScrollMist(config){
+(function installScrollMist(){
  "use strict";
 
  const map=document.querySelector(".map");
  const viewport=map?.closest(".map-viewport");
  const image=document.getElementById("mapImage");
- if(!map||!image)return;
+ if(!map||!image||window.parent!==window||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
 
  document.querySelectorAll(
   ".scroll-mist-cover,.rolling-scroll-cover"
@@ -30,7 +30,7 @@
  map.classList.add("scroll-mist-running");
 
  const ctx=canvas.getContext("2d");
- const source=new Image();
+ const source=image;
  let W=1,H=1,D=1,raf=0,start=0,done=false;
  let fogLeft,fogRight,observer=null;
 
@@ -218,31 +218,21 @@
   }
  }
 
- source.onload=()=>{
+ function startOpening(){
   if(done)return;
-
-  if(typeof loadMap==="function"){
-   loadMap(config.map,null);
-  }else{
-   image.src=config.map;
-   image.hidden=false;
-   document.getElementById("mapEmpty")?.setAttribute("hidden","");
-   document.getElementById("hotspots")?.removeAttribute("hidden");
-  }
-
-  image.style.aspectRatio=source.width+" / "+source.height;
-
-  if(!ctx||matchMedia("(prefers-reduced-motion: reduce)").matches){
-   finish();return;
-  }
-
+  if(!ctx){finish();return;}
   observer=new ResizeObserver(resize);
   observer.observe(map);
   resize();
   start=performance.now();
   raf=requestAnimationFrame(draw);
- };
+ }
 
- source.onerror=finish;
- source.src=config.map;
-})({"map":"./assets/map.jpg"});
+ if(source.complete){
+  if(source.naturalWidth)startOpening();
+  else finish();
+ }else{
+  source.addEventListener("load",startOpening,{once:true});
+  source.addEventListener("error",finish,{once:true});
+ }
+})();
