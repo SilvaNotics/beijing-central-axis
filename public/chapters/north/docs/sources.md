@@ -28,3 +28,5 @@
 三套字体均按本页实际用字（约 730 字符）做了子集，只保留页面出现的字形，未保留完整字符集。
 
 2026-11-15 字牌兼容处理：`assets/place-bell.png`、`place-drum.png`、`place-bridge.png`、`place-jingshan.png` 由已有 `p_tag2.webp` 纸签与 `kai-sub.woff2` 字体合成，文字仍为钟楼、鼓楼、万宁桥、景山公园。沿用上述素材和字体的来源、授权声明；没有引入外部图片或新增史实。生成脚本为 `scripts/render-north-labels.mjs`，在仓库根目录运行 `node scripts/render-north-labels.mjs` 可重生成，需已有 Playwright Chromium。最终页面直接加载 PNG，不在运行时绘字。
+
+2026-11-19 开场纸签：`assets/intro-open.png` 和 `assets/intro-loading.png` 由同一生成脚本将原纸签底纹与汇文明朝体字样合成，用于「点一下，翻开」和「正在加载开场…」。

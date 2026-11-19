@@ -252,11 +252,10 @@
   #intro video{display:block;width:100%;height:100%;object-fit:cover;background:#2E2823;}
   #intro.off{opacity:0;pointer-events:none;}
   #introTap{position:absolute;left:50%;bottom:7.0cqh;transform:translateX(-50%) rotate(-1.1deg);
-    padding:.80cqh 2.0cqw .86cqh;white-space:nowrap;
-    font-family:var(--ming);font-size:1.92cqh;letter-spacing:.24em;color:#3E2F1C;
-    background:url("assets/p_tag2.webp") 100% 100%/100% 100% no-repeat;
+    width:max(176px,22.4cqh);min-height:44px;padding:0;border:0;background:none;cursor:pointer;
     filter:drop-shadow(.14cqw .40cqh .34cqh rgba(20,12,5,.50));
-    transition:opacity .35s ease,transform .35s ease;pointer-events:none;}
+    transition:opacity .35s ease,transform .35s ease;}
+  #introTap img:not([hidden]){display:block;width:100%;height:auto;}
   #introTap.off{opacity:0;transform:translateX(-50%) rotate(-1.1deg) translateY(.6cqh);}
   .place,.marker{transition:opacity .5s ease;}
   #book.intro .place,#book.intro .marker{opacity:0;}
@@ -279,7 +278,6 @@
   #nextSign{border:0;background:none;}
   #nextSign.done{pointer-events:none;}
   .marker:focus-visible .tag{opacity:1;}
-  #introTap{border:0;pointer-events:auto;min-height:44px;font-size:max(16px,1.92cqh);cursor:pointer;}
   @media(max-width:900px){
     html,body{width:100%;height:auto;min-height:100%;}
     #book{width:100%;height:max(100svh,calc(56.25vw + 440px));aspect-ratio:auto;box-shadow:none;perspective:none;}
@@ -342,7 +340,15 @@
 </nav>
 <h1 class="sr">中轴线北段 · 纸雕立体书地图</h1>
 <div id="book">
-  <template id="introTemplate"><div id="intro"><video id="introV" data-src="assets/intro_book.mp4?v=f99ea045" poster="assets/intro_poster.jpg?v=1080p" playsinline muted preload="none"></video><button id="introTap" type="button">点一下，翻开</button></div></template>
+  <template id="introTemplate">
+    <div id="intro">
+      <video id="introV" data-src="assets/intro_book.mp4?v=f99ea045" poster="assets/intro_poster.jpg?v=1080p" playsinline muted preload="none"></video>
+      <button id="introTap" type="button">
+        <img src="assets/intro-open.png" width="352" height="94" alt="点一下，翻开">
+        <img src="assets/intro-loading.png" width="352" height="94" alt="正在加载开场…" hidden>
+      </button>
+    </div>
+  </template>
   <div id="stage">
     <img id="map" src="map.webp" alt="" fetchpriority="high">
   </div>
@@ -930,6 +936,7 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
   const intro=document.getElementById('intro');
   const v=document.getElementById('introV');
   const tap=document.getElementById('introTap');
+  const [openLabel, loadingLabel]=tap.children;
   const skip=document.getElementById('introSkip');
   skip.hidden=false;
   BGM.set(0);
@@ -951,7 +958,8 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
   function start(sound){
     if(done||started) return; started=true;
     tap.disabled=true;
-    tap.textContent='正在加载开场…';
+    openLabel.hidden=true;
+    loadingLabel.hidden=false;
     v.addEventListener('playing',()=>tap.classList.add('off'),{once:true});
     v.muted=!sound||soundMuted; v.volume=0.9;
     // 播放时再请求视频，跳过开场时可直接进入地图。

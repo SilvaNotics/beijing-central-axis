@@ -40,6 +40,7 @@ for (const region of ['north', 'central', 'south']) {
 
 test('north plays the original opening video in the atlas and allows skipping', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.route(/\.woff2(?:\?|$)/, route => route.abort());
   const videoRequests: string[] = [];
   page.on('request', request => {
     if (new URL(request.url()).pathname.endsWith('/intro_book.mp4')) videoRequests.push(request.url());
@@ -48,8 +49,14 @@ test('north plays the original opening video in the atlas and allows skipping', 
   const frame = page.frameLocator('iframe');
   const start = frame.getByRole('button', { name: '点一下，翻开' });
   await expect(start).toBeVisible();
+  const artwork = start.getByRole('img', { name: '点一下，翻开' });
+  await expect(artwork).toBeVisible();
+  await artwork.evaluate((img: HTMLImageElement) => img.decode());
   expect(videoRequests).toEqual([]);
   await start.click();
+  const loading = frame.getByRole('button', { name: '正在加载开场…' });
+  await expect(loading).toBeDisabled();
+  await loading.getByRole('img', { name: '正在加载开场…' }).evaluate((img: HTMLImageElement) => img.decode());
   const video = frame.locator('#introV');
   await expect.poll(() => video.evaluate((el: HTMLVideoElement) => el.currentTime)).toBeGreaterThan(0);
   expect(await video.evaluate((el: HTMLVideoElement) => [el.videoWidth, el.videoHeight])).toEqual([1920, 1080]);
