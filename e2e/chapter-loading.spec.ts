@@ -42,7 +42,7 @@ test('north plays the original opening video in the atlas and allows skipping', 
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const videoRequests: string[] = [];
   page.on('request', request => {
-    if (request.url().endsWith('/intro_book.mp4')) videoRequests.push(request.url());
+    if (new URL(request.url()).pathname.endsWith('/intro_book.mp4')) videoRequests.push(request.url());
   });
   await page.goto('/#/chapter/north', { waitUntil: 'domcontentloaded' });
   const frame = page.frameLocator('iframe');

@@ -342,7 +342,7 @@
 </nav>
 <h1 class="sr">中轴线北段 · 纸雕立体书地图</h1>
 <div id="book">
-  <template id="introTemplate"><div id="intro"><video id="introV" data-src="assets/intro_book.mp4" poster="assets/intro_poster.jpg" playsinline muted preload="none"></video><button id="introTap" type="button">点一下，翻开</button></div></template>
+  <template id="introTemplate"><div id="intro"><video id="introV" data-src="assets/intro_book.mp4?v=540p" poster="assets/intro_poster.jpg?v=720p" playsinline muted preload="none"></video><button id="introTap" type="button">点一下，翻开</button></div></template>
   <div id="stage">
     <img id="map" src="map.webp" alt="" fetchpriority="high">
   </div>
@@ -950,7 +950,9 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
   }
   function start(sound){
     if(done||started) return; started=true;
-    tap&&tap.classList.add('off');
+    tap.disabled=true;
+    tap.textContent='正在加载开场…';
+    v.addEventListener('playing',()=>tap.classList.add('off'),{once:true});
     v.muted=!sound||soundMuted; v.volume=0.9;
     // 播放时再请求视频，跳过开场时可直接进入地图。
     v.src=v.dataset.src;
