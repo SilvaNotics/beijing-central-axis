@@ -9,3 +9,20 @@ playwright-report/
 *.log
 *.tsbuildinfo
 .vscode/
+
+# Superseded verification screenshots retained locally.
+/docs/research/figures/inner-jinshui-after.png
+/docs/research/figures/inner-jinshui-before.png
+/docs/research/figures/inner-jinshui-bridges-final.png
+/docs/research/figures/inner-jinshui-bridges-oblique.png
+/docs/research/figures/inner-jinshui-connections-east.png
+/docs/research/figures/inner-jinshui-connections-overview.png
+/docs/research/figures/palace-interior-user-feedback-before.png
+/docs/research/figures/palace-interior-user-feedback-detail-trial.png
+/docs/research/figures/palace-interior-user-feedback-trial-network.png
+/docs/research/figures/palace-interior-user-feedback-trial.png
+/docs/research/figures/tiananmen-jinshui-front-after.png
+/docs/research/figures/tiananmen-jinshui-oblique-after.png
+/docs/research/figures/tiananmen-proportion-front-before.png
+/docs/research/figures/tiananmen-proportion-oblique-before.png
+/docs/research/figures/tiananmen-proportion-side-before.png
