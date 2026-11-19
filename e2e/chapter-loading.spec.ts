@@ -50,7 +50,9 @@ test('north plays the original opening video in the atlas and allows skipping', 
   await expect(start).toBeVisible();
   expect(videoRequests).toEqual([]);
   await start.click();
-  await expect.poll(() => frame.locator('#introV').evaluate((video: HTMLVideoElement) => video.currentTime)).toBeGreaterThan(0);
+  const video = frame.locator('#introV');
+  await expect.poll(() => video.evaluate((el: HTMLVideoElement) => el.currentTime)).toBeGreaterThan(0);
+  expect(await video.evaluate((el: HTMLVideoElement) => [el.videoWidth, el.videoHeight])).toEqual([1920, 1080]);
   await frame.getByRole('button', { name: '跳过开场' }).click();
   await expect(frame.locator('#intro')).toHaveCount(0);
   await frame.locator('.people button').last().click();
