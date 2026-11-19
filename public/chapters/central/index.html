@@ -150,10 +150,17 @@ const sites=[
 const $=s=>document.querySelector(s),map=$('#map'),modal=$('#modal'),content=$('#content');
 const asset=n=>'assets/'+encodeURIComponent(n.endsWith('.png')?n.slice(0,-4)+'.webp':n);let editing=false,current=null,previousFocus=null,revealTimer=null,session=0;const visited=new Set();let saved={};try{saved=JSON.parse(localStorage.getItem('jinghua-positions-v2')||'{}')}catch(e){}
 // 地图配乐只在用户交互后播放；整个讲解弹层保持安静。
+// 作为总览的章节打开时，改由父页面统一放这一首，这里只发音量意图。
+const EMBEDDED=window.parent!==window;
+const sayAudio=state=>{ if(EMBEDDED) window.parent.postMessage({type:'axis:audio',state},window.location.origin); };
 const mapMusic=new Audio('assets/bgm_map.mp3');
 mapMusic.loop=true;mapMusic.preload='metadata';mapMusic.volume=.3;
-let musicOn=true,musicUnlocked=false,musicPageActive=true;
+let musicOn=true,musicUnlocked=EMBEDDED,musicPageActive=true;
 function syncMapMusic(){
+  if(EMBEDDED){
+    sayAudio(musicOn&&musicPageActive&&!document.hidden&&modal.hidden?'normal':'mute');
+    return;
+  }
   if(musicOn&&musicUnlocked&&musicPageActive&&modal.hidden&&!document.hidden){
     if(mapMusic.paused)mapMusic.play().catch(()=>{});
   }else mapMusic.pause();
@@ -170,6 +177,7 @@ for(const type of ['pointerdown','keydown'])document.addEventListener(type,()=>{
 document.addEventListener('visibilitychange',syncMapMusic);
 window.addEventListener('pagehide',()=>{musicPageActive=false;syncMapMusic()});
 window.addEventListener('pageshow',()=>{musicPageActive=true;syncMapMusic()});
+if(EMBEDDED)syncMapMusic();
 function savePositions(){try{localStorage.setItem('jinghua-positions-v2',JSON.stringify(saved))}catch(e){$('#editnote').textContent='当前浏览器无法保存位置，微调仅在本次打开期间生效。'}}
 sites.forEach(s=>{const p=saved[s.id];if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){s.x=p.x;s.y=p.y}const pin=document.createElement('button');pin.className='pin';pin.dataset.id=s.id;pin.style.setProperty('--x',s.x+'%');pin.style.setProperty('--y',s.y+'%');pin.setAttribute('aria-label',s.name+'，介绍者'+s.guide+'，点击展开建筑图片');pin.innerHTML=`<img class="portrait" src="${asset('介绍者'+s.guide+'.png')}" alt="介绍者${s.guide}" draggable="false"><span class="pin-label">${s.name}</span>`;pin.addEventListener('click',()=>{if(!editing)openSite(s)});let dragging=false;pin.addEventListener('pointerdown',e=>{if(!editing)return;dragging=true;pin.setPointerCapture(e.pointerId);e.preventDefault()});pin.addEventListener('pointermove',e=>{if(!dragging)return;const r=map.getBoundingClientRect();s.x=Math.max(5,Math.min(95,(e.clientX-r.left)/r.width*100));s.y=Math.max(8,Math.min(96,(e.clientY-r.top)/r.height*100));pin.style.setProperty('--x',s.x+'%');pin.style.setProperty('--y',s.y+'%')});function endDrag(){if(!dragging)return;dragging=false;saved[s.id]={x:s.x,y:s.y};savePositions()}pin.addEventListener('pointerup',endDrag);pin.addEventListener('pointercancel',endDrag);map.append(pin)});
 function openSite(s){clearTimeout(revealTimer);session++;current=s;previousFocus=document.activeElement;visited.add(s.id);$('#progress').textContent=`已探访 ${visited.size} / 5`;$('#dialog-title').textContent=s.name;$('#dialog-kicker').textContent='第'+['一','二','三','四','五'][s.id-1]+'景 · 画卷徐开';modal.hidden=false;syncMapMusic();showPainting();$('#close').focus()}

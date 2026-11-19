@@ -126,8 +126,8 @@ export const landmarks: Landmark[] = [
     "category": "古代皇家祭祀建筑",
     "era": "明永乐十八年 · 1420",
     "coords": [
-      116.4012,
-      39.9118
+      116.39987,
+      39.91138
     ],
     "footprint": [
       430,

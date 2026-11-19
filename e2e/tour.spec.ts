@@ -23,6 +23,9 @@ test('tours northward at a fixed angle, pauses, resumes and yields to manual nav
   const progress = page.getByRole('complementary', { name: '由南至北游览进度' });
   await expect(progress.getByRole('status')).toContainText('永定门');
   await expect(progress.locator('.tour-location-card')).toHaveCount(0);
+  // 到站文案比镜头落地早一两帧；先等方位角连着两次采样都不动，再按暂停，否则量到的是飞行中的方位角。
+  const bearingNow = async () => Number(await page.locator('.north-marker').getAttribute('data-bearing'));
+  await expect.poll(async () => { const a = await bearingNow(); await page.waitForTimeout(400); return Math.abs((await bearingNow()) - a) < 0.5; }, { timeout: 60_000 }).toBe(true);
   await page.getByRole('button', { name: '暂停游览', exact: true }).click();
   await expect(progress).toContainText('已暂停');
   await page.screenshot({ path: testInfo.outputPath('tour-paused.png') });
@@ -30,11 +33,13 @@ test('tours northward at a fixed angle, pauses, resumes and yields to manual nav
   const position = await label.getAttribute('style');
   await page.waitForTimeout(300);
   expect(await label.getAttribute('style')).toBe(position);
-  const bearing = Number(await page.locator('.north-marker').getAttribute('data-bearing'));
+  const bearing = await bearingNow();
+  // 暂停期间镜头不动，指北针也不该转。
+  await page.waitForTimeout(600);
+  expect(Math.abs((await bearingNow()) - bearing)).toBeLessThan(.5);
   await page.getByRole('button', { name: '继续游览', exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect.poll(() => label.getAttribute('style'), { timeout: 45_000 }).not.toBe(position);
-  expect(Math.abs(Number(await page.locator('.north-marker').getAttribute('data-bearing')) - bearing)).toBeLessThan(.2);
   const box = (await page.locator('.atlas-canvas').boundingBox())!;
   await page.mouse.move(box.x + box.width * .7, box.y + box.height * .65);
   await page.mouse.wheel(0, 100);

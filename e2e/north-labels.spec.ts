@@ -20,7 +20,8 @@ for (const width of [390, 1440]) {
         const images: string[] = [];
         for (const label of await labels.all()) {
           const box = (await label.locator('img').boundingBox())!;
-          const inset = width <= 900 ? 4 : 0;
+          // 名牌是 rotate 过的，截图框四角会带上背景；背景在动，所以两边都往里缩几像素再比。
+          const inset = 3;
           images.push((await cdp.send('Page.captureScreenshot', { format: 'png', clip: { x:box.x+inset,y:box.y+inset,width:box.width-inset*2,height:box.height-inset*2,scale:1 } })).data);
         }
         return images;
