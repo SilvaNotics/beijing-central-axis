@@ -769,8 +769,18 @@ function sfx(k){
   try{ a.currentTime=0; const pr=a.play(); if(pr&&pr.catch) pr.catch(()=>{}); }catch(e){}
 }
 
-/* 界面配乐：开场结束后起，循环；进对话压下去，回地图抬起来 */
+/* 界面配乐：开场结束后起，循环；进对话压下去，回地图抬起来。
+   作为总览的章节打开时，配乐由父页面统一播放，这里只把音量意图转交过去，免得同一条曲子叠两遍。 */
+const EMBEDDED=window.parent!==window;
+const sayAudio=state=>{ if(EMBEDDED) window.parent.postMessage({type:'axis:audio',state},window.location.origin); };
 const BGM=(()=>{
+  if(EMBEDDED){
+    sayAudio('mute');                                  // 开场动画自带音轨，先让父层安静
+    return {play:()=>sayAudio('normal'),
+            set:v=>sayAudio(v>=0.45?'normal':v>0?'duck':'mute'),
+            mute:flag=>sayAudio(flag?'mute':'normal'),
+            state:()=>({started:true,vol:0,t:0,paused:true})};
+  }
   const a=new Audio('assets/bgm_map.mp3'); a.loop=true; a.preload='auto'; a.volume=0;
   let target=0, started=false, tk=null;
   const ramp=()=>{ const d=target-a.volume;

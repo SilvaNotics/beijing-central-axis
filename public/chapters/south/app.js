@@ -228,11 +228,14 @@ function updateBackground(){
 }
 
 /* 声音状态 */
+const EMBEDDED=window.parent!==window;
+const sayAudio=state=>{ if(EMBEDDED) window.parent.postMessage({type:"axis:audio",state},window.location.origin); };
 let bgm=null,bgmTarget=0,musicOn=true,musicUnlocked=false,musicPageActive=true;
 let voices=[],utterance=null,readToken=0,readState="idle";
 const synth=("speechSynthesis" in window)?window.speechSynthesis:null;
 
 function ensureAudio(){
+ if(EMBEDDED)return;
  if(!bgm){
   bgm=new Audio("./assets/music/ambient.mp3");
   bgm.loop=true;
@@ -241,6 +244,12 @@ function ensureAudio(){
  }
 }
 function musicTarget(){
+ if(EMBEDDED){
+  /* 总览里打开时由父页面统一放配乐；故事层、视频、朗读之外照常，进了故事或视频就让父层停 */
+  const active=musicOn&&musicPageActive&&!$("story").open&&mode!=="video"&&!document.hidden;
+  sayAudio(active?"normal":"mute");
+  return;
+ }
  if(!bgm)return;
  const onMap=!$("story").open;
  // 讲解期间保持静音，包括暂停朗读、关闭自动朗读和视频返回对话。
@@ -258,6 +267,7 @@ function startMusic(){
 }
 function stopMusicLoop(){
  bgmTarget=0;
+ if(EMBEDDED){sayAudio("mute");return}
  if(bgm){bgm.pause();bgm.volume=0}
 }
 /* 音量做几十毫秒的渐变，避免开关时爆音 */
@@ -300,6 +310,7 @@ for(const type of ["pointerdown","keydown","touchstart"])
  document.addEventListener(type,unlockMusic,{once:true,passive:true});
 ensureAudio();
 syncMusicButtons();
+if(EMBEDDED)musicTarget();
 
 const castAudio=new Audio();
 castAudio.preload="auto";
