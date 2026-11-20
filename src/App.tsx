@@ -22,6 +22,7 @@ import OrnamentalFrame from './components/OrnamentalFrame';
 import { useAtlasAudio } from './components/AtlasAudio';
 import { parseRoute, type AtlasRoute } from './lib/navigation';
 import { AXIS_ROTATION } from './scene/geo';
+import { chapterPreloader } from './lib/chapterPreloader';
 
 export default function App() {
   const [route, setRoute] = useState<AtlasRoute>(() => parseRoute(window.location.hash));
@@ -91,6 +92,17 @@ export default function App() {
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);
   }, []);
+
+  // 章节资源预加载：三维场景就绪后开始后台加载
+  useEffect(() => {
+    if (sceneStatus === 'ready' && !chapter) {
+      chapterPreloader.start(import.meta.env.BASE_URL);
+    }
+    return () => {
+      // 进入章节时停止预加载，避免资源竞争
+      if (chapter) chapterPreloader.stop();
+    };
+  }, [sceneStatus, chapter]);
   useEffect(() => { if (sceneStatus === 'fallback') setFlat(true); }, [sceneStatus]);
   // 十秒还没算完就先给二维图，别让人对着空屏等。
   useEffect(() => {
