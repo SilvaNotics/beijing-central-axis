@@ -191,6 +191,8 @@ async function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement,
   /** 正在游览到的那一站：地图上的名牌跟着亮，面板和模型对得上。 */
   let touringSite = '';
   const tourTarget = new THREE.Vector3(), tourPosition = new THREE.Vector3(), sunOffset = new THREE.Vector3(-180, 320, 120);
+  /** 降低标签更新频率：每2帧更新一次位置计算，避免每帧都做投影和碰撞检测。 */
+  let labelUpdateFrame = 0;
   /** 停靠时相机绕点走弧：方位角 0 = 正南，正为东侧、负为西侧，俯角恒定。 */
   const placeCamera = (x: number, y: number, z: number, azimuth: number, angle = TOUR_ANGLE) => {
     const reach = Math.cos(angle) * TOUR_DISTANCE;
@@ -433,7 +435,8 @@ async function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement,
       container.dataset.camera = JSON.stringify({ position: camera.position.toArray(), target: controls.target.toArray(), zoom: camera.zoom });
       container.dataset.tourDuration = String(Math.round(totalTourMs));
     }
-    updateLabels();
+    // 降低标签更新频率至每2帧一次，减少DOM操作和投影计算压力
+    if (++labelUpdateFrame % 2 === 0) updateLabels();
     rendering = false;
     if ((tourMode === 'playing' || animation || --needsFrames > 0) && !frame) frame = requestAnimationFrame(render);
   }
