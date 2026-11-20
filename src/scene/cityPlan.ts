@@ -13,8 +13,14 @@ import { palaceGateIds, shenwuForecourtLayout } from './palaceGates';
 
 export const planBounds = { width: 640, depth: 1090, centerX: 45, centerZ: 3 };
 
+/** 每画完一段让出主线程一帧：这张图有好几万笔绘制，一口气画完会把页面冻住两三秒。 */
+const yieldFrame = () => new Promise<void>(resolve => {
+  if (typeof requestAnimationFrame !== 'function') { setTimeout(resolve, 0); return; }
+  requestAnimationFrame(() => setTimeout(resolve, 0));
+});
+
 /** A single local map surface replaces thousands of background meshes. */
-export function createCityPlan(data: CityData, resolution = 2048, architecturalPlan = false) {
+export async function createCityPlan(data: CityData, resolution = 2048, architecturalPlan = false) {
   const canvas = document.createElement('canvas');
   canvas.width = resolution;
   canvas.height = Math.round(resolution * planBounds.depth / planBounds.width);
@@ -36,6 +42,7 @@ export function createCityPlan(data: CityData, resolution = 2048, architecturalP
     ctx.fillStyle = '#3d5445'; ctx.fill('evenodd');
     ctx.strokeStyle = '#697560'; ctx.lineWidth = .14; ctx.stroke();
   }
+  await yieldFrame();
   const temple = landmarks.find(site => site.id === 'tiantan')!;
   const paving = tiantanGround(temple,data), [tx,tz] = project(temple.coords);
   const world = ([x,z]: [number,number]): [number,number] => [x+tx,z+tz];
@@ -52,6 +59,7 @@ export function createCityPlan(data: CityData, resolution = 2048, architecturalP
     ctx.beginPath(); path.points.map(world).forEach(([x,z],i) => i ? ctx.lineTo(x,z) : ctx.moveTo(x,z));
     ctx.lineWidth = path.width; ctx.stroke();
   }
+  await yieldFrame();
   const hill = landmarks.find(site=>site.id==='jingshan')!, [jx,jz] = project(hill.coords);
   const hillPoint = ([x,z]:[number,number]):[number,number] => [x+jx,z+jz];
   for(const court of jingshanCourts(hill)) { trace([court.ring.map(hillPoint)]); ctx.fill(); }
@@ -64,8 +72,11 @@ export function createCityPlan(data: CityData, resolution = 2048, architecturalP
     ring: feature.coordinates.map(project),
     holes: (feature.holes ?? []).map(ring => ring.map(project)),
   }));
+  const palaceSite = landmarks.find(site=>site.id==='forbidden-city')!, [ppx, ppz] = project(palaceSite.coords);
+  let drawn = 0;
   for (const building of data.buildings) {
-    const palace = landmarks.find(site=>site.id==='forbidden-city')!, display = shenwuForecourtLayout(palace,data,building.id), [px,pz] = project(palace.coords);
+    if (++drawn % 250 === 0) await yieldFrame();
+    const palace = palaceSite, display = shenwuForecourtLayout(palace,data,building.id), [px,pz] = [ppx,ppz];
     const ring = display ? display.ring.map(([x,z]):[number,number]=>[x+px,z+pz]) : building.id===25109960?zhengyangPlatformRing(landmarks.find(s=>s.id==='zhengyang')!,data):localBuildingRing(building);
     const [x, z] = ring[0];
     const center: [number, number] = ring.slice(0,-1).reduce((sum, point) => [sum[0]+point[0],sum[1]+point[1]],[0,0]).map(value => value / Math.max(1,ring.length-1)) as [number, number];
@@ -74,6 +85,7 @@ export function createCityPlan(data: CityData, resolution = 2048, architecturalP
     trace([ring]); ctx.fillStyle = (palaceTerraces.has(building.id)||palaceGateIds.some(id=>id===building.id))?'#c9bca4':heritage ? '#a28b68' : '#71766f'; ctx.fill();
     ctx.lineWidth = .055; ctx.strokeStyle = heritage ? '#6e5340' : '#505b58'; ctx.stroke();
   }
+  await yieldFrame();
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   for (const feature of data.context.filter(f => f.kind === 'road')) {
     ctx.beginPath(); feature.coordinates.map(project).forEach(([x, z], i) => i ? ctx.lineTo(x, z) : ctx.moveTo(x, z));
@@ -86,6 +98,7 @@ export function createCityPlan(data: CityData, resolution = 2048, architecturalP
     ctx.fillStyle = '#3d6268'; ctx.fill('evenodd');
     ctx.lineWidth = .28; ctx.strokeStyle = '#86968a'; ctx.stroke();
   }
+  await yieldFrame();
   const palace=landmarks.find(site=>site.id==='forbidden-city')!, [px,pz]=project(palace.coords);
   const palacePoint=([x,z]:[number,number]):[number,number]=>[x+px,z+pz];
   for(const garden of [...palaceGardenZones(palace,data),...palaceCourtZones(palace,data)]) {

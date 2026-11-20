@@ -83,7 +83,7 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   const stage = async (key: CityStageKey) => {
     const index = CITY_STAGES.findIndex(item => item.key === key);
     onStage?.({ index: index + 1, total: CITY_STAGES.length, key, label: CITY_STAGES[index].label });
-    if (import.meta.env.DEV) performance.mark(`city-stage-${key}`);
+    performance.mark(`city-stage-${key}`);
     await yieldFrame();
   };
   await stage('paper');
@@ -95,7 +95,9 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(bounds.width + .5, .06, bounds.depth + .5)), new THREE.LineBasicMaterial({ color: '#8e7956', transparent: true, opacity: .65 }));
   edge.position.set(bounds.centerX, -.15, bounds.centerZ); object.add(edge);
 
-  const texture = new THREE.CanvasTexture(createCityPlan(data));
+  performance.mark('plan-start');
+  const texture = new THREE.CanvasTexture(await createCityPlan(data));
+  performance.mark('plan-end');
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 2;
   const terrainMaterial = new THREE.MeshBasicMaterial({ map: texture });
   const terrain = new THREE.Mesh(new THREE.PlaneGeometry(bounds.width, bounds.depth), terrainMaterial);
@@ -123,15 +125,27 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
     pick.position.set(labelX, 3, labelZ); pick.userData.id = site.id; pickers.push(pick); object.add(pick);
   };
   await stage('sites');
-  for (const site of landmarks) if (site.kind !== 'palace') place(site);
+  for (const site of landmarks) if (site.kind !== 'palace') {
+    place(site);
+    await yieldFrame();
+  }
   await stage('palace');
-  for (const site of landmarks) if (site.kind === 'palace') place(site);
+  for (const site of landmarks) if (site.kind === 'palace') {
+    place(site);
+    await yieldFrame();
+  }
   await stage('scape');
   // The route and every physical layer use the same geographic projection.
   const centerline = [...landmarks.filter(site => !lateralSites.has(site.id) && !['square','southern-road','zhengyang'].includes(site.id)).map(site => project(site.coords)), ...Object.values(zhengyangLayout(landmarks.find(s=>s.id==='zhengyang')!,data)).map(p=>{const [x,z]=project(landmarks.find(s=>s.id==='zhengyang')!.coords);return [x+p.x,z+p.z] as [number,number];}), ...southernRoadPath()].sort((a, b) => a[1] - b[1]);
   authored.add(path(axisThroughShenwu(centerline,landmarks.find(s=>s.id==='forbidden-city')!,data), .38, m.brass, .01));
 
-  object.add(bake(authored),createForest(data,m));
+  performance.mark('bake-start');
+  const baked = bake(authored);
+  performance.mark('bake-end');
+  performance.mark('forest-start');
+  const forest = createForest(data, m);
+  performance.mark('forest-end');
+  object.add(baked, forest);
   const halo = new THREE.Mesh(new THREE.RingGeometry(5, 5.18, 64), new THREE.MeshBasicMaterial({ color: '#d8b476', transparent: true, opacity: .75, depthWrite: false, side: THREE.DoubleSide }));
   halo.rotation.x = -Math.PI / 2; halo.position.y = .25; halo.visible = false; object.add(halo);
   if (sample) {

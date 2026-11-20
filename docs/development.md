@@ -247,6 +247,18 @@ NODE_OPTIONS=--max-old-space-size=1024 npm run build
 - 浏览器不允许无交互自动出声，首次 `pointerdown`、`keydown` 或 `touchstart` 才起播；标签页隐藏时暂停，回来接着放，不回到开头。
 - 顶栏「音乐 / 静音」按钮切换，偏好存在 `localStorage` 的 `axis:atlas-audio`。
 
+## 启动与播放性能
+
+总览页首次进入时要把三万余栋建筑、地面图、树木和航线一次性算出来，历史上这一段是一整块七秒左右的主线程长任务，载入过程看上去像卡死。现在的处理：
+
+- `src/scene/city.ts` 按站让出主线程（`yieldFrame`），`src/scene/cityPlan.ts` 改成异步，分段绘制地面图并在每 250 栋建筑处让出。整块工作被切成十几段，最长一段约 1.3 s，静止帧率回到 60 fps（1440×900，D3D11）。
+- `pointInPolygon`（`src/scene/geo.ts`）按环缓存外接框，查询点落在框外直接返回，省掉整圈遍历；这是地面图、树林、绿地三处构建的热点。
+- 载入遮罩的进度条上叠了一条只走 `transform` 的高光（`src/styles.css`），动画由合成器执行，主线程被占住时它仍在动，页面不会看上去冻住。
+- 视频统一压到 720p / CRF 26 / `+faststart`：中段社稷坛 22.7 → 4.2 MB，南段五条合计 38.8 → 22.8 MB，北段开场 4.2 → 2.2 MB（保留 1920×1080，`chapter-loading.spec.ts` 断言原始分辨率）。南段视频页播放帧率从约 5 fps 回到流畅值，首帧从 405 ms 降到 90 ms。
+- 北段三张人物背景从 JPG 换 WebP，2.1 MB → 0.8 MB。
+
+改动素材后需要重跑 `npx playwright test` 的 `chapter-loading`、`chapter-maps`、`atlas` 三组，它们对视频分辨率、地图可读性和首屏无报错有断言。
+
 ## 验证与交付
 
 改动完成后记录版本、构建输出和实际检查范围。运行时画面、键盘、窄屏、iframe 返回需要浏览器验证；编译成功不能替代这些检查。本轮实际状态见 [进度与验证](progress.md)。

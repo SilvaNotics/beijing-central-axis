@@ -43,7 +43,7 @@ interface PlanLayer { id: string; roofs: string; walls: string; ridges: string; 
 interface Plan { axis: [number,number][]; image: string; layers: PlanLayer[]; civic: {id:string;kind:string;path:string}[]; }
 let planPromise: Promise<Plan> | undefined;
 function loadPlan() {
-  planPromise ??= loadCityData().then(data => {
+  planPromise ??= loadCityData().then(async data => {
     const layers = landmarks.map(site => ({ id: site.id, roofs: '', walls: '', ridges: '' }));
     const roadLayer = layers.find(layer=>layer.id==='southern-road')!;
     const jinshuiLayer = layers.find(layer=>layer.id==='jinshui')!;
@@ -211,7 +211,8 @@ function loadPlan() {
     for(let z=-1.5;z<=1.5;z+=.3)bridgeLayer.ridges+=`M${wanningBridgePoint(-.8,z)}L${wanningBridgePoint(.8,z)}`;
     const civic=[...squarePlanParts(data).map(part=>({id:'square',...part})),...Object.values(civicLayouts).flatMap(layout=>civicPlanParts(layout).map(part=>({id:layout.id,...part})))].map(part=>({id:part.id,kind:part.kind,path:'M'+part.ring.map(([x,z])=>`${440+(x-45)*SCALE},${520+(z-3)*SCALE}`).join('L')+'Z'}));
     const axis=axisThroughShenwu([...landmarks.filter(s=>!['shejitan','taimiao','square','tiantan','xiannongtan','southern-road'].includes(s.id)).map(site=>project(site.coords)),...southernRoadPath()].sort((a,b)=>a[1]-b[1]),palace,data);
-    return { axis, image: createCityPlan(data,2048,true).toDataURL(), layers, civic };
+    const plan = await createCityPlan(data, 2048, true);
+    return { axis, image: plan.toDataURL(), layers, civic };
   }).catch(error => {planPromise=undefined;throw error;});
   return planPromise;
 }
