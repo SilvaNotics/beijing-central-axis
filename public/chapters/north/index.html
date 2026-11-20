@@ -946,7 +946,8 @@ document.getElementById('endClose').addEventListener('click',()=>{ sfx('page'); 
   let done=false, started=false;
   function finish(){
     if(done) return; done=true;
-    intro.classList.add('off');v.pause();skip.hidden=true;stage.inert=false;mobileNav.inert=false;
+    v.pause(); v.style.display='none';  // 立刻隐藏视频，避免闪现最后一帧
+    intro.classList.add('off');skip.hidden=true;stage.inert=false;mobileNav.inert=false;
     if(v.hasAttribute('src')){v.removeAttribute('src');v.load();}
     book.classList.remove('intro');
     BGM.set(0.50);
