@@ -36,6 +36,8 @@ const compoundLabels = agricultureCompounds(agricultureSite).map((compound, inde
 
 interface SceneController {
   focus: (id: string) => void;
+  precompile: () => Promise<void>;
+  grow: () => void;
   quality: (value: SceneViewProps['quality']) => void;
   reset: () => void;
   active: (value: boolean) => void;
@@ -64,9 +66,14 @@ export default function SceneView(props: SceneViewProps) {
       void loadCityData(abort.signal).then(data => {
         if (cancelled) return;
         return mountScene(container, labelLayer, propsRef, data);
-      }).then(scene => {
+      }).then(async scene => {
         if (cancelled || !scene) return;
-        controller.current = scene; setReady(true); propsRef.current.onReady?.('ready');
+        controller.current = scene;
+        await scene.precompile?.();
+        if (cancelled) return;
+        setReady(true); propsRef.current.onReady?.('ready');
+        // 树留到首帧之后种，先把画面给出来。
+        requestAnimationFrame(() => requestAnimationFrame(() => { if (!cancelled) scene.grow?.(); }));
       }).catch(error => { if (!cancelled) { console.error('Atlas renderer unavailable:', error); propsRef.current.onReady?.('fallback'); } });
     }, 60);
     return () => { cancelled = true; abort.abort(); clearTimeout(start); controller.current?.dispose(); controller.current = null; };
@@ -517,6 +524,18 @@ async function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement,
   if (ref.current.selection) focus(ref.current.selection); else if (ref.current.sample) focus('sample'); else if (ref.current.focus !== 'all') focus(ref.current.focus);
   return {
     focus,
+    /** 首帧前把着色器编译完，别让用户等的那一下全砸在第一次渲染上。
+     *  软件渲染（SwiftShader）编一次要好几秒，那里不值得预先编译，交给首帧自己慢慢来。 */
+    precompile: async () => {
+      if (software) return;
+      camera.updateMatrixWorld();
+      try {
+        const task = renderer.compileAsync(scene, camera);
+        if (task && typeof task.then === 'function') await task;
+        else renderer.compile(scene, camera);
+      } catch { renderer.compile(scene, camera); }
+    },
+    grow: () => { city.grow(); invalidate(); },
     tour: mode => {
       if (mode === tourMode) return;
       if (mode === 'playing' && tourMode !== 'paused') {

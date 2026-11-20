@@ -3,6 +3,7 @@ import { landmarks } from '../data/heritage';
 import { project } from './geo';
 import type { CityData } from './geodata';
 import { createCityPlan } from './cityPlan';
+import { bakedPlanImage } from './cityPlanAsset';
 import { createForest } from './forest';
 import { zhengyangLayout } from './zhengyangLayout';
 import { southernRoadPath } from './southernRoad';
@@ -13,6 +14,8 @@ import type { Materials } from './materials';
 export const bounds = { width: 640, depth: 1090, centerX: 45, centerZ: 3 };
 export interface City {
   object: THREE.Group;
+  /** 树林占位：首帧先不给树，画面出来之后再种，省掉一段白等。 */
+  grow: () => void;
   anchors: Map<string, THREE.Vector3>;
   labelOffsets: Map<string, { x: number; z: number }>;
   pickers: THREE.Mesh[];
@@ -96,7 +99,9 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   edge.position.set(bounds.centerX, -.15, bounds.centerZ); object.add(edge);
 
   performance.mark('plan-start');
-  const texture = new THREE.CanvasTexture(await createCityPlan(data));
+  const bakedImage = await bakedPlanImage();
+  const texture = bakedImage ? new THREE.Texture(bakedImage) : new THREE.CanvasTexture(await createCityPlan(data));
+  if (bakedImage) texture.needsUpdate = true;
   performance.mark('plan-end');
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 2;
   const terrainMaterial = new THREE.MeshBasicMaterial({ map: texture });
@@ -142,15 +147,20 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   performance.mark('bake-start');
   const baked = bake(authored);
   performance.mark('bake-end');
-  performance.mark('forest-start');
-  const forest = createForest(data, m);
-  performance.mark('forest-end');
-  object.add(baked, forest);
+  let forest: THREE.Group | null = null;
+  const grow = () => {
+    if (forest) return;
+    performance.mark('forest-start');
+    forest = createForest(data, m);
+    performance.mark('forest-end');
+    object.add(forest);
+  };
+  object.add(baked);
   const halo = new THREE.Mesh(new THREE.RingGeometry(5, 5.18, 64), new THREE.MeshBasicMaterial({ color: '#d8b476', transparent: true, opacity: .75, depthWrite: false, side: THREE.DoubleSide }));
   halo.rotation.x = -Math.PI / 2; halo.position.y = .25; halo.visible = false; object.add(halo);
   if (sample) {
     // Same full-quality architecture as the main city, framed tightly for material inspection.
     object.name = 'courtyard-lighting-study';
   }
-  return { object, anchors, labelOffsets, pickers, halo };
+  return { object, grow, anchors, labelOffsets, pickers, halo };
 }

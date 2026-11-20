@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --max-old-space-size=1024 ./node_modules/vitest/vitest.mjs run",
-    "test:e2e": "npm run build && playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "bake:plan": "node scripts/bake-plan.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

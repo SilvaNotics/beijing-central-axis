@@ -255,7 +255,22 @@ NODE_OPTIONS=--max-old-space-size=1024 npm run build
 - `pointInPolygon`（`src/scene/geo.ts`）按环缓存外接框，查询点落在框外直接返回，省掉整圈遍历；这是地面图、树林、绿地三处构建的热点。
 - 载入遮罩的进度条上叠了一条只走 `transform` 的高光（`src/styles.css`），动画由合成器执行，主线程被占住时它仍在动，页面不会看上去冻住。
 - 视频统一压到 720p / CRF 26 / `+faststart`：中段社稷坛 22.7 → 4.2 MB，南段五条合计 38.8 → 22.8 MB，北段开场 4.2 → 2.2 MB（保留 1920×1080，`chapter-loading.spec.ts` 断言原始分辨率）。南段视频页播放帧率从约 5 fps 回到流畅值，首帧从 405 ms 降到 90 ms。
-- 北段三张人物背景从 JPG 换 WebP，2.1 MB → 0.8 MB。
+- 北段三张人物背景从 JPG 换 WebP，2.1 MB → 0.8 MB；南段、中段两张导览地图同样换 WebP（617 → 267 KB、442 → 335 KB）。
+
+### 地面图预烤
+
+`createCityPlan` 在 2048×3488 的画布上画几万笔，是首次进入最大的一块计算（约 1.6 s）。现在这张图在开发时画一次、存成图直接贴：
+
+- `npm run bake:plan`（`scripts/bake-plan.mjs`）起一个临时 Vite 服务，用无头浏览器跑 `scripts/bake/plan.html`，把 `createCityPlan` 的两个变体（三维地面、二维导览）写成 `public/data/city-plan.webp`、`city-plan-arch.webp`，并把 `buildings.json` + `context.geojson` 的 SHA-256 前 16 位记进 `city-plan.json`。
+- 运行时 `src/scene/cityPlanAsset.ts` 先读指纹：一致就用预烤图（约 50 ms 解码），不一致、文件缺失或不支持 `crypto.subtle` 就退回现场绘制，并在控制台提醒。
+- **改了 `public/data/` 里的建筑或地形数据，必须重跑 `npm run bake:plan`**，否则会一直走现场绘制（画面不会错，只是慢）。
+
+### 首帧与树林
+
+- 场景建好后先 `renderer.compileAsync()` 编译着色器，再放开载入遮罩，首帧不再把编译时间算在用户等待里。
+- 树林（`createForest`）留到首帧之后再种，约 0.3 s 内补齐；载入遮罩淡出期间基本看不出。
+- 软件渲染（SwiftShader / llvmpipe）不预先编译着色器：那里编一次要好几秒，交给首帧慢慢来更划算。
+- 首屏「十秒切二维」的兜底改成**十秒没有新进展**才切（`src/App.tsx`，跟随 `loadStage` 重新计时）。慢机器上不会再出现“算到一半被换掉”。
 
 改动素材后需要重跑 `npx playwright test` 的 `chapter-loading`、`chapter-maps`、`atlas` 三组，它们对视频分辨率、地图可读性和首屏无报错有断言。
 

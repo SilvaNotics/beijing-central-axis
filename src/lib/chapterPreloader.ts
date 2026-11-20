@@ -28,8 +28,8 @@ class ChapterPreloader {
     // assets/ 下，由章节自己取，这里再拉一遍只是重复流量。
     const tasks: PreloadTask[] = [
       { url: `${baseUrl}chapters/north/map.webp`, type: 'image', priority: 1 },
-      { url: `${baseUrl}chapters/south/assets/map.jpg`, type: 'image', priority: 2 },
-      { url: `${baseUrl}chapters/central/assets/map.jpg`, type: 'image', priority: 3 },
+      { url: `${baseUrl}chapters/south/assets/map.webp`, type: 'image', priority: 2 },
+      { url: `${baseUrl}chapters/central/assets/map.webp`, type: 'image', priority: 3 },
     ];
 
     // 按优先级排序
