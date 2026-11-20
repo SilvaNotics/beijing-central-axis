@@ -22,19 +22,14 @@ class ChapterPreloader {
     if (this.abortController) return; // 已在运行
     this.abortController = new AbortController();
 
+    // 只列仓库里真有、且各章一进去就要用的图：三张章节地图。
+    // 原来那版列的是 opening.mp4 / bgm.mp3 / paper-bg.webp 这类并不存在的文件，
+    // 请求全 404，控制台报错把 e2e 的 atlas 用例弄红；真正的开场视频在各章
+    // assets/ 下，由章节自己取，这里再拉一遍只是重复流量。
     const tasks: PreloadTask[] = [
-      // 北段章节 - 剪纸风格,开场视频和背景音乐
-      { url: `${baseUrl}chapters/north/opening.mp4`, type: 'video', priority: 1 },
-      { url: `${baseUrl}chapters/north/bgm.mp3`, type: 'video', priority: 2 },
-      { url: `${baseUrl}chapters/north/paper-bg.webp`, type: 'image', priority: 3 },
-
-      // 南段章节 - 水墨风格,开场视频和核心资源
-      { url: `${baseUrl}chapters/south/opening.mp4`, type: 'video', priority: 1 },
-      { url: `${baseUrl}chapters/south/bgm.mp3`, type: 'video', priority: 2 },
-      { url: `${baseUrl}chapters/south/ink-texture.webp`, type: 'image', priority: 3 },
-
-      // 中段章节 - 示例项目,较低优先级
-      { url: `${baseUrl}chapters/central/preview.webp`, type: 'image', priority: 4 },
+      { url: `${baseUrl}chapters/north/map.webp`, type: 'image', priority: 1 },
+      { url: `${baseUrl}chapters/south/assets/map.jpg`, type: 'image', priority: 2 },
+      { url: `${baseUrl}chapters/central/assets/map.jpg`, type: 'image', priority: 3 },
     ];
 
     // 按优先级排序
