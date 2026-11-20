@@ -135,15 +135,22 @@ NODE_OPTIONS=--max-old-space-size=1024 npm run build
 
 ## 端到端测试（Playwright）
 
-`npm run test:e2e` 会先构建再用 `e2e/` 下的 8 个 spec 跑 28 条用例（总览渲染、章节地图、章节配乐、窄屏、北段名牌、游览）。浏览器要单独装一次：`npx playwright install chromium`。
+`npm run test:e2e` 会先构建再用 `e2e/` 下的 9 个 spec 跑 29 条用例（总览渲染、章节地图、章节配乐、窄屏、北段名牌、南段立绘、游览）。浏览器要单独装一次：`npx playwright install chromium`。
 
-**本机要加 `--workers=2`**：这台机器没有 GPU、WebGL 走软件渲染，默认按核数开 8 个 worker 会互相拖垮——实测 22 过 6 挂，其中 `mobile.spec.ts` 的超时用例要跑满 1.4 分钟；降到 2 个 worker 就 28 条全过（约 5 分钟）。命令：`npx playwright test --workers=2`。
+**本机要加 `--workers=2`**：这台机器没有 GPU、WebGL 走软件渲染，默认按核数开 8 个 worker 会互相拖垮——实测 22 过 6 挂，其中 `mobile.spec.ts` 的超时用例要跑满 1.4 分钟；降到 2 个 worker 就 29 条全过（约 5 分钟）。命令：`npx playwright test --workers=2`。
 
 本轮因界面重做同步改过的用例（都是「改契约」不是「放宽断言」）：
 - `chapter-music.spec.ts`：嵌进总览时章节不再自建 `<audio>`，改为断言 `axis:audio` 消息（`h1` 解锁后 `normal`，开故事后 `mute`）；单独打开仍按原来的读 `<audio>` 验。
 - `chapter-loading.spec.ts`：媒体被 abort 后解析本就收尾成 `complete`，断言从「必须是 interactive」改为「不能卡在 loading」，边下边可用仍由 `pendingMedia > 0` 与遮罩已撤来守。
 - `tour.spec.ts`：指北针的断言挪到「已暂停」之后。原来是在恢复播放之后量，可到站文案比镜头落地早一两帧，软件渲染下恢复 300 ms 时相机还在转，实测差 14–56°（用 `bearing-drift.mjs` 采过：永定门到站那 3.5 s 里方位角从 −55.8° 转到 61.8°）。现在先等方位角连采两次不动再按暂停，然后验暂停期间不论名牌位置还是指北针都不动；恢复后只验游览继续走。
-- `north-labels.spec.ts`：1440 px 那条曾经红——在未改动的 `c0174a1` 上同样红，是系统 Edge 的抗锯齿差异；换回 Playwright 自带的 chromium 后 28 条全过。截图内缩从「窄屏才缩 4 px」改成一律缩 3 px（名牌是 rotate 过的，截图框四角会带上背景）。
+- `north-labels.spec.ts`：1440 px 那条曾经红——在未改动的 `c0174a1` 上同样红，是系统 Edge 的抗锯齿差异；换回 Playwright 自带的 chromium 后全过。截图内缩从「窄屏才缩 4 px」改成一律缩 3 px（名牌是 rotate 过的，截图框四角会带上背景）。
+- `south-portrait.spec.ts`：新增。南段换到下一位 NPC 时，`updatePortrait()` 原来只改 `<img src>`，新图解码要时间，这段时间浏览器接着画上一张——读者要读几句台词才「变回来」。现在换人先清 `src`、置 `hidden`，等 `decode()` 完成再挂上，票号挡住迟到的回调。用例包住 `updatePortrait`，断言它返回的那一刻立绘是空着的；退回旧写法这条会红（实测 `swap.hidden` 为 `false`）。
+
+## 南段立绘换人
+
+`public/chapters/south/app.js` 的 `updatePortrait()` 换人时先把 `<img>` 撤干净（清 `src`、置 `hidden`），再从 `portraitCache` 取这张图、等 `decode()` 完成才挂上；`portraitTicket` 记票号，中途又换人或退回地图，迟到的回调直接丢掉。原因：只改 `src` 的话，新图解码那段时间浏览器会继续画上一张，读者先看到的是上一位 NPC 的脸。图还没到就宁可空着，也不挂别人。
+
+立绘仍然按 `1348ae9` 的约定懒加载——`chapter-loading.spec.ts` 断言进故事之前一张都不许请求。所以换到还没看过的景点时，图没到之前画面是空的：空着可以，挂错人不行。
 
 ## 名牌位置
 

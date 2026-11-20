@@ -124,12 +124,36 @@ try{
  if(Array.isArray(saved))visited=new Set(saved.filter(id=>valid.has(id)));
 }catch(_){}
 
+// 换人时先把上一张立绘撤干净，等新图解码完再挂上。只改 src 的话，新图没到的那段时间
+// 浏览器还在画上一个人，读者要读几句台词才「变回来」；票号挡住迟到的回调，
+// 期间又换人或退回地图，旧结果直接丢掉。
+const portraitCache=new Map();
+let portraitTicket=0;
+
+function portraitSource(place){return "./assets/portraits/"+place.id+".png"}
+
 function updatePortrait(){
- const portrait=$("portrait");
- portrait.alt=current.person+"的人物立绘";
- portrait.hidden=false;
- portrait.onerror=()=>{portrait.hidden=true};
- portrait.src="./assets/portraits/"+current.id+".png";
+ const ticket=++portraitTicket;
+ const place=current,portrait=$("portrait");
+ portrait.hidden=true;
+ portrait.removeAttribute("src");
+ if(!place)return;
+ const src=portraitSource(place);
+ let image=portraitCache.get(place.id);
+ if(!image){
+  image=new Image();
+  image.src=src;
+  portraitCache.set(place.id,image);
+ }
+ const paint=()=>{
+  if(ticket!==portraitTicket||current!==place)return;
+  portrait.alt=place.person+"的人物立绘";
+  portrait.onerror=()=>{portrait.hidden=true};
+  portrait.src=src;
+  portrait.hidden=false;
+ };
+ if(image.decode)image.decode().then(paint,()=>{});
+ else paint();
 }
 
 /* 地图与景点入口 */
