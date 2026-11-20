@@ -128,21 +128,33 @@ function loadPortraitFiles(){
  for(const place of DATA){
   const portrait=new Image();
   portrait.onload=()=>{
-   portraits.set(place.id,portrait.src);
+   portraits.set(place.id,portrait);
    if(current?.id===place.id)updatePortrait();
   };
   portrait.src="./assets/portraits/"+place.id+".png";
  }
 }
 
+// 换人时先把上一个人的立绘撤掉：只改 src、新图还没解码的那一小段，浏览器会接着画旧的那张，
+// 读者要读几句才「变回来」。所以先清空、等 decode 完成再挂上；票号挡住迟到的回调，
+// 宁可空一下，也不把上一个人挂到这一场对话上。
+let portraitTicket=0;
 function updatePortrait(){
- if(!current)return;
- const src=portraits.get(current.id);
- $("portrait").hidden=!src;
- if(src){
-  $("portrait").src=src;
-  $("portrait").alt=current.person+"的人物立绘";
- }else $("portrait").removeAttribute("src");
+ const ticket=++portraitTicket;
+ const place=current,image=$("portrait");
+ image.hidden=true;
+ image.removeAttribute("src");
+ if(!place)return;
+ const ready=portraits.get(place.id);
+ if(!ready)return; // 还没预载好：空着等 onload 再补，不要先挂别人
+ const paint=()=>{
+  if(ticket!==portraitTicket||current!==place)return; // 期间又换人或者回地图了
+  image.src=ready.src;
+  image.alt=place.person+"的人物立绘";
+  image.hidden=false;
+ };
+ if(ready.decode)ready.decode().then(paint,()=>paint());
+ else paint();
 }
 
 /* 地图与景点入口 */
