@@ -247,6 +247,41 @@ NODE_OPTIONS=--max-old-space-size=1024 npm run build
 - 浏览器不允许无交互自动出声，首次 `pointerdown`、`keydown` 或 `touchstart` 才起播；标签页隐藏时暂停，回来接着放，不回到开头。
 - 顶栏「音乐 / 静音」按钮切换，偏好存在 `localStorage` 的 `axis:atlas-audio`。
 
+## 启动与播放性能
+
+总览页首次进入时要把三万余栋建筑、地面图、树木和航线一次性算出来，历史上这一段是一整块七秒左右的主线程长任务，载入过程看上去像卡死。现在的处理：
+
+- `src/scene/city.ts` 按站让出主线程（`yieldFrame`），`src/scene/cityPlan.ts` 改成异步，分段绘制地面图并在每 250 栋建筑处让出。整块工作被切成十几段，最长一段约 1.3 s，静止帧率回到 60 fps（1440×900，D3D11）。
+- `pointInPolygon`（`src/scene/geo.ts`）按环缓存外接框，查询点落在框外直接返回，省掉整圈遍历；这是地面图、树林、绿地三处构建的热点。
+- 载入遮罩的进度条上叠了一条只走 `transform` 的高光（`src/styles.css`），动画由合成器执行，主线程被占住时它仍在动，页面不会看上去冻住。
+- 视频统一压到 720p / CRF 26 / `+faststart`：中段社稷坛 22.7 → 4.2 MB，南段五条合计 38.8 → 22.8 MB，北段开场 4.2 → 2.2 MB（保留 1920×1080，`chapter-loading.spec.ts` 断言原始分辨率）。南段视频页播放帧率从约 5 fps 回到流畅值，首帧从 405 ms 降到 90 ms。
+- 北段三张人物背景从 JPG 换 WebP，2.1 MB → 0.8 MB；南段、中段两张导览地图同样换 WebP（617 → 267 KB、442 → 335 KB）。
+
+### 地面图预烤
+
+`createCityPlan` 在 2048×3488 的画布上画几万笔，是首次进入最大的一块计算（约 1.6 s）。现在这张图在开发时画一次、存成图直接贴：
+
+- `npm run bake:plan`（`scripts/bake-plan.mjs`）起一个临时 Vite 服务，用无头浏览器跑 `scripts/bake/plan.html`，把 `createCityPlan` 的两个变体（三维地面、二维导览）写成 `public/data/city-plan.webp`、`city-plan-arch.webp`，并把 `buildings.json` + `context.geojson` 的 SHA-256 前 16 位记进 `city-plan.json`。
+- 运行时 `src/scene/cityPlanAsset.ts` 先读指纹：一致就用预烤图（约 50 ms 解码），不一致、文件缺失或不支持 `crypto.subtle` 就退回现场绘制，并在控制台提醒。
+- **改了 `public/data/` 里的建筑或地形数据，必须重跑 `npm run bake:plan`**，否则会一直走现场绘制（画面不会错，只是慢）。
+
+### 首帧与树林
+
+- 场景建好后先 `renderer.compileAsync()` 编译着色器，再放开载入遮罩，首帧不再把编译时间算在用户等待里。
+- 树林（`createForest`）留到首帧之后再种，约 0.3 s 内补齐；载入遮罩淡出期间基本看不出。
+- 软件渲染（SwiftShader / llvmpipe）不预先编译着色器：那里编一次要好几秒，交给首帧慢慢来更划算。
+- 首屏「十秒切二维」的兜底改成**十秒没有新进展**才切（`src/App.tsx`，跟随 `loadStage` 重新计时）。慢机器上不会再出现“算到一半被换掉”。
+
+### 首屏分片
+
+重活写成生成器，每个 `yield` 是一个可让出的位置：
+
+- `src/scene/coop.ts`：`pumpSync` 一次跑完（测试与其它同步调用方用，行为与普通函数一致）；`pumpAsync` 每 8 ms 让出一次，让出用 `MessageChannel`（不占 `setTimeout` 的 4 ms 底噪），总耗时几乎不变。
+- 已分片：整城合批 `bakeIter`、3 万栋建筑 `osmBuildingsIter`、故宫院落与四处花园的绿地扫描（`palaceCourtZonesIter` / `palaceGardenZonesIter`）、墙面贴接 `palaceWallFacadeContactsIter`、故宫本体 `palaceBuild`。
+- 新增同类重活照这个写法：写生成器 + `pumpSync` 包装，首屏路径改用 `pumpAsync`，别在函数里直接写死大循环。
+
+改动素材后需要重跑 `npx playwright test` 的 `chapter-loading`、`chapter-maps`、`atlas` 三组，它们对视频分辨率、地图可读性和首屏无报错有断言。
+
 ## 验证与交付
 
 改动完成后记录版本、构建输出和实际检查范围。运行时画面、键盘、窄屏、iframe 返回需要浏览器验证；编译成功不能替代这些检查。本轮实际状态见 [进度与验证](progress.md)。

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>预烤地面图</title></head>
+<body>
+<p id="state">正在绘制…</p>
+<script type="module">
+  import { loadCityData } from '../../src/scene/geodata'
+  import { createCityPlan } from '../../src/scene/cityPlan'
+  import { cityDataHash } from '../../src/scene/geodata'
+
+  try {
+    const data = await loadCityData()
+    const out = { hash: cityDataHash(), plan: '', arch: '', width: 0, height: 0 }
+    for (const [key, arch] of [['plan', false], ['arch', true]]) {
+      const canvas = await createCityPlan(data, 2048, arch)
+      out[key] = canvas.toDataURL('image/webp', 0.9)
+      out.width = canvas.width
+      out.height = canvas.height
+      document.getElementById('state').textContent = key + ' 完成'
+    }
+    window.__plan = out
+  } catch (error) {
+    window.__plan = { error: String(error && error.message || error) }
+  }
+</script>
+</body>
+</html>

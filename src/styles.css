@@ -116,7 +116,13 @@ button:hover,a:hover{color:#ffe0a1}button:focus-visible,a:focus-visible,[tabinde
 
 /* 首屏加载：四段真实进度（铺纸／起屋／立宫／收卷），每段让出一帧后再继续计算 */
 .scene-loading{gap:26px;font-size:23px;letter-spacing:7px}
-.scene-loading .load-track{width:262px;height:3px;background:#e0b66733;overflow:hidden}
+/* 一条只走 transform 的高光：载入时主线程被建筑计算占住，进度条本身的宽度动画会跟着卡，
+   这条高光交给合成器跑，页面看上去一直在动。 */
+.scene-loading .load-track{width:262px;height:3px;background:#e0b66733;overflow:hidden;position:relative}
+.scene-loading .load-track:after{content:'';position:absolute;top:0;bottom:0;left:0;width:38%;
+  background:linear-gradient(90deg,transparent,#ffe8b8d0,transparent);animation:loadSheen 1.9s linear infinite;will-change:transform}
+@keyframes loadSheen{from{transform:translateX(-110%)}to{transform:translateX(300%)}}
+@media(prefers-reduced-motion:reduce){.scene-loading .load-track:after{animation:none;opacity:0}}
 .scene-loading .load-track>i{display:block;height:100%;width:0;background:#e0b667;animation:none;transition:width .26s ease}
 .scene-loading .load-stages{display:flex;gap:24px;list-style:none;margin:-6px 0 0;padding:0;font-family:var(--song);font-size:16px;letter-spacing:5px;color:#e0b6675c}
 .scene-loading .load-stages li{position:relative;transition:color .3s ease}

@@ -6,6 +6,7 @@ import { localPalaceBoundary, palaceRoofRotation } from './precincts';
 import { distanceToRing } from './centralGreenery';
 import { palaceWaterAreas } from './palaceWater';
 import { treeCrown } from './treeGeometry';
+import { pumpSync } from './coop';
 import { palaceWallRuns } from './palaceWalls';
 import type { Materials } from './materials';
 
@@ -18,7 +19,7 @@ const courtCache = new WeakMap<CityData, Map<string, PalaceGardenZone[]>>();
  * of Wenhua. Anchor to the mapped screen, without altering/connecting it.
  * The envelope, beds and slab sizes are display interpretations, not surveys.
  */
-export function palaceCourtZones(site: Landmark, data: CityData): PalaceGardenZone[] {
+export function* palaceCourtZonesIter(site: Landmark, data: CityData): Generator<void, PalaceGardenZone[], void> {
   const cached=courtCache.get(data)?.get(site.id);if(cached)return cached;
   const walls=palaceWallRuns(site,data),screen=walls.find(w=>w.id===43519305);
   if(!screen)return [];
@@ -50,29 +51,40 @@ export function palaceCourtZones(site: Landmark, data: CityData): PalaceGardenZo
       if(valid&&start===undefined)start=x;
       if(!valid&&start!==undefined){if(x-start>.45)beds.push([at(start,z),at(x,z),at(x,z+step),at(start,z+step)]);start=undefined;}
     }
+    yield;
   }
   // Individual slabs expose joints at close range, sharing identical outlines
   // with the 2D plan. A small cell size allows obstacle clipping at walk edges.
   const slab=.20,joint=.012;
-  for(let z=-4.4;z+slab<=6.6+.001;z+=slab)for(let x=-5.1;x+slab<=5.1+.001;x+=slab){
-    const p=at(x+slab/2,z+slab/2);
-    if(walk(x+slab/2,z+slab/2)&&clear(p,slab/Math.SQRT2))paths.push([
-      at(x+joint,z+joint),at(x+slab-joint,z+joint),at(x+slab-joint,z+slab-joint),at(x+joint,z+slab-joint),
-    ]);
+  for(let z=-4.4;z+slab<=6.6+.001;z+=slab){
+    for(let x=-5.1;x+slab<=5.1+.001;x+=slab){
+      const p=at(x+slab/2,z+slab/2);
+      if(walk(x+slab/2,z+slab/2)&&clear(p,slab/Math.SQRT2))paths.push([
+        at(x+joint,z+joint),at(x+slab-joint,z+joint),at(x+slab-joint,z+slab-joint),at(x+joint,z+slab-joint),
+      ]);
+    }
+    yield;
   }
-  for(let z=-3.6;z<6;z+=1.3)for(let x=-4.3;x<5;x+=1.4){
-    const radius=.22,crown=radius*1.9+.12,p=at(x,z);
-    if(!walk(x,z,crown)&&clear(p,crown))trees.push({point:p,radius,height:1.15+(trees.length%3)*.12});
+  for(let z=-3.6;z<6;z+=1.3){
+    for(let x=-4.3;x<5;x+=1.4){
+      const radius=.22,crown=radius*1.9+.12,p=at(x,z);
+      if(!walk(x,z,crown)&&clear(p,crown))trees.push({point:p,radius,height:1.15+(trees.length%3)*.12});
+    }
+    yield;
   }
   const zones=[{id:'wenhua-northeast-court',name:'文华殿东北院落绿地',ring,beds,paths,trees}];
   const bySite=courtCache.get(data)??new Map();bySite.set(site.id,zones);courtCache.set(data,bySite);return zones;
+}
+
+export function palaceCourtZones(site: Landmark, data: CityData): PalaceGardenZone[] {
+  return pumpSync(palaceCourtZonesIter(site, data));
 }
 
 /** PAL-GARDEN-* gives location, planting character and overall dimensions.
  * These are conservative display envelopes, NOT mapped garden boundaries or
  * grass surveys. Beds retain walks and a roof margin; tree crowns stay inside.
  */
-export function palaceGardenZones(site: Landmark, data: CityData): PalaceGardenZone[] {
+export function* palaceGardenZonesIter(site: Landmark, data: CityData): Generator<void, PalaceGardenZone[], void> {
   const cached = cache.get(data)?.get(site.id); if (cached) return cached;
   const [ox, oz] = project(site.coords), rotation = palaceRoofRotation(), c = Math.cos(rotation), s = Math.sin(rotation);
   const local = (p: Point): Point => { const [x,z] = project(wgs84ToGcj02(p)); return [x-ox,z-oz]; };
@@ -84,7 +96,8 @@ export function palaceGardenZones(site: Landmark, data: CityData): PalaceGardenZ
     ['jianfu','建福宫花园',[116.38798,39.92016],4.4,7.6],
     ['ningshou','宁寿宫花园',[116.39358,39.91994],4,16],
   ];
-  const zones = definitions.map(([id,name,center,width,depth])=>{
+  const zones: PalaceGardenZone[] = [];
+  for (const [id,name,center,width,depth] of definitions) {
     const [cx,cz] = local(center);
     const at = (x:number,z:number):Point => [cx+x*c+z*s,cz-x*s+z*c];
     const ring = [at(-width/2,-depth/2),at(width/2,-depth/2),at(width/2,depth/2),at(-width/2,depth/2)];
@@ -102,26 +115,38 @@ export function palaceGardenZones(site: Landmark, data: CityData): PalaceGardenZ
         if(valid&&start===undefined)start=x;
         if(!valid&&start!==undefined){beds.push([at(start,z),at(x,z),at(x,z+step),at(start,z+step)]);start=undefined;}
       }
+      yield;
     }
     // Search the actual free pockets instead of requiring fixed tree columns
     // to fit narrow courtyards. Compact crowns still obey their full envelope.
-    for(let z=-depth/2+.65;z<depth/2;z+=.20)for(let x=-width/2+.65;x<width/2;x+=.20) {
-      const p=at(x,z),radius=id==='imperial'?.26:id==='cining'?.18:.12, crown=radius*1.9+.12;
-      if(!walk(x,z,crown)&&clear(p,crown)&&!trees.some(t=>Math.hypot(t.point[0]-p[0],t.point[1]-p[1])<1.15))
-        trees.push({point:p,radius,height:1.05+(trees.length%4)*.08});
+    for(let z=-depth/2+.65;z<depth/2;z+=.20) {
+      for(let x=-width/2+.65;x<width/2;x+=.20) {
+        const p=at(x,z),radius=id==='imperial'?.26:id==='cining'?.18:.12, crown=radius*1.9+.12;
+        if(!walk(x,z,crown)&&clear(p,crown)&&!trees.some(t=>Math.hypot(t.point[0]-p[0],t.point[1]-p[1])<1.15))
+          trees.push({point:p,radius,height:1.05+(trees.length%4)*.08});
+      }
+      yield;
     }
-    return {id,name,ring,beds,trees};
-  });
+    zones.push({id,name,ring,beds,trees});
+  }
   const bySite=cache.get(data)??new Map(); bySite.set(site.id,zones); cache.set(data,bySite); return zones;
 }
 
-export function createPalaceLandscape(site:Landmark,data:CityData,m:Materials) {
+export function palaceGardenZones(site: Landmark, data: CityData): PalaceGardenZone[] {
+  return pumpSync(palaceGardenZonesIter(site, data));
+}
+
+export function* palaceLandscapeIter(site:Landmark,data:CityData,m:Materials): Generator<void,THREE.Group,void> {
   const group=new THREE.Group();group.name='palace-gardens';
   const crown=treeCrown('cypress');
   const colors=crown.getAttribute('color'),tint=new THREE.Color('#4d7043');
   for(let i=0;i<colors.count;i++)colors.setXYZ(i,colors.getX(i)*tint.r,colors.getY(i)*tint.g,colors.getZ(i)*tint.b);
   const trunk=new THREE.CylinderGeometry(.035,.065,1,8);
-  for(const zone of [...palaceGardenZones(site,data),...palaceCourtZones(site,data)]) {
+  let planted=0;
+  const gardenZones=yield* palaceGardenZonesIter(site,data);
+  const courtZones=yield* palaceCourtZonesIter(site,data);
+  const zones=[...gardenZones,...courtZones];
+  for(const zone of zones) {
     const garden=new THREE.Group();garden.name=zone.name;garden.userData.gardenId=zone.id;group.add(garden);
     const shape=(ring:Point[])=>new THREE.Shape(ring.map(([x,z])=>new THREE.Vector2(x,-z)));
     const geometry=new THREE.ShapeGeometry(zone.beds.map(shape));geometry.rotateX(-Math.PI/2);
@@ -134,7 +159,13 @@ export function createPalaceLandscape(site:Landmark,data:CityData,m:Materials) {
       const [x,z]=tree.point;
       const stem=new THREE.Mesh(trunk,m.trunk);stem.position.set(x,.185+tree.height*.30,z);stem.scale.y=tree.height*.60;garden.add(stem);
       const leaf=new THREE.Mesh(crown,m.leaf);leaf.position.set(x,.185+tree.height*.75,z);leaf.scale.set(tree.radius*1.2,tree.height*.73,tree.radius*1.2);garden.add(leaf);
+      if(++planted%24===0) yield;
     }
+    yield;
   }
   return group;
+}
+
+export function createPalaceLandscape(site:Landmark,data:CityData,m:Materials) {
+  return pumpSync(palaceLandscapeIter(site,data,m));
 }

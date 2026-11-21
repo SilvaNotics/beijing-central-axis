@@ -18,6 +18,9 @@ test('renders the full axis without browser errors or horizontal overflow', asyn
   await expect(page.locator('.map-legend')).toBeVisible();
   await expect(page.locator('[data-site="bell-drum"]')).toHaveCSS('opacity', '1');
   await expect(page.locator('[data-site="yongdingmen"]')).toHaveCSS('opacity', '1');
+  // 建筑必须真的进了场景。实测：正常 5,258,757 个三角形；合批只扫到地面、
+  // 建筑没进场景时是 942,466。门槛取两者之间。
+  await expect.poll(async () => Number(await page.locator('.scene-world').getAttribute('data-triangles')), { timeout: 30_000 }).toBeGreaterThan(2_000_000);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
 
   await page.setViewportSize({ width: 390, height: 844 });

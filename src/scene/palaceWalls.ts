@@ -7,6 +7,7 @@ import {localPalaceBoundary,palaceRoofRotation} from './precincts';
 import {wallRuns} from './wallRuns';
 import {roofGeometry,roofSection} from './roofForms';
 import type {Materials} from './materials';
+import {pumpSync} from './coop';
 
 type Point=[number,number];
 type Run={id:number;a:Point;b:Point;outer:boolean;contactBuilding?:number;contactOrigin?:Point;contactElbow?:true;interpreted?:true;isolatedNetwork?:true;courtyardFrame?:true;layoutRepair?:string;sourceIds?:number[]};
@@ -208,7 +209,7 @@ export function palaceWallRuns(site:Landmark,data:CityData):Run[] {
 /** A map footprint follows the roof edge. Continue a clipped wall underneath
  * that overhang until it contacts the rendered structure. Never bridge a free
  * source end or an entrance, and never extend past the owning footprint. */
-export function palaceWallFacadeContacts(site:Landmark,data:CityData,model:THREE.Group):Run[] {
+export function* palaceWallFacadeContactsIter(site:Landmark,data:CityData,model:THREE.Group):Generator<void,Run[],void> {
   const objects=new Map<number,THREE.Object3D>();
   model.updateMatrixWorld(true);
   model.traverse(o=>{if(typeof o.userData.osmId==='number')objects.set(o.userData.osmId,o);});
@@ -379,16 +380,22 @@ export function palaceWallFacadeContacts(site:Landmark,data:CityData,model:THREE
         ...(i<points.length-1?{contactElbow:true as const}:{}),
       });
     }
+    yield;
   }
   return [...source,...contacts];
 }
 
-export function createPalaceWalls(site:Landmark,data:CityData,m:Materials,model?:THREE.Group) {
+export function palaceWallFacadeContacts(site:Landmark,data:CityData,model:THREE.Group):Run[] {
+  return pumpSync(palaceWallFacadeContactsIter(site,data,model));
+}
+
+export function* palaceWallsIter(site:Landmark,data:CityData,m:Materials,model?:THREE.Group): Generator<void,THREE.Group,void> {
   const group=new THREE.Group();group.name='mapped-palace-wall-lines';
   const buildings=new Map<number,THREE.Object3D>();
   model?.traverse(o=>{if(o.userData.osmId)buildings.set(o.userData.osmId,o);});
   const capRay=new THREE.Raycaster();
-  for(const run of model?palaceWallFacadeContacts(site,data,model):palaceWallRuns(site,data)) {
+  const runs=model?yield* palaceWallFacadeContactsIter(site,data,model):palaceWallRuns(site,data);
+  for(const run of runs) {
     const dx=run.b[0]-run.a[0],dz=run.b[1]-run.a[1],length=Math.hypot(dx,dz),height=run.outer?1:.38;
     const segment=new THREE.Group();segment.userData.osmWallId=run.id;segment.userData.contactBuilding=run.contactBuilding;segment.userData.contactOrigin=run.contactOrigin;segment.userData.contactElbow=Boolean(run.contactElbow);
     segment.userData.layoutRepair=run.layoutRepair;segment.userData.interpretedGap=Boolean(run.interpreted);segment.userData.isolatedNetwork=Boolean(run.isolatedNetwork);segment.userData.sourceWallIds=run.sourceIds;
@@ -420,6 +427,11 @@ export function createPalaceWalls(site:Landmark,data:CityData,m:Materials,model?
         positions.needsUpdate=true;cap.geometry.computeVertexNormals();
       }
     }
+    yield;
   }
   return group;
+}
+
+export function createPalaceWalls(site:Landmark,data:CityData,m:Materials,model?:THREE.Group) {
+  return pumpSync(palaceWallsIter(site,data,m,model));
 }

@@ -8,12 +8,13 @@ import { project, pointInPolygon } from './geo';
 import { mappedLayout, palaceAxis, jingshanPavilions } from './layouts';
 import { localPalaceBoundary, alignPalaceRoof } from './precincts';
 import { createPalaceGarden } from './palaceGarden';
-import { createPalaceLandscape } from './palaceLandscape';
+import { createPalaceLandscape, palaceLandscapeIter } from './palaceLandscape';
 import { createPalacePaving, createInnerJinshuiBridges, palaceWaterAreas } from './palaceWater';
-import { createPalaceWalls } from './palaceWalls';
+import { createPalaceWalls, palaceWallsIter } from './palaceWalls';
 import { clipPalaceFootprint, createPalaceCityWalls } from './palaceCityWalls';
 import { createPalaceGates, palaceGateIds, shenwuForecourtLayout } from './palaceGates';
 import { axisThroughShenwu } from './axisRoute';
+import { pumpSync, pumpAsync } from './coop';
 import { createRoadRemains } from './roadRemains';
 import { jinshuiLayout } from './gateLayout';
 import { createDuanmen } from './duanmen';
@@ -311,13 +312,18 @@ function footprintBuilding(group: THREE.Group, m: Materials, building: BuildingF
   group.add(item);
 }
 
-function osmBuildings(group: THREE.Group, m: Materials, data: CityData | undefined, site: Landmark, excludes: Set<number>, roofMat: THREE.Material | ((building: BuildingFootprint) => THREE.Material), include?: (layout: ReturnType<typeof localFootprintLayout>, building:BuildingFootprint) => boolean, offsetX = 0) {
+function* osmBuildingsIter(group: THREE.Group, m: Materials, data: CityData | undefined, site: Landmark, excludes: Set<number>, roofMat: THREE.Material | ((building: BuildingFootprint) => THREE.Material), include?: (layout: ReturnType<typeof localFootprintLayout>, building:BuildingFootprint) => boolean, offsetX = 0): Generator<void, void, void> {
   if (!data) return;
   for (const building of data.buildings) {
     if (excludes.has(building.id)) continue;
     const layout = localFootprintLayout(building, site);
     if (!include || include(layout,building)) footprintBuilding(group,m,building,site,typeof roofMat === 'function' ? roofMat(building) : roofMat, .22, offsetX, site.id==='forbidden-city' ? shenwuForecourtLayout(site,data,building.id) : undefined,data);
+    yield;
   }
+}
+
+function osmBuildings(group: THREE.Group, m: Materials, data: CityData | undefined, site: Landmark, excludes: Set<number>, roofMat: THREE.Material | ((building: BuildingFootprint) => THREE.Material), include?: (layout: ReturnType<typeof localFootprintLayout>, building:BuildingFootprint) => boolean, offsetX = 0) {
+  pumpSync(osmBuildingsIter(group, m, data, site, excludes, roofMat, include, offsetX));
 }
 
 /** A single mapped building owns its roof and facade; no second generic copy. */
@@ -364,84 +370,114 @@ function jingshan(group:THREE.Group,m:Materials,site:Landmark,data?:CityData) {
   }
 }
 
-function palace(group: THREE.Group, m: Materials, w: number, d: number, imperial = false, site: Landmark, data?: CityData) {
-  if (imperial) {
+/** 故宫这一块一次要起几百座殿座、墙和桥，整算下来一秒多。
+ *  写成生成器：同步调用逐段跑完（与原来一致），首屏构建时由 pumpAsync 按时间片让出。 */
+function* palaceBuild(group: THREE.Group, m: Materials, w: number, d: number, imperial: boolean, site: Landmark, data?: CityData): Generator<void, void, void> {
+  if (!imperial) {
+          court(group,m,0,0,w*.92,d*.92);
+          enclosure(group,m,w,d,1.2,m.wall);
+          for (let row = 0; row < 3; row++) hall(group, m, 0, -d * .25 + row * d * .23, w * .52, d * .10, 1.5, m.gold);
+          for (const x of [-1, 1]) hall(group, m, x * w * .35, 0, w * .13, d * .55, .85);
+    return;
+  }
     const boundary = localPalaceBoundary(site);
     const axisX = palaceAxis.map(id => mappedLayout(id, site).x).reduce((sum, x) => sum + x, 0) / palaceAxis.length;
-    group.add(createPalacePaving(site,data,m,axisX,d));
-    if(data)group.add(createPalaceCityWalls(site,data,m));
     const water = palaceWaterAreas(site,data).map(area=>area.ring);
     const [palaceX,palaceZ]=project(site.coords);
     const stripe=axisThroughShenwu([[palaceX+axisX,palaceZ+.3-(d-8)/2],[palaceX+axisX,palaceZ+.3+(d-8)/2]],site,data);
-    for(let i=1;i<stripe.length;i++) {
-      const a:[number,number]=[stripe[i-1][0]-palaceX,stripe[i-1][1]-palaceZ],b:[number,number]=[stripe[i][0]-palaceX,stripe[i][1]-palaceZ];
-      for(const [from,to] of wallRuns(a,b,water)) {
-        const mesh=box(group,m.brass,(from[0]+to[0])/2,.17,(from[1]+to[1])/2,.12,.02,Math.hypot(to[0]-from[0],to[1]-from[1]));
-        mesh.rotation.y=Math.atan2(to[0]-from[0],to[1]-from[1]);
-      }
-    }
-    if(data)group.add(createInnerJinshuiBridges(site,data,m));
-    const sharedDeck=data?sharedPalaceTerrace(site,data):[];
-    if(sharedDeck.length){const deck=palacePlatform(sharedDeck,.813,m,undefined,true);deck.name='three-hall-shared-terrace';deck.position.y=.002;group.add(deck);}
-    for (const id of palaceAxis.filter(id => !data || !palaceGateIds.some(gateId => gateId === id))) mappedHall(group, site, m, id, id === 638449347 ? 1.7 : id === 638981229 ? .85 : 1.2, id === 638449347 || id === 638473398 || id === 638981317, undefined, data);
-    const middleLayout=zhongheLayout(site,data),middle=new THREE.Group();middle.name='中和殿';
-    middle.position.set(middleLayout.x,0,middleLayout.z);
-    middle.rotation.y=middleLayout.rotation;
-    hall(middle,m,0,0,middleLayout.width,middleLayout.depth,.8,m.gold,false,0,true,zhongheProfile,sharedDeck.length>0);group.add(middle);
-    for (const id of [40631331,40631343,40631116,40631121,685316170,40631788,40631798,40631806,40631817,40631826,40631832,40593735,40606461,40592355,40592356]) {
-      mappedHall(group, site, m, id, .7, false, undefined, data);
-    }
-    for (const id of [43512262,43519304]) {
-      const building=data?.buildings.find(b=>b.id===id);
-      if(building) {
-        const [ox,oz]=project(site.coords),ring=localBuildingRing(building).map(([x,z]):[number,number]=>[x-ox,z-oz]);
-        const item=new THREE.Group();item.name=building.name??String(id);item.userData.osmId=id;group.add(item);
-        footprintSolid(item,ring,.18,m.marble);
-        const layout=palaceSideHallLayout(building,site);
-        for(const name of ['front','rear','corridor'] as const) {
-          const p=layout[name],part=new THREE.Group();part.name=`palace-side-hall-${name}`;
-          part.position.set(p.x,0,p.z);part.rotation.y=p.rotation;item.add(part);
-          const corridor=name==='corridor';
-          if(corridor) {
-            part.rotation.y+=Math.PI/2;
-            timberBody(part,m,p.depth,p.width*.78,.48,.18,false,{frontBays:3,sideBays:1,enclosure:'flush'});
-            const roof=new THREE.Mesh(roofGeometry(p.depth,p.width,.22,'gable'),m.gold);roof.position.y=.66;part.add(roof);
-            const gables=roofGables(p.depth,p.width,.22,'gable',m.wood);gables.position.y=.66;part.add(gables);
-            timberEaves(part,m,p.depth,p.width,p.depth*.95,p.width*.75,.66,false);
-            roofRidges(part,m,0,0,p.depth,p.width,.22,.66,'gable');
-          } else hall(part,m,0,0,p.width,p.depth,1,m.gold,false,0,true,
-            {roof:'hip-gable',double:false,height:1.48,platform:.18,frontBays:5,sideBays:3},true);
-        }
-      } else mappedHall(group,site,m,id,.82,false);
-    }
-    if(data)group.add(createPalaceLandscape(site,data,m));
-    group.add(createPalaceGarden(site,m,data));
-    const detailed = new Set([
-      ...palaceAxis,...palaceGateIds,42424174,
-      ...[40631331,40631343,40631116,40631121,685316170,40631788,40631798,40631806,40631817,40631826,40631832,40593735,40606461,40592355,40592356,43512262,43519304],
-    ]);
-    // Wall centres sit on the boundary; include their full footprint without a
-    // centre-only clipping test. The moat remains the mapped water polygon.
-    detailed.add(638156366);
-    osmBuildings(group,m,data,site,detailed,building=>/房|库|所|厕所/.test(building.name ?? '')?m.grayRoof:m.gold,(layout,building)=>{
-      const ring=localBuildingRing(building).map(([x,z]):[number,number]=>[x-project(site.coords)[0],z-project(site.coords)[1]]);
-      return clipPalaceFootprint(ring,boundary).length>=3||palaceBoundaryGap(ring,boundary)<=1.5;
-    });
-    if (data) group.add(...createPalaceGates(site, data, m, (parent, part) => {
-      const upper = new THREE.Group(); upper.name = part.name;
-      upper.position.set(part.x, part.elevation, part.z); upper.rotation.y = part.rotation;
-      // Gate stairs/railings belong to the deck, not a generic hall platform.
-      hall(upper, m, 0, 0, part.width, part.depth, 1, m.gold, part.profile.double, 0, true, part.profile, true);
-      parent.add(upper);
-    }));
-    // Buildings must exist before wall ends can meet their actual lower facade.
-    if(data)group.add(createPalaceWalls(site,data,m,group));
-  } else {
-    court(group,m,0,0,w*.92,d*.92);
-    enclosure(group,m,w,d,1.2,m.wall);
-    for (let row = 0; row < 3; row++) hall(group, m, 0, -d * .25 + row * d * .23, w * .52, d * .10, 1.5, m.gold);
-    for (const x of [-1, 1]) hall(group, m, x * w * .35, 0, w * .13, d * .55, .85);
-  }
+  let sharedDeck: ReturnType<typeof sharedPalaceTerrace> = [];
+                group.add(createPalacePaving(site, data, m, axisX, d));
+      yield;
+      if (data) group.add(createPalaceCityWalls(site, data, m));
+      yield;
+          for(let i=1;i<stripe.length;i++) {
+            const a:[number,number]=[stripe[i-1][0]-palaceX,stripe[i-1][1]-palaceZ],b:[number,number]=[stripe[i][0]-palaceX,stripe[i][1]-palaceZ];
+            for(const [from,to] of wallRuns(a,b,water)) {
+              const mesh=box(group,m.brass,(from[0]+to[0])/2,.17,(from[1]+to[1])/2,.12,.02,Math.hypot(to[0]-from[0],to[1]-from[1]));
+              mesh.rotation.y=Math.atan2(to[0]-from[0],to[1]-from[1]);
+            }
+          }
+      yield;
+          if(data)group.add(createInnerJinshuiBridges(site,data,m));
+      yield;
+          sharedDeck = data ? sharedPalaceTerrace(site, data) : [];
+          if(sharedDeck.length){const deck=palacePlatform(sharedDeck,.813,m,undefined,true);deck.name='three-hall-shared-terrace';deck.position.y=.002;group.add(deck);}
+      yield;
+          for (const id of palaceAxis.filter(id => !data || !palaceGateIds.some(gateId => gateId === id))) mappedHall(group, site, m, id, id === 638449347 ? 1.7 : id === 638981229 ? .85 : 1.2, id === 638449347 || id === 638473398 || id === 638981317, undefined, data);
+      yield;
+          const middleLayout=zhongheLayout(site,data),middle=new THREE.Group();middle.name='中和殿';
+          middle.position.set(middleLayout.x,0,middleLayout.z);
+          middle.rotation.y=middleLayout.rotation;
+          hall(middle,m,0,0,middleLayout.width,middleLayout.depth,.8,m.gold,false,0,true,zhongheProfile,sharedDeck.length>0);group.add(middle);
+      yield;
+          for (const id of [40631331,40631343,40631116,40631121,685316170,40631788,40631798,40631806,40631817,40631826,40631832,40593735,40606461,40592355,40592356]) {
+            mappedHall(group, site, m, id, .7, false, undefined, data);
+          }
+      yield;
+          for (const id of [43512262,43519304]) {
+            const building=data?.buildings.find(b=>b.id===id);
+            if(building) {
+              const [ox,oz]=project(site.coords),ring=localBuildingRing(building).map(([x,z]):[number,number]=>[x-ox,z-oz]);
+              const item=new THREE.Group();item.name=building.name??String(id);item.userData.osmId=id;group.add(item);
+              footprintSolid(item,ring,.18,m.marble);
+              const layout=palaceSideHallLayout(building,site);
+              for(const name of ['front','rear','corridor'] as const) {
+                const p=layout[name],part=new THREE.Group();part.name=`palace-side-hall-${name}`;
+                part.position.set(p.x,0,p.z);part.rotation.y=p.rotation;item.add(part);
+                const corridor=name==='corridor';
+                if(corridor) {
+                  part.rotation.y+=Math.PI/2;
+                  timberBody(part,m,p.depth,p.width*.78,.48,.18,false,{frontBays:3,sideBays:1,enclosure:'flush'});
+                  const roof=new THREE.Mesh(roofGeometry(p.depth,p.width,.22,'gable'),m.gold);roof.position.y=.66;part.add(roof);
+                  const gables=roofGables(p.depth,p.width,.22,'gable',m.wood);gables.position.y=.66;part.add(gables);
+                  timberEaves(part,m,p.depth,p.width,p.depth*.95,p.width*.75,.66,false);
+                  roofRidges(part,m,0,0,p.depth,p.width,.22,.66,'gable');
+                } else hall(part,m,0,0,p.width,p.depth,1,m.gold,false,0,true,
+                  {roof:'hip-gable',double:false,height:1.48,platform:.18,frontBays:5,sideBays:3},true);
+              }
+            } else mappedHall(group,site,m,id,.82,false);
+          }
+      yield;
+      if(data)group.add(yield* palaceLandscapeIter(site,data,m));
+      yield;
+          group.add(createPalaceGarden(site,m,data));
+      yield;
+          const detailed = new Set([
+            ...palaceAxis,...palaceGateIds,42424174,
+            ...[40631331,40631343,40631116,40631121,685316170,40631788,40631798,40631806,40631817,40631826,40631832,40593735,40606461,40592355,40592356,43512262,43519304],
+          ]);
+          // Wall centres sit on the boundary; include their full footprint without a
+          // centre-only clipping test. The moat remains the mapped water polygon.
+          detailed.add(638156366);
+      yield* osmBuildingsIter(group,m,data,site,detailed,building=>/房|库|所|厕所/.test(building.name ?? '')?m.grayRoof:m.gold,(layout,building)=>{
+            const ring=localBuildingRing(building).map(([x,z]):[number,number]=>[x-project(site.coords)[0],z-project(site.coords)[1]]);
+            return clipPalaceFootprint(ring,boundary).length>=3||palaceBoundaryGap(ring,boundary)<=1.5;
+          });
+      yield;
+          if (data) group.add(...createPalaceGates(site, data, m, (parent, part) => {
+            const upper = new THREE.Group(); upper.name = part.name;
+            upper.position.set(part.x, part.elevation, part.z); upper.rotation.y = part.rotation;
+            // Gate stairs/railings belong to the deck, not a generic hall platform.
+            hall(upper, m, 0, 0, part.width, part.depth, 1, m.gold, part.profile.double, 0, true, part.profile, true);
+            parent.add(upper);
+          }));
+      yield;
+      if(data)group.add(yield* palaceWallsIter(site,data,m,group));
+      yield;
+}
+
+function palace(group: THREE.Group, m: Materials, w: number, d: number, imperial = false, site: Landmark, data?: CityData) {
+  pumpSync(palaceBuild(group, m, w, d, imperial, site, data));
+}
+
+/** 和 createLandmark 等价，但故宫那一段会按时间片让出主线程，供首屏分帧构建。 */
+export async function createLandmarkAsync(site: Landmark, m: Materials, data: CityData | undefined): Promise<THREE.Group> {
+  if (site.kind !== 'palace') return createLandmark(site, m, data);
+  const group = new THREE.Group();
+  group.name = site.id;
+  const w = site.footprint[0] / 10, d = site.footprint[1] / 10;
+  await pumpAsync(palaceBuild(group, m, w, d, site.id === 'forbidden-city', site, data));
+  return group;
 }
 
 function roundRoof(group: THREE.Group, m: Materials, radius: number, y: number, rise: number) {
@@ -884,22 +920,33 @@ export function createLandmark(site: Landmark, m: Materials, data?: CityData): T
 }
 
 /** Merge static geometry by material, keeping roof/court detail with few draw calls. */
-export function bake(group: THREE.Group, castShadow = true) {
+export function* bakeIter(group: THREE.Group, castShadow = true): Generator<void, THREE.Group, void> {
   group.updateMatrixWorld(true);
   const batches = new Map<THREE.Material, THREE.BufferGeometry[]>();
   const repeated=new Map<THREE.BufferGeometry,Map<THREE.Material,THREE.Mesh[]>>();
+  const meshes: { mesh: THREE.Mesh; material: THREE.Material }[] = [];
   group.traverse(object=>{
     if(!(object instanceof THREE.Mesh)||Array.isArray(object.material))return;
-    const byMaterial=repeated.get(object.geometry)??new Map<THREE.Material,THREE.Mesh[]>();
-    const objects=byMaterial.get(object.material)??[];objects.push(object);byMaterial.set(object.material,objects);repeated.set(object.geometry,byMaterial);
+    meshes.push({ mesh: object, material: object.material });
   });
+  let scanned = 0;
+  for (const entry of meshes) {
+    const object = entry.mesh;
+    const byMaterial=repeated.get(object.geometry)??new Map<THREE.Material,THREE.Mesh[]>();
+    const objects=byMaterial.get(entry.material)??[];objects.push(object);byMaterial.set(entry.material,objects);repeated.set(object.geometry,byMaterial);
+    if(++scanned%200===0)yield;
+  }
   const result = new THREE.Group();
+  let copied = 0;
   for(const [source,byMaterial] of repeated)for(const [material,objects] of byMaterial) {
     if(objects.length>=8) {
       // Repeated beams, columns and window bars keep one geometry instead of
       // hundreds of thousands of transformed vertex copies.
       const mesh=new THREE.InstancedMesh(source.clone(),material,objects.length);
-      objects.forEach((object,i)=>mesh.setMatrixAt(i,object.matrixWorld));
+      for(let i=0;i<objects.length;i++) {
+        mesh.setMatrixAt(i,objects[i].matrixWorld);
+        if(i%3000===2999)yield;
+      }
       mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();mesh.castShadow=castShadow;mesh.receiveShadow=true;result.add(mesh);
       continue;
     }
@@ -911,7 +958,9 @@ export function bake(group: THREE.Group, castShadow = true) {
       if(!g.getAttribute('uv'))g.setAttribute('uv',new THREE.Float32BufferAttribute(new Float32Array(count*2),2));
       if((material as THREE.MeshStandardMaterial).vertexColors&&!g.getAttribute('color'))g.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(count*3).fill(1),3));
       const array=batches.get(material)??[];array.push(g);batches.set(material,array);
+      if(++copied%80===0)yield;
     }
+    yield;
   }
   for (const [material, geometries] of batches) {
     const merged = mergeGeometries(geometries, false);
@@ -919,9 +968,14 @@ export function bake(group: THREE.Group, castShadow = true) {
     if (!merged) continue;
     const mesh = new THREE.Mesh(merged, material);
     mesh.castShadow = castShadow; mesh.receiveShadow = true; result.add(mesh);
+    yield;
   }
   // Temporary authored roof geometries are no longer needed after baking.
   const sharedGeometries:THREE.BufferGeometry[]=[boxGeometry,cylinderGeometry,terraceGeometry,columnGeometry];
   for(const geometry of repeated.keys())if(!sharedGeometries.includes(geometry))geometry.dispose();
   return result;
+}
+
+export function bake(group: THREE.Group, castShadow = true) {
+  return pumpSync(bakeIter(group, castShadow));
 }

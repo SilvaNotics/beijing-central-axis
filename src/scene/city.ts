@@ -3,16 +3,20 @@ import { landmarks } from '../data/heritage';
 import { project } from './geo';
 import type { CityData } from './geodata';
 import { createCityPlan } from './cityPlan';
+import { bakedPlanImage } from './cityPlanAsset';
 import { createForest } from './forest';
 import { zhengyangLayout } from './zhengyangLayout';
 import { southernRoadPath } from './southernRoad';
 import { axisThroughShenwu } from './axisRoute';
-import { bake, createLandmark } from './architecture';
+import { bakeIter, createLandmarkAsync } from './architecture';
+import { pumpAsync } from './coop';
 import type { Materials } from './materials';
 
 export const bounds = { width: 640, depth: 1090, centerX: 45, centerZ: 3 };
 export interface City {
   object: THREE.Group;
+  /** 树林占位：首帧先不给树，画面出来之后再种，省掉一段白等。 */
+  grow: () => void;
   anchors: Map<string, THREE.Vector3>;
   labelOffsets: Map<string, { x: number; z: number }>;
   pickers: THREE.Mesh[];
@@ -83,7 +87,7 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   const stage = async (key: CityStageKey) => {
     const index = CITY_STAGES.findIndex(item => item.key === key);
     onStage?.({ index: index + 1, total: CITY_STAGES.length, key, label: CITY_STAGES[index].label });
-    if (import.meta.env.DEV) performance.mark(`city-stage-${key}`);
+    performance.mark(`city-stage-${key}`);
     await yieldFrame();
   };
   await stage('paper');
@@ -95,7 +99,11 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(bounds.width + .5, .06, bounds.depth + .5)), new THREE.LineBasicMaterial({ color: '#8e7956', transparent: true, opacity: .65 }));
   edge.position.set(bounds.centerX, -.15, bounds.centerZ); object.add(edge);
 
-  const texture = new THREE.CanvasTexture(createCityPlan(data));
+  performance.mark('plan-start');
+  const bakedImage = await bakedPlanImage();
+  const texture = bakedImage ? new THREE.Texture(bakedImage) : new THREE.CanvasTexture(await createCityPlan(data));
+  if (bakedImage) texture.needsUpdate = true;
+  performance.mark('plan-end');
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 2;
   const terrainMaterial = new THREE.MeshBasicMaterial({ map: texture });
   const terrain = new THREE.Mesh(new THREE.PlaneGeometry(bounds.width, bounds.depth), terrainMaterial);
@@ -103,9 +111,9 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   terrain.name = 'city-plan'; object.add(terrain);
   object.add(waterSurface(data, m.water));
   const lateralSites = new Set(['shejitan', 'taimiao', 'tiantan', 'xiannongtan']);
-  const place = (site: typeof landmarks[number]) => {
+  const place = async (site: typeof landmarks[number]) => {
     const [x, z] = project(site.coords);
-    const group = createLandmark(site, m, data); group.position.set(x, .05, z);
+    const group = await createLandmarkAsync(site, m, data); group.position.set(x, .05, z);
     authored.add(group);
     const anchorY = site.kind === 'temple' ? 9 : site.kind === 'hill' ? 10 : site.kind === 'tower' ? 9 : site.kind === 'gate' ? 9 : 5;
     // 名牌挂在实际画出来的那团建筑上，而不是数据里的坐标点：
@@ -123,20 +131,37 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
     pick.position.set(labelX, 3, labelZ); pick.userData.id = site.id; pickers.push(pick); object.add(pick);
   };
   await stage('sites');
-  for (const site of landmarks) if (site.kind !== 'palace') place(site);
+  for (const site of landmarks) if (site.kind !== 'palace') {
+    await place(site);
+    await yieldFrame();
+  }
   await stage('palace');
-  for (const site of landmarks) if (site.kind === 'palace') place(site);
+  for (const site of landmarks) if (site.kind === 'palace') {
+    await place(site);
+    await yieldFrame();
+  }
   await stage('scape');
   // The route and every physical layer use the same geographic projection.
   const centerline = [...landmarks.filter(site => !lateralSites.has(site.id) && !['square','southern-road','zhengyang'].includes(site.id)).map(site => project(site.coords)), ...Object.values(zhengyangLayout(landmarks.find(s=>s.id==='zhengyang')!,data)).map(p=>{const [x,z]=project(landmarks.find(s=>s.id==='zhengyang')!.coords);return [x+p.x,z+p.z] as [number,number];}), ...southernRoadPath()].sort((a, b) => a[1] - b[1]);
   authored.add(path(axisThroughShenwu(centerline,landmarks.find(s=>s.id==='forbidden-city')!,data), .38, m.brass, .01));
 
-  object.add(bake(authored),createForest(data,m));
+  performance.mark('bake-start');
+  const baked = await pumpAsync(bakeIter(authored));
+  performance.mark('bake-end');
+  let forest: THREE.Group | null = null;
+  const grow = () => {
+    if (forest) return;
+    performance.mark('forest-start');
+    forest = createForest(data, m);
+    performance.mark('forest-end');
+    object.add(forest);
+  };
+  object.add(baked);
   const halo = new THREE.Mesh(new THREE.RingGeometry(5, 5.18, 64), new THREE.MeshBasicMaterial({ color: '#d8b476', transparent: true, opacity: .75, depthWrite: false, side: THREE.DoubleSide }));
   halo.rotation.x = -Math.PI / 2; halo.position.y = .25; halo.visible = false; object.add(halo);
   if (sample) {
     // Same full-quality architecture as the main city, framed tightly for material inspection.
     object.name = 'courtyard-lighting-study';
   }
-  return { object, anchors, labelOffsets, pickers, halo };
+  return { object, grow, anchors, labelOffsets, pickers, halo };
 }

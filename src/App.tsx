@@ -104,12 +104,13 @@ export default function App() {
     };
   }, [sceneStatus, chapter]);
   useEffect(() => { if (sceneStatus === 'fallback') setFlat(true); }, [sceneStatus]);
-  // 十秒还没算完就先给二维图，别让人对着空屏等。
+  // 十秒没有任何新进展才先给二维图，别让人对着空屏等；只要还在推进就重新计时，
+  // 慢机器上不至于把已经算到一半的三维场景换掉。
   useEffect(() => {
     if (sceneStatus !== 'loading') return;
     const timer = window.setTimeout(() => { setSlowScene(true); setFlat(true); }, 10000);
     return () => window.clearTimeout(timer);
-  }, [sceneStatus]);
+  }, [sceneStatus, loadStage?.index]);
   // 提示留到他真的切回三维为止，别在场景算完的瞬间把提示撤掉。
   useEffect(() => { if (!flat) setSlowScene(false); }, [flat]);
 

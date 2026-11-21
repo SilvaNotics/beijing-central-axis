@@ -12,7 +12,25 @@ export function project([longitude, latitude]: [number, number]): [number, numbe
 export function unproject([x, z]: [number, number]): [number, number] {
   return [(cos * x + sin * z) / longitudeScale + ORIGIN[0], ORIGIN[1] - (-sin * x + cos * z) / 11132];
 }
+const ringBounds = new WeakMap<[number, number][], { minX: number; maxX: number; minZ: number; maxZ: number }>();
+/** 外接框按环缓存：绝大多数查询点落在框外，先一步排除，省掉整圈遍历。 */
+function boundsOf(polygon: [number, number][]) {
+  let box = ringBounds.get(polygon);
+  if (!box) {
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (const [x, z] of polygon) {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
+    }
+    box = { minX, maxX, minZ, maxZ };
+    ringBounds.set(polygon, box);
+  }
+  return box;
+}
 export function pointInPolygon([x, y]: [number, number], polygon: [number, number][]): boolean {
+  if (polygon.length < 3) return false;
+  const box = boundsOf(polygon);
+  if (x < box.minX || x > box.maxX || y < box.minZ || y > box.maxZ) return false;
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const [xi, yi] = polygon[i];

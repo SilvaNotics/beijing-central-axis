@@ -33,6 +33,24 @@ export function buildingHeight(b: BuildingFootprint): number {
   return Math.max(2.5, Math.min(150, b.height && b.height > 0 ? b.height : b.levels && b.levels > 0 ? b.levels*3.2 : 6));
 }
 let cityDataPromise: Promise<CityData> | undefined;
+/** 预烤地面图按这份指纹校验：数据换了而地面图没重烤，就退回现场绘制，不让两者错位。 */
+let cityHash = '';
+export function cityDataHash() { return cityHash; }
+async function fingerprint(...chunks: Uint8Array[]): Promise<string> {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) return '';
+  const total = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
+  const merged = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) { merged.set(chunk, offset); offset += chunk.byteLength; }
+  const digest = new Uint8Array(await subtle.digest('SHA-256', merged));
+  return [...digest].map(byte => byte.toString(16).padStart(2, '0')).join('').slice(0, 16);
+}
+async function readBytes(name: string, failure: string): Promise<Uint8Array> {
+  const response = await fetch(`${import.meta.env.BASE_URL}data/${name}`);
+  if (!response.ok) throw new Error(failure);
+  return new Uint8Array(await response.arrayBuffer());
+}
 export async function loadCityData(signal?: AbortSignal): Promise<CityData> {
   cityDataPromise ??= readCityData().catch(error => { cityDataPromise = undefined; throw error; });
   const data = await cityDataPromise;
@@ -40,10 +58,13 @@ export async function loadCityData(signal?: AbortSignal): Promise<CityData> {
   return data;
 }
 async function readCityData(): Promise<CityData> {
-  const [b, c] = await Promise.all([
-    fetch(`${import.meta.env.BASE_URL}data/buildings.json`).then(r => { if (!r.ok) throw new Error('本地建筑数据未能载入'); return r.json(); }),
-    fetch(`${import.meta.env.BASE_URL}data/context.geojson`).then(r => { if (!r.ok) throw new Error('本地地形数据未能载入'); return r.json(); }),
+  const [bBytes, cBytes] = await Promise.all([
+    readBytes('buildings.json', '本地建筑数据未能载入'),
+    readBytes('context.geojson', '本地地形数据未能载入'),
   ]);
+  cityHash = await fingerprint(bBytes, cBytes);
+  const decode = (bytes: Uint8Array) => JSON.parse(new TextDecoder().decode(bytes));
+  const b = decode(bBytes), c = decode(cBytes);
   const context: CityContext[] = [];
   for (const f of c.features) {
     const kind = f.properties.kind as ContextFeature['kind'];
