@@ -272,6 +272,14 @@ NODE_OPTIONS=--max-old-space-size=1024 npm run build
 - 软件渲染（SwiftShader / llvmpipe）不预先编译着色器：那里编一次要好几秒，交给首帧慢慢来更划算。
 - 首屏「十秒切二维」的兜底改成**十秒没有新进展**才切（`src/App.tsx`，跟随 `loadStage` 重新计时）。慢机器上不会再出现“算到一半被换掉”。
 
+### 首屏分片
+
+重活写成生成器，每个 `yield` 是一个可让出的位置：
+
+- `src/scene/coop.ts`：`pumpSync` 一次跑完（测试与其它同步调用方用，行为与普通函数一致）；`pumpAsync` 每 8 ms 让出一次，让出用 `MessageChannel`（不占 `setTimeout` 的 4 ms 底噪），总耗时几乎不变。
+- 已分片：整城合批 `bakeIter`、3 万栋建筑 `osmBuildingsIter`、故宫院落与四处花园的绿地扫描（`palaceCourtZonesIter` / `palaceGardenZonesIter`）、墙面贴接 `palaceWallFacadeContactsIter`、故宫本体 `palaceBuild`。
+- 新增同类重活照这个写法：写生成器 + `pumpSync` 包装，首屏路径改用 `pumpAsync`，别在函数里直接写死大循环。
+
 改动素材后需要重跑 `npx playwright test` 的 `chapter-loading`、`chapter-maps`、`atlas` 三组，它们对视频分辨率、地图可读性和首屏无报错有断言。
 
 ## 验证与交付

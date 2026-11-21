@@ -8,7 +8,8 @@ import { createForest } from './forest';
 import { zhengyangLayout } from './zhengyangLayout';
 import { southernRoadPath } from './southernRoad';
 import { axisThroughShenwu } from './axisRoute';
-import { bake, createLandmark } from './architecture';
+import { bakeIter, createLandmarkAsync } from './architecture';
+import { pumpAsync } from './coop';
 import type { Materials } from './materials';
 
 export const bounds = { width: 640, depth: 1090, centerX: 45, centerZ: 3 };
@@ -110,9 +111,9 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   terrain.name = 'city-plan'; object.add(terrain);
   object.add(waterSurface(data, m.water));
   const lateralSites = new Set(['shejitan', 'taimiao', 'tiantan', 'xiannongtan']);
-  const place = (site: typeof landmarks[number]) => {
+  const place = async (site: typeof landmarks[number]) => {
     const [x, z] = project(site.coords);
-    const group = createLandmark(site, m, data); group.position.set(x, .05, z);
+    const group = await createLandmarkAsync(site, m, data); group.position.set(x, .05, z);
     authored.add(group);
     const anchorY = site.kind === 'temple' ? 9 : site.kind === 'hill' ? 10 : site.kind === 'tower' ? 9 : site.kind === 'gate' ? 9 : 5;
     // 名牌挂在实际画出来的那团建筑上，而不是数据里的坐标点：
@@ -131,12 +132,12 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   };
   await stage('sites');
   for (const site of landmarks) if (site.kind !== 'palace') {
-    place(site);
+    await place(site);
     await yieldFrame();
   }
   await stage('palace');
   for (const site of landmarks) if (site.kind === 'palace') {
-    place(site);
+    await place(site);
     await yieldFrame();
   }
   await stage('scape');
@@ -145,7 +146,7 @@ export async function createCity(m: Materials, data: CityData, sample = false, o
   authored.add(path(axisThroughShenwu(centerline,landmarks.find(s=>s.id==='forbidden-city')!,data), .38, m.brass, .01));
 
   performance.mark('bake-start');
-  const baked = bake(authored);
+  const baked = await pumpAsync(bakeIter(authored));
   performance.mark('bake-end');
   let forest: THREE.Group | null = null;
   const grow = () => {

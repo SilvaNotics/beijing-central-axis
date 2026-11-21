@@ -436,8 +436,11 @@ async function mountScene(container: HTMLDivElement, labelLayer: HTMLDivElement,
     const north = controls.target.clone().add(new THREE.Vector3(Math.sin(AXIS_ROTATION), 0, -Math.cos(AXIS_ROTATION))).project(camera);
     const bearing = Math.atan2((north.x-origin.x)*width,(north.y-origin.y)*height)*180/Math.PI;
     ref.current.onBearingChange?.(Math.round(bearing*10)/10);
+    // 三角形数也留在生产构建里：合批/构建出问题（例如整片建筑没进场景）时，
+    // e2e 能靠它直接判死，而不是只看到一张平的地面图。
+    const drawnTriangles = String(renderer.info.render.triangles);
+    if (container.dataset.triangles !== drawnTriangles) container.dataset.triangles = drawnTriangles;
     if (import.meta.env.DEV) {
-      container.dataset.triangles = String(renderer.info.render.triangles);
       container.dataset.drawCalls = String(renderer.info.render.calls);
       container.dataset.camera = JSON.stringify({ position: camera.position.toArray(), target: controls.target.toArray(), zoom: camera.zoom });
       container.dataset.tourDuration = String(Math.round(totalTourMs));
